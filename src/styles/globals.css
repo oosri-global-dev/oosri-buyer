@@ -15,6 +15,8 @@ body {
   color: var(--poprevFadedWhite);
   scroll-behavior: smooth;
   font-family: 'Inter', sans-serif;
+  padding: 0;
+  margin: 0;
 }
 ::-webkit-scrollbar {
   width: 0;
@@ -89,7 +91,7 @@ border: none;
 
   .ant-select-dropdown{
     background-color: var(--poprevBlack);
-    border: 1px solid var(--poprevFadedWhite);
+    border: 1px solid var(--orrsiWhite);
     overflow-x:hidden ;
     padding: 0;
   }
@@ -107,29 +109,9 @@ border: none;
     display: none !important;
   }
 
+  h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+  }
+
 
   
-/* p, a{
-  font-family: "ModellicaMedium", sans-serif;
-}
-h1, small, button small, h3{
-  font-family: "ModellicaBold", sans-serif;
-}
-h2, button span {
-  font-family: "ModellicaBold2", sans-serif;
-}
-h4, h4 span{
-  font-family: "ModellicaBold3", sans-serif;
-}
-
-h5, h5 span{
-  font-family: "ModellicaBold4", sans-serif;
-}
-
-h1, h1 small{
-  font-family: "RaitorRegular", sans-serif;
-}
-
- button small , button span{
-  font-family: "MadeOuterBold", sans-serif;
-} */

@@ -8,20 +8,22 @@ export const HeaderWrapper = styled(FlexibleDiv)`
   flex-direction: row;
   flex-wrap: nowrap;
 
+  .logo__section {
+    width: fit-content;
+  }
 
-  .menu__items {
+  .middle__section {
     gap: 40px;
     text-shadow: 1px 2px 2px rgba(0, 0, 0, 0.3);
     flex-direction: row;
+    width: fit-content;
 
     p {
       cursor: pointer;
+    }
 
-      :hover {
-        color: red;
-        text-decoration: underline;
-        text-decoration-color: var(--orrsiPrimary);
-      }
+    :hover {
+      color: var(--orrsiPrimary);
     }
 
     #active__link {
@@ -31,6 +33,16 @@ export const HeaderWrapper = styled(FlexibleDiv)`
       border-radius: 20px;
       text-shadow: none;
       background: var(--orrsiPrimary);
+    }
+  }
+
+  .right__section {
+    gap: 25px;
+    width: fit-content;
+
+    svg {
+      width: 18px;
+      height: 18px !important;
     }
   }
 `;
