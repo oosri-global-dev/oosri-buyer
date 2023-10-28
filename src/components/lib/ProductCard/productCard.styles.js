@@ -99,4 +99,27 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
   &:hover {
     cursor: pointer;
   }
+
+  /* media query for mobiles */
+  @media (max-width: 440px){
+    flex-basis: 48%;
+
+    .card__image {
+      height: 200px;
+    }
+
+    .product__info {
+      .product__name {
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 130px;
+        overflow: hidden;
+      }
+
+      .likes__wrapper {
+        width: 100px;
+        gap: 1px;
+      }
+    }
+  }
 `;

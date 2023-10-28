@@ -45,4 +45,22 @@ export const HeaderWrapper = styled(FlexibleDiv)`
       height: 18px !important;
     }
   }
+
+  /* Header menu shrinks here */
+  @media (max-width: 820px) {
+    margin-top: 15px;
+    max-height: 40px;
+    .logo__section .logo__wrapper,
+    .middle__section {
+      display: none;
+    }
+
+    .right__section {
+      gap: 18px;
+    }
+
+    .right__section .wishlist__icon {
+      display: none;
+    }
+  }
 `;

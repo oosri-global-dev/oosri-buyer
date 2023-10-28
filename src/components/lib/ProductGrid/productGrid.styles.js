@@ -9,7 +9,7 @@ export const PGWrapper = styled(FlexibleDiv)`
   }
 
   .grid__wrapper {
-    gap: 20px;
-    justify-content: space-between;
+    gap: 2.6%;
+    justify-content: flex-start;
   }
 `;

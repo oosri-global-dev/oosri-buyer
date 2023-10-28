@@ -21,6 +21,7 @@ export const PCWrapper = styled(FlexibleDiv)`
     overflow-x: scroll;
     align-items: center;
     justify-content: flex-start;
+    scroll-behavior: smooth;
     /* position: relative; */
 
     > div {

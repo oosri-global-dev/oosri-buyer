@@ -10,7 +10,7 @@ export default function HeroSection() {
       <FlexibleDiv flexDir="column">
         <h1 className="introductory__text">Welcome to Orrsi</h1>
         <p className="introductory__subText">
-          Striving to bridge gap between traders
+          Discover, Compare, and Shop with Confidence
         </p>
       </FlexibleDiv>
       <HeroCarousel content={heroBannerFiles} />

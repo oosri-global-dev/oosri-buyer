@@ -4,7 +4,6 @@ import { FlexibleDiv } from "@/components/lib/Box/styles";
 export const HeroCarouselWrapper = styled(FlexibleDiv)`
   width: 100%;
   height: 580px;
-  /* background-color: red; */
 
   .carousel__container {
     width: 100%;
@@ -32,7 +31,6 @@ export const HeroCarouselWrapper = styled(FlexibleDiv)`
         transform: translateX(47.5%);
         display: flex;
         gap: 5px;
-        
 
         button.carousel__dot {
           border-radius: 50%;
@@ -62,6 +60,11 @@ export const HeroCarouselWrapper = styled(FlexibleDiv)`
       align-items: center;
       top: 50%;
       transform: translateY(-50%);
+
+      svg {
+        width: 30px;
+        height: 30px;
+      }
     }
 
     .button__left__position {
@@ -76,6 +79,42 @@ export const HeroCarouselWrapper = styled(FlexibleDiv)`
 
       svg {
         padding-left: 2px;
+      }
+    }
+  }
+
+  @media (max-width: 440px) {
+    height: 230px;
+
+    .carousel__container {
+      .carousel__slider {
+        div {
+          .carousel__inner-slide {
+            border-radius: 5px;
+          }
+        }
+
+        .custom__carousel__dot {
+          bottom: 10px;
+          gap: 3px;
+
+          button.carousel__dot {
+            width: 7px;
+            height: 7px;
+          }
+        }
+      }
+
+      .custom__carousel__button {
+        position: absolute;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        width: 25px;
+        height: 25px;
+
+        svg {
+          width: 15px;
+          flex-shrink: 0;
+        }
       }
     }
   }
@@ -104,6 +143,28 @@ export const BannerBox = styled(FlexibleDiv)`
 
     .hero__sub__text {
       text-align: center;
+    }
+  }
+
+  @media (max-width: 440px) {
+    .text__section {
+      width: 80%;
+
+      .hero__text {
+        font-size: 1rem;
+      }
+
+      .hero__sub__text {
+        font-size: 0.8rem;
+      }
+    }
+
+    button {
+      margin-top: 10px !important;
+      font-size: 0.8rem;
+      height: 30px;
+      padding: 0px 25px;
+      min-height: 30px;
     }
   }
 `;

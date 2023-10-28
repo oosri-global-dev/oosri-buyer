@@ -49,10 +49,10 @@ export default function HeroCarousel({ content }) {
           ))}
         </Slider>
         <ButtonBack className="custom__carousel__button button__left__position">
-          <BackArrow color="#fff" size={30} />
+          <BackArrow color="#fff" />
         </ButtonBack>
         <ButtonNext className="custom__carousel__button button__right__position">
-          <ForwardArrow color="#fff" size={30} />
+          <ForwardArrow color="#fff" />
         </ButtonNext>
       </CarouselProvider>
     </HeroCarouselWrapper>

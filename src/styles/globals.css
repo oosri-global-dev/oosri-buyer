@@ -7,12 +7,12 @@ html {
 }
 
 body {
-  background-color: var(--poprevBlack);
+  background-color: var(--orrsiWhite);
   -ms-text-size-adjust: 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  color: var(--poprevFadedWhite);
+  color: var(--orrsiBlack);
   scroll-behavior: smooth;
   font-family: 'Inter', sans-serif;
   padding: 0;
@@ -27,91 +27,6 @@ body {
   height: 0;
 }
 
-.ant-checkbox-wrapper {
-  margin-left: 0 !important;
-}
-.country_name .country_flag, .selected_country__code .country_flag{
-  margin-right: 10px;
-  overflow: hidden;
-  border-radius: 100%;
-}
-.country_flag img{
-  width: 100%;
-  height: 100%;
-  object-fit: fill;
-}
-.country_name , .dial_code{
-  font-size: 12px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-
-.ant-form-item-has-error .ant-input, .ant-form-item-has-error .ant-input-affix-wrapper, .ant-form-item-has-error .ant-input:hover, .ant-form-item-has-error .ant-input-affix-wrapper:hover {
-  border: none !important;
-  background-color: #00000000 !important;
-}
-.ant-picker-content thead tr th, .ant-picker-footer, .ant-picker-cell-disabled{
-  display: none;
-}
-
- .ant-picker-cell-in-view.ant-picker-cell-selected .ant-picker-cell-inner, .ant-picker-cell-in-view.ant-picker-cell-range-start .ant-picker-cell-inner, .ant-picker-cell-in-view.ant-picker-cell-range-end .ant-picker-cell-inner{
-  background-color: var(--poprevYellow);
- }
- 
-
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type="number"] {
-  -moz-appearance: textfield;
-}
-
-.ant-picker-cell-in-view.ant-picker-cell-today .ant-picker-cell-inner::before{
-  border: none;
-}
-.ant-select-item{
-background-color: var(--poprevWhite);
-border: none;
-}
-.ant-select-item-option-content p{
-    color: var(--poprevWhite);
-    margin: 0;
-    background-color: var(--poprevBlack);
-    position: absolute;
-    width: 100vw;
-    left: 0;
-    top: -1px;
-    padding: 6px 10px;
-    font-size: 12px;
-  }
-
-  .ant-select-dropdown{
-    background-color: var(--poprevBlack);
-    border: 1px solid var(--orrsiWhite);
-    overflow-x:hidden ;
-    padding: 0;
-  }
- 
-
-  .ant-picker.ant-picker-disabled{
-    border-color: var(--poprevGray);
-    background-color: transparent;
-  }
-  .ant-picker-input > input[disabled]{
-    color: var(--poprevFadedWhite);
-  }
- 
-  .ant-picker-year-btn, .ant-picker-month-btn, .ant-picker-header-prev-btn , .ant-picker-header-next-btn{
-    display: none !important;
-  }
-
   h1, h2, h3, h4, h5, h6 {
     margin: 0;
   }
-
-
-  

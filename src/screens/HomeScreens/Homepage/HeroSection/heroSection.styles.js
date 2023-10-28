@@ -16,4 +16,14 @@ export const HeroSectionWrapper = styled(FlexibleSection)`
     font-size: 0.9rem;
     color: #bbb;
   }
+
+  @media (max-width: 650px) {
+    .introductory__text {
+      font-size: 1.5rem;
+    }
+
+    .introductory__subText {
+      margin: 6px 0;
+    }
+  }
 `;

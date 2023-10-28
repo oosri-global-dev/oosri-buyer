@@ -14,4 +14,16 @@ export const SDWrapper = styled(FlexibleDiv)`
     color: #757575;
     cursor: pointer;
   }
+
+  @media (max-width: 440px){
+    justify-content: space-between;
+
+    h2 {
+      font-size: 1.2rem;
+    }
+
+    .view__all__style {
+      font-size: 1rem;
+    }
+  }
 `;

@@ -7,4 +7,5 @@ export const HomepageWrapper = styled(FlexibleDiv)`
   flex-direction: column;
   margin-top: 40px;
   gap: 30px;
+
 `;

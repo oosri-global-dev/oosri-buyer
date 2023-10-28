@@ -8,4 +8,8 @@ export const GeneralLayoutWrapper = styled(FlexibleDiv)`
   padding: 30px;
   height: 100%;
   width: 100%;
+
+  @media (max-width: 440px) {
+    padding: 10px;
+  }
 `;
