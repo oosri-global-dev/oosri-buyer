@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { HomepageWrapper } from "./homepage.styles";
 import GeneralLayout from "@/components/layouts/GeneralLayout/generalLayout";
 import HeroSection from "./HeroSection/heroSection";
-import SmartphoneDeals from "../SmartphoneDeals/smartphoneDeals";
+import SmartphoneDeals from "./SmartphoneDeals/smartphoneDeals";
 import ProductCarousel from "@/components/lib/ProductCarousel/productCarousel";
 import ProductGrid from "@/components/lib/ProductGrid/productGrid";
 import { smartphoneDealsData } from "@/data-helpers/homepage-helper";

@@ -7,6 +7,13 @@ export const HeaderWrapper = styled(FlexibleDiv)`
   justify-content: space-between;
   flex-direction: row;
   flex-wrap: nowrap;
+  position: sticky;
+  top: 0;
+  padding: 12px 0;
+  left: 0;
+  right: 0;
+  z-index: 6;
+  background-color: white;
 
   .logo__section {
     width: fit-content;
@@ -48,7 +55,6 @@ export const HeaderWrapper = styled(FlexibleDiv)`
 
   /* Header menu shrinks here */
   @media (max-width: 820px) {
-    margin-top: 15px;
     max-height: 40px;
     .logo__section .logo__wrapper,
     .middle__section {

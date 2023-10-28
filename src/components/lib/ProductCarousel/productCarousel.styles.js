@@ -9,6 +9,10 @@ export const PCWrapper = styled(FlexibleDiv)`
     width: 100%;
     text-align: left;
     margin-bottom: 20px;
+
+    @media (max-width: 440px) {
+      font-size: 1.2rem;
+    }
   }
 
   .product__card__carousel {
@@ -22,11 +26,22 @@ export const PCWrapper = styled(FlexibleDiv)`
     align-items: center;
     justify-content: flex-start;
     scroll-behavior: smooth;
-    /* position: relative; */
+
+    @media (max-width: 440px) {
+      gap: 3.8%;
+    }
 
     > div {
       min-width: 18.5%;
       position: relative;
+
+      @media (max-width: 440px) {
+        min-width: 48%;
+      }
+    }
+
+    .flex__end__div {
+      justify-content: flex-end;
     }
 
     .button__wrapper {
@@ -45,6 +60,10 @@ export const PCWrapper = styled(FlexibleDiv)`
         top: 50%;
         transform: translateY(-50%);
         cursor: pointer;
+      }
+
+      .hide__button {
+        display: none;
       }
 
       .button__left__position {

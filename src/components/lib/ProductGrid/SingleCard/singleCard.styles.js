@@ -3,7 +3,7 @@ import { FlexibleDiv } from "../../Box/styles";
 
 export const SingleCardWrapper = styled(FlexibleDiv)`
   justify-content: flex-start;
-  height: 110px;
+  height: 120px;
   width: 23%;
   display: flex;
   flex-wrap: nowrap;
@@ -14,6 +14,11 @@ export const SingleCardWrapper = styled(FlexibleDiv)`
   transition: box-shadow 0.1s ease-out;
   -webkit-transition: box-shadow 0.1s ease-out;
 
+  @media (max-width: 440px) {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
   &:hover {
     box-shadow: 1px 8px 20px grey;
     transition: box-shadow 0.4s ease-in;
@@ -22,7 +27,7 @@ export const SingleCardWrapper = styled(FlexibleDiv)`
   }
 
   .img__wrapper {
-    width: 90px;
+    width: 140px;
     height: 100%;
 
     img {
@@ -44,8 +49,16 @@ export const SingleCardWrapper = styled(FlexibleDiv)`
     }
 
     .device__name {
-      font-size: 0.85rem;
+      font-size: 1rem;
       font-weight: normal;
+      width: 180px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+
+      @media (max-width: 440px) {
+        font-size: 1.1rem;
+      }
     }
 
     .price__wrapper {

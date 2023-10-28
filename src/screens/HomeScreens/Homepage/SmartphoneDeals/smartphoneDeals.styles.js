@@ -8,14 +8,20 @@ export const SDWrapper = styled(FlexibleDiv)`
   align-items: flex-start;
   gap: 1.8%;
   flex-wrap: wrap;
+  margin-top: 20px;
+
+  .top__section {
+    margin-bottom: 20px;
+  }
 
   .view__all__style {
     font-size: 1.1rem;
     color: #757575;
     cursor: pointer;
+    margin: 0;
   }
 
-  @media (max-width: 440px){
+  @media (max-width: 440px) {
     justify-content: space-between;
 
     h2 {

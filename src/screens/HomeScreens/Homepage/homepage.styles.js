@@ -6,6 +6,6 @@ export const HomepageWrapper = styled(FlexibleDiv)`
   height: 100%;
   flex-direction: column;
   margin-top: 40px;
-  gap: 30px;
+  gap: 10px;
 
 `;

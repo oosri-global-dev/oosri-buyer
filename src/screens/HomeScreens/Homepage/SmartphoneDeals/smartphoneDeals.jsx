@@ -18,7 +18,7 @@ export default function SmartphoneDeals({ content }) {
   
   return (
     <SDWrapper>
-      <FlexibleDiv justifyContent="space-between" alignItems="center">
+      <FlexibleDiv className="top__section" justifyContent="space-between" alignItems="center">
         <h2>SmartPhone Deals</h2>
         <p className="view__all__style">View All</p>
       </FlexibleDiv>

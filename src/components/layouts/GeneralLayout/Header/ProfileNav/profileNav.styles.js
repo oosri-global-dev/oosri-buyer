@@ -8,6 +8,10 @@ export const ProfileNavWrapper = styled(FlexibleDiv)`
   gap: 5px;
   flex-wrap: nowrap;
   border: 1.5px solid #9e9e9e;
-  padding: 7px;
+  padding: 5px;
   border-radius: 70px;
+
+  img {
+    width: 17px;
+  }
 `;
