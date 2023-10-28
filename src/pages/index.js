@@ -1,8 +1,7 @@
+import Homepage from "@/screens/HomeScreens/Homepage/homepage";
+
 export default function Home() {
   return (
-    <>
-    <p>Homepage</p>
-    <p>Homepage</p>
-    </>
+    <Homepage />
   );
 }
