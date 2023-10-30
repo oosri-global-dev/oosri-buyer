@@ -26,4 +26,15 @@ export const HeroSectionWrapper = styled(FlexibleSection)`
       margin: 6px 0;
     }
   }
+
+  @media (max-width: 280px) {
+    .introductory__text {
+      font-size: 1.3rem;
+    }
+
+    .introductory__subText {
+      margin: 6px 0;
+      font-size: 0.8rem;
+    }
+  }
 `;

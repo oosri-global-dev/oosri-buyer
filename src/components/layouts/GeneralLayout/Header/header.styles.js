@@ -17,6 +17,10 @@ export const HeaderWrapper = styled(FlexibleDiv)`
 
   .logo__section {
     width: fit-content;
+
+    .nav__menu__wrapper {
+      display: none;
+    }
   }
 
   .middle__section {
@@ -56,6 +60,11 @@ export const HeaderWrapper = styled(FlexibleDiv)`
   /* Header menu shrinks here */
   @media (max-width: 820px) {
     max-height: 40px;
+
+    .logo__section .nav__menu__wrapper {
+      display: flex;
+    }
+
     .logo__section .logo__wrapper,
     .middle__section {
       display: none;

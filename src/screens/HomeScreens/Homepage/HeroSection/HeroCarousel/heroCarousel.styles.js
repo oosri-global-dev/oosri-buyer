@@ -40,6 +40,11 @@ export const HeroCarouselWrapper = styled(FlexibleDiv)`
           padding: 0px;
           background-color: white;
         }
+
+        button:not(.carousel__dot--selected) {
+          background-color: #999999;
+          border-color: #999999;
+        }
       }
 
       button {
@@ -79,6 +84,36 @@ export const HeroCarouselWrapper = styled(FlexibleDiv)`
 
       svg {
         padding-left: 2px;
+      }
+    }
+  }
+
+  @media (max-width: 1370px) {
+    height: 560px;
+  }
+
+  @media (max-width: 1100px) {
+    height: 540px;
+  }
+
+  @media (max-width: 920px) {
+    height: 500px;
+  }
+
+  @media (max-width: 600px) {
+    height: 400px;
+
+    .carousel__container {
+      .custom__carousel__button {
+        position: absolute;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        width: 35px;
+        height: 35px;
+
+        svg {
+          width: 15px;
+          flex-shrink: 0;
+        }
       }
     }
   }
@@ -146,6 +181,54 @@ export const BannerBox = styled(FlexibleDiv)`
     }
   }
 
+  @media (max-width: 920px) {
+    .text__section {
+      width: 80%;
+
+      .hero__text {
+        font-size: 2rem;
+
+        @media (max-width: 800px) {
+          font-size: 1.8rem;
+        }
+      }
+
+      .hero__sub__text {
+        font-size: 1.3rem;
+      }
+    }
+
+    button {
+      margin-top: 10px !important;
+      font-size: 0.8rem;
+      height: 35px;
+      padding: 0px 25px;
+      min-height: 30px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .text__section {
+      width: 80%;
+
+      .hero__text {
+        font-size: 1.2rem;
+      }
+
+      .hero__sub__text {
+        font-size: 0.9rem;
+      }
+    }
+
+    button {
+      margin-top: 10px !important;
+      font-size: 0.8rem;
+      height: 35px;
+      padding: 0px 25px;
+      min-height: 30px;
+    }
+  }
+
   @media (max-width: 440px) {
     .text__section {
       width: 80%;
@@ -161,6 +244,29 @@ export const BannerBox = styled(FlexibleDiv)`
 
     button {
       margin-top: 10px !important;
+      font-size: 0.8rem;
+      height: 30px;
+      padding: 0px 25px;
+      min-height: 30px;
+    }
+  }
+
+  /* Smallest screen on the chrome developer tool */
+  @media (max-width: 280px) {
+    .text__section {
+      width: 80%;
+
+      .hero__text {
+        font-size: 0.8rem;
+      }
+
+      .hero__sub__text {
+        font-size: 0.7rem;
+      }
+    }
+
+    button {
+      margin-top: 0px !important;
       font-size: 0.8rem;
       height: 30px;
       padding: 0px 25px;
