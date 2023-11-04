@@ -21,6 +21,7 @@ export default function HeroCarousel({ content }) {
         className="carousel__container"
         totalSlides={3}
         infinite={true}
+  
       >
         <Slider className="carousel__slider">
           {content.map((sgn, idx) => (

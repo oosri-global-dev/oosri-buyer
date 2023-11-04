@@ -3,6 +3,7 @@ import { SDWrapper, CardWrapper } from "./smartphoneDeals.styles";
 import ProductCard from "@/components/lib/ProductCard/productCard";
 import { useState, useEffect } from "react";
 import { useWindowSize } from "@/data-helpers/hooks";
+import Link from "next/link";
 
 export default function SmartphoneDeals({ content }) {
   const [isMobile, setIsMobile] = useState(false);
@@ -15,12 +16,18 @@ export default function SmartphoneDeals({ content }) {
       setIsMobile(false);
     }
   }, [width]);
-  
+
   return (
     <SDWrapper>
-      <FlexibleDiv className="top__section" justifyContent="space-between" alignItems="center">
+      <FlexibleDiv
+        className="top__section"
+        justifyContent="space-between"
+        alignItems="center"
+      >
         <h2>SmartPhone Deals</h2>
-        <p className="view__all__style">View All</p>
+        <Link className="view__all__style" href={"/shop"}>
+          View All
+        </Link>
       </FlexibleDiv>
       {content.map((card, idx) => (
         <>
