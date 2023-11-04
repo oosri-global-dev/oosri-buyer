@@ -19,6 +19,7 @@ export const SDWrapper = styled(FlexibleDiv)`
     color: #757575;
     cursor: pointer;
     margin: 0;
+    text-decoration: none;
   }
 
   @media (max-width: 440px) {

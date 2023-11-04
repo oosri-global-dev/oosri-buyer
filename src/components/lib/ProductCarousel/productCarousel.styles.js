@@ -35,6 +35,18 @@ export const PCWrapper = styled(FlexibleDiv)`
       min-width: 18.5%;
       position: relative;
 
+      @media (max-width: 1300px) {
+        min-width: 18.5%;
+      }
+
+      @media (max-width: 1050px) {
+        min-width: 23.6%;
+      }
+
+      @media (max-width: 700px) {
+        min-width: 32.1%;
+      }
+
       @media (max-width: 440px) {
         min-width: 48%;
       }
@@ -60,6 +72,16 @@ export const PCWrapper = styled(FlexibleDiv)`
         top: 50%;
         transform: translateY(-50%);
         cursor: pointer;
+
+        @media (max-width: 1100px) {
+          width: 40px;
+          height: 40px;
+        }
+
+        @media (max-width: 700px) {
+          width: 35px;
+          height: 35px;
+        }
       }
 
       .hide__button {

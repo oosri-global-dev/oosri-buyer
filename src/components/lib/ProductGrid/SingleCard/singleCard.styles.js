@@ -14,8 +14,25 @@ export const SingleCardWrapper = styled(FlexibleDiv)`
   transition: box-shadow 0.1s ease-out;
   -webkit-transition: box-shadow 0.1s ease-out;
 
+  @media (max-width: 1300px) {
+    width: 31.5%;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 1050px) {
+    width: 48.5%;
+  }
+
+  @media (max-width: 700px) {
+    width: 100%;
+  }
+
   @media (max-width: 440px) {
     width: 100%;
+  }
+
+  @media (max-width: 280px) {
+    height: 100px;
     margin-bottom: 20px;
   }
 
@@ -29,6 +46,10 @@ export const SingleCardWrapper = styled(FlexibleDiv)`
   .img__wrapper {
     width: 140px;
     height: 100%;
+
+    @media (max-width: 280px) {
+      width: 70px;
+    }
 
     img {
       object-fit: cover;
@@ -44,8 +65,16 @@ export const SingleCardWrapper = styled(FlexibleDiv)`
     height: 100%;
     margin-left: 12px;
 
+    @media (max-width: 280px) {
+      width: fit-content;
+    }
+
     p {
       margin: 0;
+
+      @media (max-width: 280px) {
+        width: fit-content;
+      }
     }
 
     .device__name {
@@ -59,15 +88,28 @@ export const SingleCardWrapper = styled(FlexibleDiv)`
       @media (max-width: 440px) {
         font-size: 1.1rem;
       }
+
+      @media (max-width: 280px) {
+        font-size: 0.9rem;
+        width: fit-content;
+      }
     }
 
     .price__wrapper {
       gap: 10px;
       flex-wrap: nowrap;
 
+      @media (max-width: 280px) {
+        width: fit-content;
+      }
+
       .product__price__grid {
         font-size: 1.15rem;
         font-weight: bold;
+
+        @media (max-width: 280px) {
+          font-size: 1rem;
+        }
       }
 
       .discounted__price__grid {

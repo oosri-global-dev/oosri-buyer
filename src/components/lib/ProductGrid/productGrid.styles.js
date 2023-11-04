@@ -12,4 +12,14 @@ export const PGWrapper = styled(FlexibleDiv)`
     gap: 2.6%;
     justify-content: flex-start;
   }
+
+  @media (max-width: 440px) {
+    h2 {
+      font-size: 1.2rem;
+    }
+
+    .view__all__style {
+      font-size: 1rem;
+    }
+  }
 `;

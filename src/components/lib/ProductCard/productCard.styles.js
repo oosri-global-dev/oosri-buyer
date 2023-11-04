@@ -93,6 +93,7 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
       width: fit-content;
       text-align: left;
       font-size: 0.65rem;
+      color: #bdbdbd;
     }
   }
 
@@ -100,12 +101,42 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
     cursor: pointer;
   }
 
-  /* media query for mobiles */
-  @media (max-width: 440px){
-    flex-basis: 48%;
+  @media (max-width: 1300px) {
+    /* flex-basis: 23.6%; */
+    flex-basis: 18.5%;
 
     .card__image {
-      height: 200px;
+      height: 230px;
+
+      @media (max-width: 1100px) {
+        height: 200px;
+      }
+    }
+
+    .product__info {
+      .product__name {
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 150px;
+        overflow: hidden;
+      }
+
+      .likes__wrapper {
+        width: 100px;
+        gap: 1px;
+      }
+    }
+  }
+
+  @media (max-width: 1050px) {
+    flex-basis: 23.6%;
+
+    .card__image {
+      height: 240px;
+
+      @media (max-width: 820px) {
+        height: 200px;
+      }
     }
 
     .product__info {
@@ -119,6 +150,79 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
       .likes__wrapper {
         width: 100px;
         gap: 1px;
+      }
+    }
+  }
+
+  @media (max-width: 700px) {
+    flex-basis: 32.1%;
+
+    .card__image {
+      height: 180px;
+    }
+  }
+
+  /* media query for mobiles */
+  @media (max-width: 440px) {
+    flex-basis: 48%;
+    gap: 3px;
+
+    .card__image {
+      height: 200px;
+
+      @media (max-width: 280px) {
+        height: 140px;
+      }
+    }
+
+    .product__info {
+      height: fit-content;
+      .product__name {
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 130px;
+        overflow: hidden;
+      }
+
+      .likes__wrapper {
+        width: 50px;
+        gap: 1px;
+      }
+
+      .likes__number {
+        margin: 0;
+      }
+    }
+
+    .product__price__section {
+      margin: 0;
+    }
+
+    .seller__info {
+      .seller__text {
+        margin: 0;
+      }
+    }
+
+    .favorite__wrapper {
+      top: 10px;
+      right: 10px;
+      width: 25px;
+      height: 25px;
+
+      @media (max-width: 280px) {
+        width: 20px;
+        height: 20px;
+      }
+
+      svg {
+        stroke-width: 40px;
+        stroke: white;
+        width: 16px;
+
+        @media (max-width: 280px) {
+          width: 14px;
+        }
       }
     }
   }
