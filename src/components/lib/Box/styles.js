@@ -27,6 +27,7 @@ export const FlexibleDiv = styled("div")`
   top: ${({ top }) => top || ""};
   bottom: ${({ bottom }) => bottom || ""};
   border: ${({ border }) => border || ""};
+  gap: ${({ gap }) => gap || "0px"};
 `;
 
 // Flexible box section element
