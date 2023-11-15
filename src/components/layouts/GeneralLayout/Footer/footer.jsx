@@ -29,7 +29,7 @@ export default function Footer() {
   const aboutLinks = [
     {
       linkName: "Contact Us",
-      linkUrl: "/contact",
+      linkUrl: "/contact-us",
     },
     {
       linkName: "FAQs",

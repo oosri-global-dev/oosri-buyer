@@ -104,7 +104,6 @@ export const ContactWrapper = styled(FlexibleDiv)`
     width: 36px;
     height:20px;
     flex:0.5;
-
 }
 
 .admin__details p {
