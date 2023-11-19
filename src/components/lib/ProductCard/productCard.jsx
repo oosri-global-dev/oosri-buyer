@@ -10,7 +10,7 @@ export default function ProductCard({ card, key, isLoading = false }) {
   const maxLikes = ["", "", "", "", ""];
 
   if (isLoading) {
-    return <LoadingCard />;
+    return <LoadingCard key={key} />;
   } else {
     return (
       <ProductCardWrapper key={key}>

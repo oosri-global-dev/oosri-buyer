@@ -1,6 +1,6 @@
 import GeneralLayout from "@/components/layouts/GeneralLayout/generalLayout";
-import Breadcrumb from "./Breadcrumb/breadcrumb";
-import { PPWrapper } from "./shopPage.styles";
+import Breadcrumb from "../../components/lib/Breadcrumb/breadcrumb";
+import { ShopPageWrapper } from "./ShopPage.styles";
 import { FlexibleDiv } from "@/components/lib/Box/styles";
 import Filter from "@/assets/images/filter.svg";
 import { AiOutlineClose as CloseIcon } from "react-icons/ai";
@@ -13,8 +13,9 @@ import useOutsideAlerter from "@/data-helpers/hooks";
 import { smartphoneDealsData } from "@/data-helpers/homepage-helper";
 import ProductCard from "@/components/lib/ProductCard/productCard";
 import { useRef } from "react";
+import { nairaFormatter } from "@/data-helpers/hooks";
 
-export default function ProductPage() {
+export default function ShopPage() {
   const [showFilter, setShowFilter] = useState(false);
   const [categories, setCategories] = useState(null);
   const popupRef = useRef(null);
@@ -29,12 +30,6 @@ export default function ProductPage() {
       options: ["Samsung", "iPhone 13", "Fly", "Bontel"],
     },
   ]);
-  const nairaFormatter = Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "NGN",
-    useGrouping: true,
-    maximumSignificantDigits: 3,
-  });
   const options = [
     { label: "Mobile Phones", value: "Mobile Phones" },
     { label: "Wristwatch", value: "Wristwatch" },
@@ -86,13 +81,10 @@ export default function ProductPage() {
   //This hook helps hide the filter if an outside click is noticed
   useOutsideAlerter(popupRef, showFilter, setShowFilter);
 
-  //Get the value of the price slider
-  useEffect(() => {}, []);
-
   return (
     <GeneralLayout>
       <Breadcrumb numOfProducts={19233} />
-      <PPWrapper>
+      <ShopPageWrapper>
         <hr />
         <FlexibleDiv
           justifyContent="space-between"
@@ -207,10 +199,10 @@ export default function ProductPage() {
           margin="30px 0 0 0"
         >
           {smartphoneDealsData.map((sgn, idx) => (
-            <ProductCard isLoading card={sgn} key={idx} />
+            <ProductCard card={sgn} key={idx} />
           ))}
         </FlexibleDiv>
-      </PPWrapper>
+      </ShopPageWrapper>
     </GeneralLayout>
   );
 }

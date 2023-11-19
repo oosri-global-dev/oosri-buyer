@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { FlexibleDiv } from "@/components/lib/Box/styles";
 
-export const PPWrapper = styled(FlexibleDiv)`
+export const ShopPageWrapper = styled(FlexibleDiv)`
   position: relative;
   hr {
     border: 0.4px solid #f5f5f5;

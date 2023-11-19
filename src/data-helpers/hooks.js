@@ -34,3 +34,10 @@ export default function useOutsideAlerter(ref, checkElement, setDisplay) {
     }
   }, [ref, checkElement]);
 }
+
+export const nairaFormatter = Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "NGN",
+    useGrouping: true,
+    maximumSignificantDigits: 3,
+  });
