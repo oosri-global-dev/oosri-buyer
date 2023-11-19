@@ -1,5 +1,5 @@
-import ProductPage from "@/screens/ShopPage/shopPage";
+import ShopPage from "@/screens/ShopScreen/ShopScreen";
 
-export default function Home() {
-  return <ProductPage />;
+export default function Shop() {
+  return <ShopPage />;
 }
