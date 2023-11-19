@@ -1,6 +1,6 @@
 import GeneralLayout from "@/components/layouts/GeneralLayout/generalLayout";
 import Breadcrumb from "../../components/lib/Breadcrumb/breadcrumb";
-import { ShopPageWrapper } from "./ShopPage.styles";
+import { ShopPageWrapper } from "./ShopScreen.styles";
 import { FlexibleDiv } from "@/components/lib/Box/styles";
 import Filter from "@/assets/images/filter.svg";
 import { AiOutlineClose as CloseIcon } from "react-icons/ai";

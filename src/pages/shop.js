@@ -1,4 +1,4 @@
-import ShopPage from "@/screens/ShopPage/ShopScreen";
+import ShopPage from "@/screens/ShopScreen/ShopScreen";
 
 export default function Shop() {
   return <ShopPage />;
