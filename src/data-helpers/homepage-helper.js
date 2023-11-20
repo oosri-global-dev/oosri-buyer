@@ -32,6 +32,15 @@ export const heroBannerFiles = [
     btnLink: "http://localhost:3001",
     openInNewTab: false,
   },
+  {
+    image: SecondBanner,
+    heroText: "Don't miss out on the finest Smartphone Deals",
+    heroSubText:
+      "Your dream smartphone is now within reach. Explore our e-commerce platform and discover exclusive deals that redefine affordability.",
+    btnText: "Shop Now",
+    btnLink: "http://localhost:3001",
+    openInNewTab: false,
+  }
 ];
 
 export const smartphoneDealsData = [
