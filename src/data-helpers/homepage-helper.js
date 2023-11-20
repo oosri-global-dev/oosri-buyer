@@ -1,4 +1,4 @@
-import SecondBanner from "@/assets/images/profile-image.png";
+import SecondBanner from "@/assets/images/oosri-bg.jpg";
 import FirstBanner from "@/assets/images/phone.jpeg";
 import Iphone14Back from "@/assets/images/iphone14.png";
 import Iphone15Back from "@/assets/images/iphone15.png";
@@ -6,10 +6,16 @@ import Phone1 from "@/assets/images/phone1.png";
 import Phone2 from "@/assets/images/phone2.png";
 import Phone3 from "@/assets/images/phone3.png";
 import Phone4 from "@/assets/images/phone4.png";
+import Phone5 from "@/assets/images/phone5.png";
+import Phone6 from "@/assets/images/phone6.png";
+import Phone7 from "@/assets/images/phone7.png";
+import Phone8 from "@/assets/images/phone8.png";
+import Phone9 from "@/assets/images/phone9.png";
+import Phone10 from "@/assets/images/phone10.png";
 
 export const heroBannerFiles = [
   {
-    image: FirstBanner,
+    image: SecondBanner,
     heroText: "Don't miss out on the finest Smartphone Deals",
     heroSubText:
       "Your dream smartphone is now within reach. Explore our e-commerce platform and discover exclusive deals that redefine affordability.",
@@ -18,7 +24,7 @@ export const heroBannerFiles = [
     openInNewTab: false,
   },
   {
-    image: SecondBanner,
+    image: FirstBanner,
     heroText: "Don't miss out on the finest Smartphone Deals",
     heroSubText:
       "Your dream smartphone is now within reach. Explore our e-commerce platform and discover exclusive deals that redefine affordability.",
@@ -30,7 +36,7 @@ export const heroBannerFiles = [
 
 export const smartphoneDealsData = [
   {
-    image: Iphone14Back,
+    image: Phone4,
     deviceName: "Iphone 14 Pro Max",
     deviceStatus: "Used",
     price: "₦21,000",
@@ -41,7 +47,7 @@ export const smartphoneDealsData = [
     isFavorite: false,
   },
   {
-    image: Phone1,
+    image: Phone7,
     deviceName: "Iphone 15 Pro Max",
     deviceStatus: "Brand New",
     price: "₦21,000",
@@ -52,7 +58,7 @@ export const smartphoneDealsData = [
     isFavorite: false,
   },
   {
-    image: Iphone15Back,
+    image: Phone6,
     deviceName: "Samsung Galaxy",
     deviceStatus: "Brand New",
     price: "₦21,000",
@@ -63,7 +69,7 @@ export const smartphoneDealsData = [
     isFavorite: true,
   },
   {
-    image: Iphone14Back,
+    image: Phone8,
     deviceName: "Iphone 15 Pro Max",
     deviceStatus: "Brand New",
     price: "₦21,000",
@@ -74,7 +80,7 @@ export const smartphoneDealsData = [
     isFavorite: true,
   },
   {
-    image: Phone2,
+    image: Phone9,
     deviceName: "Iphone 14 Pro Max",
     deviceStatus: "Used",
     price: "₦21,000",
@@ -85,7 +91,7 @@ export const smartphoneDealsData = [
     isFavorite: false,
   },
   {
-    image: Phone4,
+    image: Phone10,
     deviceName: "Iphone 15 Pro Max",
     deviceStatus: "Brand New",
     price: "₦21,000",
@@ -118,7 +124,7 @@ export const smartphoneDealsData = [
     isFavorite: false,
   },
   {
-    image: Iphone15Back,
+    image: Phone1,
     deviceName: "Iphone 14 Pro Max",
     deviceStatus: "Brand New",
     price: "₦21,000",
@@ -129,7 +135,7 @@ export const smartphoneDealsData = [
     isFavorite: true,
   },
   {
-    image: Iphone14Back,
+    image: Phone3,
     deviceName: "Iphone 15 Pro Max",
     deviceStatus: "Brand New",
     price: "₦21,000",

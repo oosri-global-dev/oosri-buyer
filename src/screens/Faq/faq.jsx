@@ -1,7 +1,7 @@
 import GeneralLayout from "@/components/layouts/GeneralLayout/generalLayout";
 import { FaqWrapper } from "./faq.styles";
 import { useState } from "react";
-
+import { FlexibleDiv, FlexibleSection } from "@/components/lib/Box/styles";
 
 
 export default function FAQPage() {
@@ -44,21 +44,21 @@ export default function FAQPage() {
   return (
     <GeneralLayout>
       <FaqWrapper>
-      <div className="container">
+      <FlexibleSection className="container">
             <h1 className="faq_title">FREQUENTLY ASKED QUESTIONS (FAQs)</h1>
-            <div className="accordion">
+            <FlexibleDiv className="accordion">
                 
                 {faqCollection.map((item, i) => (
-                  <div className="item" key={i}>
-                    <div className="title" onClick={() => toggle(i)}>
-                      <h2>{item.question}</h2>
+                  <FlexibleDiv className="item"  key={i}>
+                    <FlexibleDiv className="title" onClick={() => toggle(i)}>
+                      <h2 className="question">{item.question}</h2>
                       <span className="expand_sign">{selected === i ? '-' : '+'}</span>
-                    </div>
-                    <div className={selected === i ? 'content show' : 'content'}>{item.answer}</div>
-                  </div>
+                    </FlexibleDiv>
+                    <FlexibleDiv className={selected === i ? 'content show' : 'content'}>{item.answer}</FlexibleDiv>
+                  </FlexibleDiv>
                 ))}
-            </div>
-        </div>
+            </FlexibleDiv>
+        </FlexibleSection>
       </FaqWrapper>
     </GeneralLayout>
   );
