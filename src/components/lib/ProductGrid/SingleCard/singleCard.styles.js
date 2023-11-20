@@ -4,7 +4,8 @@ import { FlexibleDiv } from "../../Box/styles";
 export const SingleCardWrapper = styled(FlexibleDiv)`
   justify-content: flex-start;
   height: 120px;
-  width: 23%;
+  /* width: 23%; */
+  width: 31.5%;
   display: flex;
   flex-wrap: nowrap;
   box-sizing: border-box;
@@ -14,10 +15,10 @@ export const SingleCardWrapper = styled(FlexibleDiv)`
   transition: box-shadow 0.1s ease-out;
   -webkit-transition: box-shadow 0.1s ease-out;
 
-  @media (max-width: 1300px) {
+  /* @media (max-width: 1300px) {
     width: 31.5%;
     margin-bottom: 20px;
-  }
+  } */
 
   @media (max-width: 1050px) {
     width: 48.5%;
@@ -44,7 +45,7 @@ export const SingleCardWrapper = styled(FlexibleDiv)`
   }
 
   .img__wrapper {
-    width: 140px;
+    width: 120px;
     height: 100%;
 
     @media (max-width: 280px) {

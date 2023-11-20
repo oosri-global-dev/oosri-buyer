@@ -9,6 +9,9 @@ export const GeneralLayoutWrapper = styled(FlexibleDiv)`
   height: 100%;
   width: 100%;
   position: relative;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
 
   @media (max-width: 1370px) {
     padding: 20px;

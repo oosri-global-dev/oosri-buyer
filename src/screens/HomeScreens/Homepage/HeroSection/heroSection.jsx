@@ -2,16 +2,18 @@ import { FlexibleDiv } from "@/components/lib/Box/styles";
 import HeroCarousel from "./HeroCarousel/heroCarousel";
 import { HeroSectionWrapper } from "./heroSection.styles";
 import { heroBannerFiles } from "@/data-helpers/homepage-helper";
+import WelcomeImage from '@/assets/images/homepage/welcome.gif'
 
 export default function HeroSection() {
     
   return (
     <HeroSectionWrapper>
       <FlexibleDiv flexDir="column">
-        <h1 className="introductory__text">Welcome to Orrsi</h1>
+        <img src={WelcomeImage.src} alt="welcome__png" className="welcome__image__box" />
+        {/* <h1 className="introductory__text">Welcome to Orrsi</h1>
         <p className="introductory__subText">
           Discover, Compare, and Shop with Confidence
-        </p>
+        </p> */}
       </FlexibleDiv>
       <HeroCarousel content={heroBannerFiles} />
     </HeroSectionWrapper>
