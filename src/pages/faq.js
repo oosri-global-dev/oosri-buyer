@@ -1,5 +1,5 @@
 import FAQPage from "@/screens/Faq/faq";
 
-export default function Femi() {
+export default function Faq() {
   return <FAQPage />;
 }
