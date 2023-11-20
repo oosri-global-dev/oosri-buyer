@@ -4,6 +4,7 @@ import { FlexibleDiv } from "../Box/styles";
 export const ProductCardWrapper = styled(FlexibleDiv)`
   flex-direction: column;
   flex-basis: 18.5%;
+  /* flex-basis: 23.6%; */
   overflow: hidden;
   margin-bottom: 30px;
   position: relative;
@@ -17,7 +18,9 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
 
   .product__info {
     height: fit-content;
-    margin-top: 4px;
+    margin-top: 10px;
+    align-items: flex-start;
+    margin-bottom: 4px;
 
     .product__name {
       font-size: 0.9rem;
@@ -30,13 +33,14 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
       justify-content: flex-end;
       align-items: center;
       height: fit-content;
-      width: 130px;
-      gap: 5px;
+      width: 85px;
+      gap: 2px;
 
       .likes__number {
         font-size: 0.7rem;
         color: #bdbdbd;
         font-weight: bold;
+        margin: 0;
       }
     }
   }
@@ -122,7 +126,7 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
       }
 
       .likes__wrapper {
-        width: 100px;
+        width: 90px;
         gap: 1px;
       }
     }
@@ -185,7 +189,7 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
       }
 
       .likes__wrapper {
-        width: 50px;
+        width: 55px;
         gap: 1px;
       }
 

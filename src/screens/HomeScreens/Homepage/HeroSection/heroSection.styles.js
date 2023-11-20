@@ -6,6 +6,10 @@ export const HeroSectionWrapper = styled(FlexibleSection)`
   flex-wrap: nowrap;
   gap: 20px;
 
+  .welcome__image__box {
+    width: 100%;
+  }
+
   .introductory__text {
     font-size: 2.2rem;
     font-weight: 400;

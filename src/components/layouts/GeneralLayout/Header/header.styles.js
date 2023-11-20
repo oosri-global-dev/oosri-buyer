@@ -18,6 +18,10 @@ export const HeaderWrapper = styled(FlexibleDiv)`
   .logo__section {
     width: fit-content;
 
+    .logo__wrapper {
+      width: 120px;
+    }
+
     .nav__menu__wrapper {
       display: none;
     }
@@ -29,8 +33,10 @@ export const HeaderWrapper = styled(FlexibleDiv)`
     flex-direction: row;
     width: fit-content;
 
-    p {
+    a {
       cursor: pointer;
+      text-decoration: none;
+      color: var(--orrsiBlack);
     }
 
     :hover {
