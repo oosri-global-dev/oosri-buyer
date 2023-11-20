@@ -7,6 +7,12 @@ export const FooterWrapper = styled(FlexibleDiv)`
   flex-wrap: nowrap;
   background: #fbfbfb;
 
+  .footer__content {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   .bottom__section {
     margin: 10px 0;
   }

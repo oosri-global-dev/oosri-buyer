@@ -5,8 +5,16 @@ import iPhoneImage4 from "@/assets/images/iphone19.png";
 
 
 export const iPhone14ProMax = {
-  name: "",
-  price: "",
-  images: [iPhoneImage1.src, iPhoneImage2.src, iPhoneImage3.src, iPhoneImage4.src],
+  name: "Iphone 14 Pro Max",
+  price: "₦410,000",
+  images: [
+    iPhoneImage1.src,
+    iPhoneImage2.src,
+    iPhoneImage3.src,
+    iPhoneImage4.src,
+  ],
   likes: 5,
+  numOfReviews: 102,
+  numOfPurchase: "Purchase over 1k+",
+  shippingFee: "₦500",
 };
