@@ -12,13 +12,17 @@ import { HiOutlineMinusSmall as MinusIcon } from "react-icons/hi2";
 import Button from "@/components/lib/Button";
 import { Tabs, theme } from "antd";
 import StickyBox from "react-sticky-box";
-import ProductDescription from "./sections/productDescription";
+import ProductDescription from "./sections/product-desc/productDescription";
+import ProductReviewBox from "./sections/product-reviews/productReview";
+import Link from "next/link";
+import SmartphoneDeals from "../HomeScreens/Homepage/SmartphoneDeals/smartphoneDeals";
+import { smartphoneDealsData } from "@/data-helpers/homepage-helper";
 
 function NoOfProductReviews({ numOfReviews }) {
   return (
     <div className="product__reviews">
       <p>Customer Reviews</p>
-      <p className="num__of__reviews">{numOfReviews || 67}</p>
+      <p className="num__of__reviews">{numOfReviews || 0}</p>
     </div>
   );
 }
@@ -50,6 +54,42 @@ export default function ProductPage() {
     </StickyBox>
   );
 
+  const reviews = [
+    {
+      reviewerName: "Mike Tyson",
+      likes: 4,
+      review:
+        "The iPhone 14 is a very good phone for the money, offering improved cameras, a faster A15 Bionic chip and fun.",
+    },
+    {
+      reviewerName: "Mike Tyson",
+      likes: 3,
+      review:
+        "The iPhone 14 is a very good phone for the money, offering improved cameras, a faster A15 Bionic chip and fun.",
+    },
+    {
+      reviewerName: "Mike Tyson",
+      likes: 5,
+      review:
+        "The iPhone 14 is a very good phone for the money, offering improved cameras, a faster A15 Bionic chip and fun.",
+    },
+    {
+      reviewerName: "Mike Tyson",
+      likes: 1,
+      review:
+        "The iPhone 14 is a very good phone for the money, offering improved cameras, a faster A15 Bionic chip and fun.",
+    },
+  ];
+
+  const handleSeeMoreReviews = (key) => {
+    const seeMoreBtn = document.getElementsByClassName("see__more__reviews")[0];
+    if (key === 1) {
+      seeMoreBtn.style.display = "none";
+    } else {
+      seeMoreBtn.style.display = "block";
+    }
+  };
+
   const items = [
     {
       label: "Product Description",
@@ -58,22 +98,12 @@ export default function ProductPage() {
       style: {},
     },
     {
-      label: <NoOfProductReviews numOfReviews={67} />,
+      label: <NoOfProductReviews numOfReviews={reviews.length} />,
       key: 2,
-      children: "",
+      children: <ProductReviewBox reviews={reviews} />,
       style: {},
     },
   ];
-
-  const newItems = new Array(3).fill(null).map((_, i) => {
-    const id = String(i + 1);
-    return {
-      label: `Tab ${id}`,
-      key: id,
-      children: `Content of Tab Pane ${id}`,
-      style: i === 0 ? { height: 200 } : undefined,
-    };
-  });
 
   return (
     <GeneralLayout>
@@ -217,6 +247,22 @@ export default function ProductPage() {
             defaultActiveKey="1"
             renderTabBar={renderTabBar}
             items={items}
+            onChange={(key) => handleSeeMoreReviews(key)}
+          />
+          <Link href={"/"}>
+            <p className="see__more__reviews">See more reviews</p>
+          </Link>
+        </FlexibleDiv>
+        {/* Related Products Section */}
+        <FlexibleDiv
+          justifyContent="flex-start"
+          alignItems="flex-start"
+          margin="20px 0"
+        >
+          <SmartphoneDeals
+            content={smartphoneDealsData.slice(0, 5)}
+            sectionTitle="More Products"
+            showViewAll={false}
           />
         </FlexibleDiv>
       </ProductPageWrapper>

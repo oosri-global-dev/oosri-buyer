@@ -7,8 +7,8 @@ export default styled(Button)`
   height: ${({ height }) => height || "45px"};
   min-height: ${({ height }) => height || "45px"};
   padding: ${({ padding }) => (padding ? padding : "0 20px")};
-  border: ${({ border }) => border || "1px solid transparent"};
   border-color: ${({ borderColor }) => borderColor || "transparent"};
+  border: ${({ border }) => border || "1px solid transparent"};
   background: ${({ backgroundColor }) => backgroundColor || "transparent"};
   border-radius: ${({ radius }) => radius || "0"};
   box-shadow: ${({ boxShadow }) => boxShadow || "none"};

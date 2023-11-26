@@ -10,8 +10,9 @@ export const SDWrapper = styled(FlexibleDiv)`
   flex-wrap: wrap;
   margin-top: 20px;
 
-  .top__section {
+  .top__section__container {
     margin-bottom: 20px;
+    height: fit-content;
   }
 
   .view__all__style {

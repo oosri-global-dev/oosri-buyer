@@ -143,6 +143,63 @@ export const ProductPageWrapper = styled(FlexibleDiv)`
       color: #424242;
     }
   }
+
+  .product__description {
+    position: relative;
+
+    .see__more__reviews {
+      background: var(--orrsiPrimary);
+      padding: 8px 10px;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      color: var(--orrsiWhite);
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      -webkit-transform: translateX(-50%);
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (max-width: 1000px){
+    .top__section {
+      .top__right__section {
+        .cart__options {
+          width: 75%;
+        }
+      }
+    }
+  }
+
+  @media (max-width: 550px) {
+    .top__section {
+      flex-direction: column;
+      height: fit-content;
+      gap: 15px;
+
+      .top__left__section {
+        flex-direction: column-reverse;
+
+        .main__image__wrapper {
+          .main__image {
+            width: 100%;
+          }
+        }
+
+        .image__section {
+          flex-direction: row;
+          width: 100%;
+          flex-wrap: nowrap;
+        }
+      }
+
+      .top__right__section {
+        .cart__options {
+          width: 100%;
+        }
+      }
+    }
+  }
 `;
 
 export const ProductBreadcrumbsWrapper = styled(FlexibleDiv)`
