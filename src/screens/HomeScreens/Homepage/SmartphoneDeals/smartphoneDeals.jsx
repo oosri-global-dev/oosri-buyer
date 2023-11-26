@@ -5,7 +5,11 @@ import { useState, useEffect } from "react";
 import { useWindowSize } from "@/data-helpers/hooks";
 import Link from "next/link";
 
-export default function SmartphoneDeals({ content }) {
+export default function SmartphoneDeals({
+  content,
+  sectionTitle = "SmartPhone Deals",
+  showViewAll = true,
+}) {
   const [isMobile, setIsMobile] = useState(false);
   const [width, height] = useWindowSize();
 
@@ -20,14 +24,16 @@ export default function SmartphoneDeals({ content }) {
   return (
     <SDWrapper>
       <FlexibleDiv
-        className="top__section"
+        className="top__section__container"
         justifyContent="space-between"
         alignItems="center"
       >
-        <h2>SmartPhone Deals</h2>
-        <Link className="view__all__style" href={"/shop"}>
-          View All
-        </Link>
+        <h2>{sectionTitle}</h2>
+        {showViewAll && (
+          <Link className="view__all__style" href={"/shop"}>
+            View All
+          </Link>
+        )}
       </FlexibleDiv>
       {content.map((card, idx) => (
         <>

@@ -2,14 +2,18 @@ import Footer from "./Footer/footer";
 import { GeneralLayoutWrapper } from "./generalLayout.styles";
 import Header from "./Header/header";
 
-export default function GeneralLayout({ children }) {
+export default function GeneralLayout({
+  children,
+  noFooter = false,
+  noHeader = false,
+}) {
   return (
     <>
       <GeneralLayoutWrapper>
-        <Header />
+        {!noHeader && <Header />}
         {children}
       </GeneralLayoutWrapper>
-      <Footer />
+      {!noFooter && <Footer />}
     </>
   );
 }

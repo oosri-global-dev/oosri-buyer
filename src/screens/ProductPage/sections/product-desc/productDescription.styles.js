@@ -10,4 +10,10 @@ export const ProductDescWrapper = styled(FlexibleDiv)`
     font-size: 0.9rem;
     width: 70%;
   }
+
+  @media (max-width: 550px) {
+    p {
+      width: 100%;
+    }
+  }
 `;

@@ -12,6 +12,7 @@ export const GeneralLayoutWrapper = styled(FlexibleDiv)`
   max-width: 1200px;
   margin-left: auto;
   margin-right: auto;
+  background: transparent;
 
   @media (max-width: 1370px) {
     padding: 20px;
