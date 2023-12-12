@@ -54,12 +54,92 @@ export const HeaderWrapper = styled(FlexibleDiv)`
   }
 
   .right__section {
-    gap: 25px;
+    gap: 20px;
     width: fit-content;
+    position: relative;
+    padding-left: 25px;
 
     svg {
-      width: 18px;
-      height: 18px !important;
+      width: 17px;
+      height: 17px !important;
+    }
+
+    .single__menu {
+      cursor: pointer;
+    }
+
+    .selected__icon {
+      background: var(--orrsiPrimary);
+      width: 30px;
+      height: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+
+      svg {
+        color: white;
+      }
+    }
+
+    .back__triangle {
+      width: 0;
+      height: 0;
+      border: 15px solid transparent;
+      border-top: 0;
+      border-bottom: 20px solid var(--orrsiPrimary);
+      position: absolute;
+      top: 35px;
+      right: 6px;
+    }
+
+    .account__dropdown {
+      position: absolute;
+      height: fit-content;
+      top: 50px;
+      width: 100%;
+      background: var(--orrsiPrimary);
+      border-radius: 10px;
+      right: 0;
+      padding: 20px 10px;
+
+      p {
+        margin: 0;
+      }
+
+      .header__span {
+        font-size: 0.8rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        width: 100%;
+        padding-bottom: 8px;
+        color: white;
+      }
+
+      .auth__btn {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        width: 100%;
+        min-height: fit-content;
+        height: fit-content;
+        padding: 0px;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 0;
+        border-radius: 10px;
+
+        .btn__text {
+          font-size: 1rem;
+          font-weight: normal;
+          color: #fff;
+
+          svg {
+            width: 12px;
+            height: 12px !important;
+          }
+        }
+      }
     }
   }
 
@@ -82,6 +162,14 @@ export const HeaderWrapper = styled(FlexibleDiv)`
 
     .right__section .wishlist__icon {
       display: none;
+    }
+  }
+
+  @media (max-width: 550px) {
+    .right__section {
+      .account__dropdown {
+        min-width: 200px;
+      }
     }
   }
 `;

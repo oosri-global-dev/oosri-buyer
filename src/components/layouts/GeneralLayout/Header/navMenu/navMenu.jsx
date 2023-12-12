@@ -2,6 +2,7 @@ import { FlexibleDiv } from "@/components/lib/Box/styles";
 import { NavMenuWrapper } from "./navMenu.styles";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 export default function NavMenu({ menuItems }) {
   const [checked, setChecked] = useState(false);
@@ -34,9 +35,13 @@ export default function NavMenu({ menuItems }) {
       {/* The navigation menus */}
       <FlexibleDiv className="nav__content__wrapper">
         {menuItems.map((sgn, idx) => (
-          <p key={idx} id={`${asPath === sgn.url ? "active__link" : ""}`}>
+          <Link
+            key={idx}
+            href={sgn.url}
+            id={`${asPath === sgn.url ? "active__link" : ""}`}
+          >
             {sgn.link}
-          </p>
+          </Link>
         ))}
       </FlexibleDiv>
     </NavMenuWrapper>

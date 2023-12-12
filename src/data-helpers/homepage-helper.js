@@ -12,6 +12,10 @@ import Phone7 from "@/assets/images/phone7.png";
 import Phone8 from "@/assets/images/phone8.png";
 import Phone9 from "@/assets/images/phone9.png";
 import Phone10 from "@/assets/images/phone10.png";
+import PhonesCategoryImage from "@/assets/images/category-boxes/phones.png";
+import WristWatchCategoryImage from "@/assets/images/category-boxes/wristwatches.png";
+import ComputerAssessories from "@/assets/images/category-boxes/computer-assessories.png";
+import Tablets from "@/assets/images/category-boxes/tablets.png";
 
 export const heroBannerFiles = [
   {
@@ -40,7 +44,7 @@ export const heroBannerFiles = [
     btnText: "Shop Now",
     btnLink: "http://localhost:3001",
     openInNewTab: false,
-  }
+  },
 ];
 
 export const smartphoneDealsData = [
@@ -154,4 +158,11 @@ export const smartphoneDealsData = [
     likes: 2,
     isFavorite: false,
   },
+];
+
+export const homepageCategoryData = [
+  { name: "Phones", image: PhonesCategoryImage },
+  { name: "Wristwatches", image: WristWatchCategoryImage },
+  { name: "Computer Accessories", image: ComputerAssessories },
+  { name: "Tablets", image: Tablets },
 ];

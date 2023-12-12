@@ -5,6 +5,13 @@ import TextField from "@/components/lib/TextField";
 import Button from "@/components/lib/Button";
 import PaymentMethodImage from '@/assets/images/payment-method.svg'
 import {PiCopyrightLight as CopyrightIcon} from 'react-icons/pi'
+import Logo from "@/assets/images/homepage/logo.png";
+import Image from "next/image";
+import {
+  BsFacebook as FacebookIcon,
+  BsInstagram as InstagramIcon,
+} from "react-icons/bs";
+import { FaSquareXTwitter as TwitterIcon } from "react-icons/fa6";
 
 export default function Footer() {
   const quickLinks = [
@@ -49,8 +56,17 @@ export default function Footer() {
       <FlexibleDiv className="footer__content">
         <TopSectionWrapper>
           <FlexibleDiv className="section__box box__1">
-            <p>LOGO</p>
-            <p>MEDIAS</p>
+            <Image className="site__logo" src={Logo} alt="site-logo" />
+            <FlexibleDiv
+              justifyContent="flex-start"
+              flexWrap="nowrap"
+              alignItems="flex-start"
+              gap="15px"
+            >
+              <FacebookIcon size={28} />
+              <TwitterIcon size={30} />
+              <InstagramIcon size={28} />
+            </FlexibleDiv>
           </FlexibleDiv>
           <FlexibleDiv className="section__box box__2">
             <h3>Quick Links</h3>
@@ -71,7 +87,7 @@ export default function Footer() {
           <FlexibleDiv className="section__box box__4">
             <h3>Newsletter Signup?</h3>
             <FlexibleDiv className="newsletter__wrapper" flexWrap="nowrap">
-              <TextField />
+              <TextField placeholder="Enter your Email Address" />
               <Button
                 color="var(--orrsiWhite)"
                 backgroundColor="var(--orrsiPrimary)"
@@ -85,7 +101,8 @@ export default function Footer() {
         </TopSectionWrapper>
         <FlexibleDiv className="bottom__section">
           <p>
-            <CopyrightIcon /> 2023 Oosri.com All rights reserved
+            <CopyrightIcon /> {new Date().getFullYear()} Oosri.com All rights
+            reserved
           </p>
         </FlexibleDiv>
       </FlexibleDiv>

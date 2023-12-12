@@ -4,7 +4,6 @@ import { FlexibleDiv } from "../Box/styles";
 export const ProductCardWrapper = styled(FlexibleDiv)`
   flex-direction: column;
   flex-basis: 18.5%;
-  /* flex-basis: 23.6%; */
   overflow: hidden;
   margin-bottom: 30px;
   position: relative;
