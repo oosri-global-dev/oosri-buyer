@@ -6,11 +6,13 @@ export default function GeneralLayout({
   children,
   noFooter = false,
   noHeader = false,
+  title = false,
 }) {
   return (
     <>
       <GeneralLayoutWrapper>
         {!noHeader && <Header />}
+        {title && <h1 className="page__title">{title}</h1>}
         {children}
       </GeneralLayoutWrapper>
       {!noFooter && <Footer />}

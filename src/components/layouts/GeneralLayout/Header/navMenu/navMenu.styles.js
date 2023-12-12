@@ -73,10 +73,12 @@ export const NavMenuWrapper = styled(FlexibleDiv)`
     left: ${({ inputChecked }) => (inputChecked ? 0 : "")};
   }
 
-  .nav__content__wrapper p {
+  .nav__content__wrapper a {
     text-align: center;
     padding: 20px;
     color: #555555;
+    display: block;
+    text-decoration: none;
   }
 
   .nav__content__wrapper #active__link {

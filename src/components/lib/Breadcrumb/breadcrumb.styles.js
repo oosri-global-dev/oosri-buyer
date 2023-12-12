@@ -30,4 +30,13 @@ export const BreadcrumbWrapper = styled(FlexibleDiv)`
       height: 100%;
     }
   }
+
+  @media (max-width: 540px) {
+    .banner__wrapper {
+      height: fit-content;
+      img {
+        object-fit: contain;
+      }
+    }
+  }
 `;

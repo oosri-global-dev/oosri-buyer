@@ -14,6 +14,13 @@ export const GeneralLayoutWrapper = styled(FlexibleDiv)`
   margin-right: auto;
   background: transparent;
 
+  .page__title {
+    width: 100%;
+    text-align: left;
+    font-weight: 400;
+    margin: 20px 0;
+  }
+
   @media (max-width: 1370px) {
     padding: 20px;
   }

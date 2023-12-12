@@ -7,4 +7,8 @@ export default styled(Input)`
   height: ${({ height }) => height || "45px"};
   border: ${({ border }) => border || "0.5px solid #E0DED3"};
   border-radius: ${({ borderRadius }) => borderRadius || "0"};
+
+  &:focus, &:focus-within, &:hover {
+    border-color: var(--orrsiPrimary);
+  }
 `;

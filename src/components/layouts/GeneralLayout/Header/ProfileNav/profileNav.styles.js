@@ -10,6 +10,7 @@ export const ProfileNavWrapper = styled(FlexibleDiv)`
   border: 1.5px solid #9e9e9e;
   padding: 5px;
   border-radius: 70px;
+  cursor: pointer;
 
   img {
     width: 17px;

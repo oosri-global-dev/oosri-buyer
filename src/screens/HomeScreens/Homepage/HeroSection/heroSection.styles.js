@@ -21,6 +21,16 @@ export const HeroSectionWrapper = styled(FlexibleSection)`
     color: #bbb;
   }
 
+  .category__wrapper {
+    flex-direction: row;
+    width: 100%;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 1.8%;
+    flex-wrap: wrap;
+    margin: 35px 0;
+  }
+
   @media (max-width: 650px) {
     .introductory__text {
       font-size: 1.5rem;

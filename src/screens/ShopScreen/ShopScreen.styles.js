@@ -3,6 +3,7 @@ import { FlexibleDiv } from "@/components/lib/Box/styles";
 
 export const ShopPageWrapper = styled(FlexibleDiv)`
   position: relative;
+
   hr {
     border: 0.4px solid #f5f5f5;
     width: 100%;

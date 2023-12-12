@@ -35,6 +35,13 @@ export const TopSectionWrapper = styled(FlexibleDiv)`
     justify-content: flex-start;
     align-items: flex-start;
 
+    .site__logo{
+      width: 100px;
+      height: 100%;
+      margin-left: -8px;
+      margin-bottom: 9px;
+    }
+
     h3 {
       color: #333333;
       font-weight: 600;
@@ -69,7 +76,7 @@ export const TopSectionWrapper = styled(FlexibleDiv)`
   }
 
   
-  @media (max-width: 440px) {
+  @media (max-width: 540px) {
     flex-wrap: wrap;
     .box__1 {
       flex-grow: 4;
