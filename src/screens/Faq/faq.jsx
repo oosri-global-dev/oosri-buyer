@@ -42,24 +42,27 @@ export default function FAQPage() {
     setSelected(i)
   }
   return (
-    <GeneralLayout>
-      <FaqWrapper>
+    <FaqWrapper>
       <FlexibleSection className="container">
-            <h1 className="faq_title">FREQUENTLY ASKED QUESTIONS (FAQs)</h1>
-            <FlexibleDiv className="accordion">
-                
-                {faqCollection.map((item, i) => (
-                  <FlexibleDiv className="item"  key={i}>
-                    <FlexibleDiv className="title" onClick={() => toggle(i)}>
-                      <h2 className="question">{item.question}</h2>
-                      <span className="expand_sign">{selected === i ? '-' : '+'}</span>
-                    </FlexibleDiv>
-                    <FlexibleDiv className={selected === i ? 'content show' : 'content'}>{item.answer}</FlexibleDiv>
-                  </FlexibleDiv>
-                ))}
+        <h1 className="faq_title">FREQUENTLY ASKED QUESTIONS (FAQs)</h1>
+        <FlexibleDiv className="accordion">
+          {faqCollection.map((item, i) => (
+            <FlexibleDiv className="item" key={i}>
+              <FlexibleDiv className="title" onClick={() => toggle(i)}>
+                <h2 className="question">{item.question}</h2>
+                <span className="expand_sign">
+                  {selected === i ? "-" : "+"}
+                </span>
+              </FlexibleDiv>
+              <FlexibleDiv
+                className={selected === i ? "content show" : "content"}
+              >
+                {item.answer}
+              </FlexibleDiv>
             </FlexibleDiv>
-        </FlexibleSection>
-      </FaqWrapper>
-    </GeneralLayout>
+          ))}
+        </FlexibleDiv>
+      </FlexibleSection>
+    </FaqWrapper>
   );
 }

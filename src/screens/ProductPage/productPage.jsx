@@ -106,7 +106,7 @@ export default function ProductPage() {
   ];
 
   return (
-    <GeneralLayout>
+    <>
       {/* Breacrumb starts here */}
       <ProductBreadcrumbsWrapper>
         {previousLinks.map((sgn, idx) => (
@@ -266,7 +266,7 @@ export default function ProductPage() {
           />
         </FlexibleDiv>
       </ProductPageWrapper>
-    </GeneralLayout>
+    </>
   );
 }
 

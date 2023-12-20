@@ -19,6 +19,7 @@ export const GeneralLayoutWrapper = styled(FlexibleDiv)`
     text-align: left;
     font-weight: 400;
     margin: 20px 0;
+    font-size: 1.6rem;
   }
 
   @media (max-width: 1370px) {
