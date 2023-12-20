@@ -11,7 +11,6 @@ export default function Homepage() {
 
   console.log();
   return (
-    <GeneralLayout>
       <HomepageWrapper>
         <HeroSection />
         <SmartphoneDeals content={smartphoneDealsData} />
@@ -19,6 +18,5 @@ export default function Homepage() {
         <ProductCarousel carouselTitle={`Top Phones Deals`} />
         <ProductGrid gridTitle={"Best Prices For You"} />
       </HomepageWrapper>
-    </GeneralLayout>
   );
 }

@@ -27,8 +27,6 @@ export default function Header() {
     console.log("e", showDropdown);
   }, [showDropdown]);
 
-  console.log(asPath);
-
   return (
     <HeaderWrapper>
       <FlexibleDiv className="logo__section">

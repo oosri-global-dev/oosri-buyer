@@ -3,7 +3,8 @@ import styled from "styled-components";
 
 export const AuthWrapperBox = styled(FlexibleDiv)`
   flex-direction: column;
-  height: calc(100dvh - 160px);
+  min-height: calc(100dvh - 160px);
+  max-height: fit-content;
   background-color: #eee;
   padding: 0 25px 25px 25px;
 
@@ -23,7 +24,7 @@ export const AuthWrapperBox = styled(FlexibleDiv)`
 
   @media (max-width: 550px) {
     background: transparent;
-    height: calc(100dvh - 30px);
+    height: fit-content;
     padding: 0;
 
     .top__navigation {

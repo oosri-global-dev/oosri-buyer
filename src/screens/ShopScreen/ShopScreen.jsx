@@ -82,7 +82,7 @@ export default function ShopPage() {
   useOutsideAlerter(popupRef, showFilter, setShowFilter);
 
   return (
-    <GeneralLayout>
+    <>
       <Breadcrumb numOfProducts={19233} />
       <ShopPageWrapper>
         <hr />
@@ -203,6 +203,6 @@ export default function ShopPage() {
           ))}
         </FlexibleDiv>
       </ShopPageWrapper>
-    </GeneralLayout>
+    </>
   );
 }
