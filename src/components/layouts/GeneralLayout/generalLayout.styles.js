@@ -13,6 +13,8 @@ export const GeneralLayoutWrapper = styled(FlexibleDiv)`
   margin-left: auto;
   margin-right: auto;
   background: transparent;
+  min-height: calc(100dvh - 300px);
+  align-items: flex-start;
 
   .page__title {
     width: 100%;
@@ -28,5 +30,6 @@ export const GeneralLayoutWrapper = styled(FlexibleDiv)`
 
   @media (max-width: 550px) {
     padding: 10px;
+    min-height: fit-content;
   }
 `;

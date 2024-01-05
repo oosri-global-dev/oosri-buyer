@@ -40,6 +40,31 @@ export const CartPageWrapper = styled(FlexibleDiv)`
   }
 
   .cart__section {
-    margin: 15px 0;
+    margin-bottom: 105px;
+
+    .total__prices__box {
+      p,
+      h2 {
+        margin: 0;
+        width: 100%;
+        text-align: right;
+      }
+
+      .shipping__fee__text {
+        color: #bbb;
+
+        span {
+          color: var(--orrsiBlack);
+        }
+      }
+    }
+  }
+
+  @media (max-width: 550px) {
+    .cart__section {
+      .summary__box {
+        margin: 40px 20px 0 0;
+      }
+    }
   }
 `;

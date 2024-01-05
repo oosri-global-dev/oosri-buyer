@@ -7,10 +7,13 @@ import ProductCarousel from "@/components/lib/ProductCarousel/productCarousel";
 import { MainContext } from "@/context";
 import { PAGE_TITLE } from "@/context/types";
 import SingleCartProduct from "@/components/lib/SingleCartProduct/single-cart-product";
+import { cartItemsHelper } from "@/data-helpers/cart-helper";
+import RemoveFromCartModal from "@/components/lib/Modals/remove-from-cart";
 
 export default function CartPage() {
   const [cartIsEmpty, setCartIsEmpty] = useState(false);
   const { dispatch } = useContext(MainContext);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (!cartIsEmpty) {
@@ -34,7 +37,8 @@ export default function CartPage() {
 
   return (
     <CartPageWrapper>
-      {cartIsEmpty && (
+      <RemoveFromCartModal isOpen={isModalOpen} setIsOpen={setIsModalOpen} />
+      {cartIsEmpty ? (
         <FlexibleDiv
           className="empty__cart__box"
           flexDir="column"
@@ -60,12 +64,48 @@ export default function CartPage() {
             Start Shopping
           </Button>
         </FlexibleDiv>
+      ) : (
+        <>
+          <FlexibleDiv className="cart__section">
+            {cartItemsHelper.map((item, idx) => (
+              <SingleCartProduct item={item} key={idx} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
+            ))}
+            <FlexibleDiv
+              className="summary__box"
+              flexDir="row"
+              justifyContent="flex-end"
+              margin="50px 100px 0 0"
+            >
+              <FlexibleDiv
+                className="total__prices__box"
+                flexDir="column"
+                gap="25px"
+                justifyContent="flex-end"
+                alignItems="flex-start"
+                width="fit-content"
+              >
+                <h2>Cart Summary</h2>
+                <p className="shipping__fee__text">
+                  Shipping Fee: <span>N500</span>
+                </p>
+                <p className="shipping__fee__text">
+                  Sub Total: <span>N500,000</span>
+                </p>
+                <Button
+                  backgroundColor="var(--orrsiPrimary)"
+                  radius="10px"
+                  height="40px"
+                  color="var(--orrsiWhite)"
+                  padding="0px 45px"
+                >
+                  Checkout (N550,000)
+                </Button>
+              </FlexibleDiv>
+            </FlexibleDiv>
+          </FlexibleDiv>
+        </>
       )}
-      {!cartIsEmpty && (
-        <FlexibleDiv className="cart__section">
-          <SingleCartProduct />
-        </FlexibleDiv>
-      )}
+
       <FlexibleDiv>
         <ProductCarousel carouselTitle={`You may also like`} />
       </FlexibleDiv>
