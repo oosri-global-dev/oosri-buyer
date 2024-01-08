@@ -25,7 +25,7 @@ export default styled(Button)`
     cursor: pointer;
     border-color: ${({ hoverBg, borderColor }) =>
       hoverBg ? hoverBg : borderColor || "var(--orrsiPrimary) !important"};
-    color: var(--orrsiWhite) !important;
+    color: ${({ hoverColor }) => hoverColor || "var(--orrsiWhite)"} !important;
     cursor: pointer !important;
   }
 

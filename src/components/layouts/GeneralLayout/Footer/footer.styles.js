@@ -76,7 +76,7 @@ export const TopSectionWrapper = styled(FlexibleDiv)`
   }
 
   
-  @media (max-width: 540px) {
+  @media (max-width: 650px) {
     flex-wrap: wrap;
     .box__1 {
       flex-grow: 4;

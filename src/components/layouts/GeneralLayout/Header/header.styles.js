@@ -129,6 +129,10 @@ export const HeaderWrapper = styled(FlexibleDiv)`
         padding: 8px 0;
         border-radius: 10px;
 
+        &:hover {
+          background: rgba(18, 18, 18, 0.16);
+        }
+
         .btn__text {
           font-size: 1rem;
           font-weight: normal;

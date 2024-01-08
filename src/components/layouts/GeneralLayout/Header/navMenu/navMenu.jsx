@@ -40,7 +40,7 @@ export default function NavMenu({ menuItems }) {
             href={sgn.url}
             id={`${asPath === sgn.url ? "active__link" : ""}`}
           >
-            {sgn.link}
+            <span onClick={() => setChecked(false)}>{sgn.link}</span>
           </Link>
         ))}
       </FlexibleDiv>

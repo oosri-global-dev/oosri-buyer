@@ -7,6 +7,7 @@ export const AuthWrapperBox = styled(FlexibleDiv)`
   max-height: fit-content;
   background-color: #eee;
   padding: 0 25px 25px 25px;
+  box-sizing: border-box;
 
   .top__navigation {
     padding: 8px 0;

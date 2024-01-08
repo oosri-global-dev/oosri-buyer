@@ -6,18 +6,48 @@ import { FcGoogle as GoogleIcon } from "react-icons/fc";
 import TextField from "@/components/lib/TextField";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import Link from "next/link";
+import { useState } from "react";
 import AuthWrapper from "@/components/layouts/AuthWrapper/auth-wrapper";
+import { loginUser } from "@/network/user";
+import { validatePassword } from "@/data-helpers/validator";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function Login() {
   const [form] = Form.useForm();
+  const [loadingBtn, setLoadingBtn] = useState(false);
 
   const handleLoginSubmit = async (values) => {
-    console.log("values", values);
+    setLoadingBtn(true);
+
+    if (!validatePassword(values.password)) {
+      toast.error(
+        "Password must not be less than 8 characters and must contain at least one alpha (A-Z), (a-z), numeric (0-9)and a special character",
+        {
+          duration: "400",
+          position: "bottom-center",
+        }
+      );
+      setLoadingBtn(false);
+      return;
+    }
+
+    try {
+      const res = await loginUser(values);
+      console.log(res);
+    } catch (err) {
+      toast.error(`${err?.response?.data?.message}`, {
+        duration: "400",
+        position: "bottom-center",
+      });
+    }
+
+    setLoadingBtn(false);
   };
 
   return (
     <AuthWrapper>
       <LoginWrapper>
+        <Toaster containerClassName="toaster__style" />
         <FlexibleDiv maxWidth="350px" gap="40px" flexDir="column">
           <h2>Login</h2>
           <Button
@@ -66,6 +96,7 @@ export default function Login() {
                 color="var(--orrsiWhite)"
                 radius="10px"
                 margin="15px 0 0 0"
+                loading={loadingBtn}
               >
                 Login
               </Button>

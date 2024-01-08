@@ -5,6 +5,19 @@ export const LoginWrapper = styled(FlexibleDiv)`
   height: 100%;
   background: var(--orrsiWhite);
 
+  .toaster__style {
+    position: relative !important;
+    z-index: 9999 !important;
+    height: fit-content !important;
+    width: 100% !important;
+    pointer-events: none;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    margin: 10px 0;
+  }
+
   .google__auth__btn {
     display: flex;
     justify-content: center;
