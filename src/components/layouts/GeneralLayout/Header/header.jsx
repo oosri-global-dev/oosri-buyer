@@ -94,7 +94,7 @@ export default function Header() {
             <p className="header__span">{`Let's`} get you in!</p>
             <Button
               className="auth__btn"
-              backgroundColor="rgba(18, 18, 18, 0.16)"
+              // backgroundColor="rgba(18, 18, 18, 0.16)"
               onClick={() => push("/login")}
             >
               <ProfileIcon color="white" size={12} />

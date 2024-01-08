@@ -15,6 +15,8 @@ export const GeneralLayoutWrapper = styled(FlexibleDiv)`
   background: transparent;
   min-height: calc(100dvh - 300px);
   align-items: flex-start;
+  justify-content: flex-start;
+  flex-direction: column;
 
   .page__title {
     width: 100%;
