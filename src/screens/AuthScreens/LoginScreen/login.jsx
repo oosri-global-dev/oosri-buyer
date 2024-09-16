@@ -57,7 +57,7 @@ export default function Login() {
 
       if (
         err?.response?.data?.message ===
-        "Error: Please verify your email before logging in"
+        "Please verify your email before logging in"
       ) {
         push(`/otp?email=${values?.email}`);
         return;
