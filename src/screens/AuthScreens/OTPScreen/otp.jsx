@@ -1,18 +1,19 @@
 /* eslint-disable react/no-unescaped-entities */
 import AuthWrapper from "@/components/layouts/AuthWrapper/auth-wrapper";
 import { FlexibleDiv } from "@/components/lib/Box/styles";
-import { CheckEmailWrapper } from "./check-email.styles";
+import { CheckEmailWrapper } from "./otp.styles";
 import { GoLock as LockIcon } from "react-icons/go";
 import { Form } from "antd";
 import TextField from "@/components/lib/TextField";
 import Button from "@/components/lib/Button";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { resendOTP } from "@/network/user";
+import { confirmOTP, resendOTP } from "@/network/user";
 import { TOAST_BOX } from "@/context/types";
 import { useMainContext } from "@/context";
+import { storeDataInCookie } from "@/data-helpers/auth-session";
 
-export default function CheckEmail() {
+export default function OTP() {
   const [form] = Form.useForm();
   const { push, query } = useRouter();
   const [isResending, setIsResending] = useState(false);
@@ -94,8 +95,36 @@ export default function CheckEmail() {
       email: decodeURIComponent(query?.email),
     };
 
-    //route to the reset page
-    push(`/reset-password?email=${payload?.email}&otp=${payload?.otp}`);
+    try {
+      const res = await confirmOTP(payload);
+
+      //set token
+      storeDataInCookie("access_token", res?.body?.accessToken);
+      storeDataInCookie("refresh_token", res?.body?.refreshToken);
+
+      //message
+      dispatch({
+        type: TOAST_BOX,
+        payload: {
+          type: "success",
+          message: "Email verified successfully.",
+        },
+      });
+
+      //direct inside the app
+      setTimeout(() => {
+        window.open(`/`, "_self");
+      }, 3000);
+    } catch (err) {
+      dispatch({
+        type: TOAST_BOX,
+        payload: {
+          type: "error",
+          message: err?.response?.data?.message || "Sorry, an error occured",
+        },
+      });
+      setLoading(false);
+    }
   };
 
   const handleInput = (e) => {

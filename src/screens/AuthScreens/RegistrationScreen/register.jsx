@@ -7,18 +7,71 @@ import TextField from "@/components/lib/TextField";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import Link from "next/link";
 import AuthWrapper from "@/components/layouts/AuthWrapper/auth-wrapper";
+import toast, { Toaster } from "react-hot-toast";
+import { useState } from "react";
+import { signUpUser } from "@/network/user";
+import { useRouter } from "next/router";
 
 export default function Register() {
   const [form] = Form.useForm();
+  const [loading, setIsLoading] = useState(false);
+  const { push } = useRouter();
 
   const handleRegisterSubmit = async (values) => {
-    console.log("values", values);
+    setIsLoading(true);
+    if (typeof values?.gender === "undefined") {
+      toast.error(`Please select a gender`, {
+        duration: "400",
+        position: "bottom-center",
+      });
+      window.scroll(0, 0);
+      return;
+    }
+
+    if (values?.password?.length < 5) {
+      toast.error(`Password must not be less than 5 characters`, {
+        duration: "400",
+        position: "bottom-center",
+      });
+      window.scroll(0, 0);
+      return;
+    }
+
+    try {
+      const res = await signUpUser(values);
+
+      //scroll to the top
+      window.scroll(0, 0);
+
+      //toast message
+      toast.success(`Signup was successful`, {
+        duration: "500",
+        position: "bottom-center",
+      });
+
+      setTimeout(() => {
+        //redirect to the otp
+        push(`/otp?email=${res?.body?.email}`);
+      }, [1200]);
+    } catch (err) {
+      //scroll to the top
+      window.scroll(0, 0);
+      toast.error(
+        err?.response?.data?.message || "Cannot sign user up at the moment",
+        {
+          duration: "500",
+          position: "bottom-center",
+        }
+      );
+      setIsLoading(false);
+    }
   };
 
   return (
-    <AuthWrapper>
+    <AuthWrapper isAuth={false}>
       <LoginWrapper>
         <FlexibleDiv maxWidth="350px" gap="40px" flexDir="column">
+          <Toaster containerClassName="toaster__style" />
           <h2>Register</h2>
           <Button
             border="1.5px solid rgba(224, 224, 224, 0.60)"
@@ -38,16 +91,18 @@ export default function Register() {
                   className="move__down"
                   borderRadius="10px"
                   autoComplete="new-password"
+                  maxLength={50}
+                  required
                 />
               </Form.Item>
 
               <FlexibleDiv className="move__down" flexWrap="nowrap" gap="15px">
-                <Form.Item name="gender">
+                <Form.Item name="gender" required>
                   <Radio.Group className="radio__group__support">
-                    <Radio value={"male"} className="radio__box">
+                    <Radio value={"Male"} className="radio__box">
                       Male
                     </Radio>
-                    <Radio value={"female"} className="radio__box">
+                    <Radio value={"Female"} className="radio__box">
                       Female
                     </Radio>
                   </Radio.Group>
@@ -60,15 +115,17 @@ export default function Register() {
                   type="email"
                   className="move__down"
                   borderRadius="10px"
+                  required
                 />
               </Form.Item>
 
               <label className="input__label">Phone Number</label>
               <Form.Item name="phoneNumber">
                 <TextField
-                  type="text"
+                  type="number"
                   className="move__down"
                   borderRadius="10px"
+                  required
                 />
               </Form.Item>
 
@@ -82,6 +139,7 @@ export default function Register() {
                     visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
                   }
                   autoComplete="new-password"
+                  required
                 />
               </Form.Item>
 
@@ -93,6 +151,7 @@ export default function Register() {
                 color="var(--orrsiWhite)"
                 radius="10px"
                 margin="25px 0 0 0"
+                loading={loading}
               >
                 Register
               </Button>

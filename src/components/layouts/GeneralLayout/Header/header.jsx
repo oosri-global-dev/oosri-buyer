@@ -13,19 +13,46 @@ import Link from "next/link";
 import { CgProfile as ProfileIcon } from "react-icons/cg";
 import { HiOutlineUserPlus as RegisterIcon } from "react-icons/hi2";
 import Button from "@/components/lib/Button";
-import useOutsideAlerter from "@/data-helpers/hooks";
+import useOutsideAlerter, { truncateString } from "@/data-helpers/hooks";
+import { useMainContext } from "@/context";
+import { TbLogout2 as LogoutIcon } from "react-icons/tb";
+import ProfileImage from "@/assets/images/profile/profile-1.svg";
+import { deleteAllCookie } from "@/data-helpers/auth-session";
 
 export default function Header() {
   const { asPath, push } = useRouter();
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
+  const unauthorizedLinks = [
+    {
+      label: "Login",
+      link: "/login",
+      icon: <ProfileIcon color="white" size={12} />,
+    },
+    {
+      label: "Register",
+      link: "/register",
+      icon: <RegisterIcon color="white" size={12} />,
+    },
+  ];
+  const authorizedLinks = [
+    {
+      label: "Profile",
+      link: "/profile",
+      icon: <ProfileIcon color="white" size={12} />,
+    },
+    {
+      label: "Logout",
+      link: "/login",
+      icon: <LogoutIcon color="white" size={12} />,
+    },
+  ];
+  const {
+    state: { user },
+  } = useMainContext();
 
   //This hook helps hide the filter if an outside click is noticed
   useOutsideAlerter(dropdownRef, showDropdown, setShowDropdown);
-
-  useEffect(() => {
-    console.log("e", showDropdown);
-  }, [showDropdown]);
 
   return (
     <HeaderWrapper>
@@ -76,35 +103,97 @@ export default function Header() {
           <WishlistIcon />
         </div>
 
-        <ProfileNav
-          setShowDropdown={setShowDropdown}
-          showDropdown={showDropdown}
-          ref={dropdownRef}
-        />
-        {/* popup for account dropdown */}
-        <div style={{ display: showDropdown ? "contents" : "none" }}>
-          <FlexibleDiv className="back__triangle"></FlexibleDiv>
-          <FlexibleDiv
-            className="account__dropdown"
-            flexDir="column"
-            justifyContent="center"
-            alignItems="flex-start"
-            gap="5px"
-          >
-            <p className="header__span">{`Let's`} get you in!</p>
-            <Button
-              className="auth__btn"
-              // backgroundColor="rgba(18, 18, 18, 0.16)"
-              onClick={() => push("/login")}
-            >
-              <ProfileIcon color="white" size={12} />
-              <p className="btn__text">Login</p>
-            </Button>
-            <Button className="auth__btn" onClick={() => push("/register")}>
-              <RegisterIcon color="white" size={12} />
-              <p className="btn__text">Register</p>
-            </Button>
-          </FlexibleDiv>
+        <div ref={dropdownRef}>
+          <ProfileNav
+            setShowDropdown={setShowDropdown}
+            showDropdown={showDropdown}
+            profilePicture={user?.profilePicture || ProfileImage.src}
+            loggedIn={user?.id ? true : false}
+          />
+
+          {/* popup for account dropdown */}
+          {showDropdown && (
+            <div style={{ display: showDropdown ? "contents" : "none" }}>
+              <FlexibleDiv className="back__triangle"></FlexibleDiv>
+              {user?.id ? (
+                <FlexibleDiv
+                  className="account__dropdown"
+                  flexDir="column"
+                  justifyContent="center"
+                  alignItems="flex-start"
+                  gap="5px"
+                >
+                  <FlexibleDiv
+                    flexDir="row"
+                    flexWrap="nowrap"
+                    className="profile__div__wrap"
+                    alignItems="center"
+                    gap="10px"
+                  >
+                    <img
+                      alt="user-profile"
+                      src={user?.profilePicture || ProfileImage.src}
+                      className="profile"
+                    />
+                    <FlexibleDiv
+                      justifyContent="flex-start"
+                      alignItems="flex-start"
+                      flexDir="column"
+                    >
+                      <p className="username">
+                        {truncateString(user?.fullName, 25)}
+                      </p>
+                      <p className="profile__span">
+                        Last login on {user?.lastLogin}
+                      </p>
+                    </FlexibleDiv>
+                  </FlexibleDiv>
+
+                  {authorizedLinks.map((lk, idx) => (
+                    <Button
+                      className={`auth__btn ${
+                        asPath === lk.link ? "active__auth__btn" : ""
+                      }`}
+                      onClick={() => {
+                        if (lk.link === "/login") {
+                          deleteAllCookie();
+                          window.open(lk.link, "_self");
+                          return;
+                        }
+                        push(lk.link).then(setShowDropdown(false));
+                      }}
+                      key={idx}
+                    >
+                      {lk.icon}
+                      <p className="btn__text">{lk.label}</p>
+                    </Button>
+                  ))}
+                </FlexibleDiv>
+              ) : (
+                <FlexibleDiv
+                  className="account__dropdown"
+                  flexDir="column"
+                  justifyContent="center"
+                  alignItems="flex-start"
+                  gap="5px"
+                >
+                  <p className="header__span">{`Let's`} get you in!</p>
+                  {unauthorizedLinks.map((lk, idx) => (
+                    <Button
+                      className={`auth__btn ${
+                        asPath === lk.link ? "active__auth__btn" : ""
+                      }`}
+                      onClick={() => push(lk.link)}
+                      key={idx}
+                    >
+                      {lk.icon}
+                      <p className="btn__text">{lk.label}</p>
+                    </Button>
+                  ))}
+                </FlexibleDiv>
+              )}
+            </div>
+          )}
         </div>
       </FlexibleDiv>
     </HeaderWrapper>

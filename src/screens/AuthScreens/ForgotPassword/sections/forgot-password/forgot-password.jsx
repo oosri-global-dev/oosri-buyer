@@ -5,13 +5,60 @@ import { GoLock as LockIcon } from "react-icons/go";
 import { Form } from "antd";
 import TextField from "@/components/lib/TextField";
 import Button from "@/components/lib/Button";
+import { forgotPassword } from "@/network/user";
+import { useState } from "react";
+import { TOAST_BOX } from "@/context/types";
+import { useMainContext } from "@/context";
+import { useRouter } from "next/router";
 
 export default function ForgotPassword({ setStep }) {
   const [form] = Form.useForm();
+  const { dispatch } = useMainContext();
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  const appendParams = (newParams) => {
+    const pathname = router.pathname;
+    const query = { ...router.query, ...newParams };
+
+    router.push(
+      {
+        pathname,
+        query,
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
 
   const handleSubmit = async (values) => {
+    setIsLoading(true);
+    try {
+      const res = await forgotPassword({ email: values?.email?.trim() });
+      //message
+      dispatch({
+        type: TOAST_BOX,
+        payload: {
+          type: "success",
+          message: res?.message,
+        },
+      });
+
+      setTimeout(() => {
+        appendParams({ email: encodeURIComponent(values?.email?.trim()) });
+        setStep(2);
+      }, 1200);
+    } catch (err) {
+      dispatch({
+        type: TOAST_BOX,
+        payload: {
+          type: "error",
+          message: err?.response?.data?.message || "Sorry, an error occured",
+        },
+      });
+      setIsLoading(false);
+    }
     console.log("values", values);
-    setStep(2);
   };
 
   return (
@@ -38,8 +85,8 @@ export default function ForgotPassword({ setStep }) {
             flexDir="column"
           >
             <label className="input__label">Email Address</label>
-            <Form.Item name="email">
-              <TextField type="email" borderRadius="10px" />
+            <Form.Item name="email" required>
+              <TextField type="email" borderRadius="10px" required />
             </Form.Item>
             <Button
               width="100%"
@@ -49,6 +96,7 @@ export default function ForgotPassword({ setStep }) {
               color="var(--orrsiWhite)"
               radius="10px"
               margin="15px 0 0 0"
+              loading={isLoading}
             >
               Send
             </Button>

@@ -14,5 +14,8 @@ export const ProfileNavWrapper = styled(FlexibleDiv)`
 
   img {
     width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    overflow: hidden;
   }
 `;

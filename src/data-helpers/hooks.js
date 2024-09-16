@@ -14,30 +14,38 @@ export const useWindowSize = () => {
 };
 
 
-export default function useOutsideAlerter(ref, checkElement, setDisplay) {
+export default function useOutsideAlerter(ref, isOpen, setIsOpen) {
   useEffect(() => {
-    /**
-     * Hide if clicked on outside of element
-     */
-    if (checkElement) {
-      function handleClickOutside(event) {
-        if (ref.current && !ref.current.contains(event.target)) {
-          setDisplay(false);
-        }
+    function handleClickOutside(event) {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setIsOpen(false);
       }
-      // Bind the event listener
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => {
-        // Unbind the event listener on clean up
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
     }
-  }, [ref, checkElement]);
+
+    // Only add the event listener if the dropdown is open
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [ref, isOpen, setIsOpen]);
 }
 
 export const nairaFormatter = Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "NGN",
-    useGrouping: true,
-    maximumSignificantDigits: 3,
-  });
+  style: "currency",
+  currency: "NGN",
+  useGrouping: true,
+  maximumSignificantDigits: 3,
+});
+
+export function truncateString(str, num) {
+  // If the length of str is less than or equal to num
+  // just return str--don't truncate it.
+  if (str.length <= num) {
+    return str;
+  }
+  // Return str truncated with '...' concatenated to the end of str.
+  return str.slice(0, num) + "...";
+}

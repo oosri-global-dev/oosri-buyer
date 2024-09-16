@@ -5,14 +5,67 @@ import { GoLock as LockIcon } from "react-icons/go";
 import { Form } from "antd";
 import TextField from "@/components/lib/TextField";
 import Button from "@/components/lib/Button";
+import { useState } from "react";
+import { resetPassword } from "@/network/user";
+import { useRouter } from "next/router";
+import { useMainContext } from "@/context";
+import { TOAST_BOX } from "@/context/types";
 
 export default function ResetPassword({ setStep }) {
   const [form] = Form.useForm();
+  const [isLoading, setIsLoading] = useState(false);
+  const { push, query } = useRouter();
+  const { dispatch } = useMainContext();
 
   const handleSubmit = async (values) => {
-    console.log("values", values);
-    setStep(2);
+    setIsLoading(true);
+
+    const payload = {
+      email: decodeURIComponent(query?.email),
+      otp: decodeURIComponent(query?.otp),
+      ...values,
+    };
+
+    try {
+      const res = await resetPassword(payload);
+
+      dispatch({
+        type: TOAST_BOX,
+        payload: {
+          type: "success",
+          message: res?.message,
+        },
+      });
+
+      setTimeout(() => {
+        setStep(2);
+      }, 4000);
+    } catch (err) {
+      dispatch({
+        type: TOAST_BOX,
+        payload: {
+          type: "error",
+          message: err?.response?.data?.message || "Sorry, an error occured",
+        },
+      });
+
+      if (err?.response?.data?.message === "Otp code has Expired") {
+        setTimeout(() => {
+          push("/forgot-password");
+        }, 4000);
+      }
+      setIsLoading(false);
+    }
   };
+
+  const validateConfirmPassword = ({ getFieldValue }) => ({
+    validator(_, value) {
+      if (!value || getFieldValue("newPassword") === value) {
+        return Promise.resolve();
+      }
+      return Promise.reject(new Error("The two passwords do not match!"));
+    },
+  });
 
   return (
     <AuthWrapper>
@@ -37,7 +90,17 @@ export default function ResetPassword({ setStep }) {
             flexDir="column"
           >
             <label className="input__label">New Password</label>
-            <Form.Item name="newPassword" style={{ marginBottom: "20px" }}>
+            <Form.Item
+              name="newPassword"
+              style={{ marginBottom: "20px" }}
+              rules={[
+                { required: true, message: "Please input your new password!" },
+                {
+                  min: 5,
+                  message: "Password must be at least 5 characters long",
+                },
+              ]}
+            >
               <TextField.Password
                 className="password__style"
                 type="password"
@@ -45,7 +108,14 @@ export default function ResetPassword({ setStep }) {
               />
             </Form.Item>
             <label className="input__label">Confirm Password</label>
-            <Form.Item name="confirmPassword">
+            <Form.Item
+              name="confirmPassword"
+              dependencies={["newPassword"]}
+              rules={[
+                { required: true, message: "Please confirm your password!" },
+                validateConfirmPassword,
+              ]}
+            >
               <TextField.Password
                 className="password__style"
                 type="password"
@@ -60,6 +130,7 @@ export default function ResetPassword({ setStep }) {
               color="var(--orrsiWhite)"
               radius="10px"
               margin="20px 0 0 0"
+              loading={isLoading}
             >
               Reset Password
             </Button>

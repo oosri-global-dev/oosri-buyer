@@ -2,6 +2,7 @@ import { FlexibleDiv } from "@/components/lib/Box/styles";
 import { AccountLayoutWrapper } from "./account-layout.styles";
 import { accountMenuItems } from "@/data-helpers/profile-helper";
 import { useState } from "react";
+import { deleteAllCookie } from "@/data-helpers/auth-session";
 
 export default function AccountLayout({ children }) {
   const [activeMenu, setActiveMenu] = useState("Profile");
@@ -36,7 +37,13 @@ export default function AccountLayout({ children }) {
               alignItems="center"
               gap="8px"
               key={idx}
-              onClick={() => routeToView(sgn.name)}
+              onClick={() => {
+                if (sgn.name === "Log out") {
+                  deleteAllCookie();
+                  window.open("/login", "_self");
+                }
+                routeToView(sgn.name);
+              }}
             >
               <sgn.icon
                 color={`${
@@ -51,9 +58,7 @@ export default function AccountLayout({ children }) {
           ))}
         </FlexibleDiv>
       </FlexibleDiv>
-      <FlexibleDiv className="profile__content">
-        {children}
-      </FlexibleDiv>
+      <FlexibleDiv className="profile__content">{children}</FlexibleDiv>
     </AccountLayoutWrapper>
   );
 }

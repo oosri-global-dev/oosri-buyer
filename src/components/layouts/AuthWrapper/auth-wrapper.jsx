@@ -4,10 +4,16 @@ import { MdOutlineArrowBack as ArrowBack } from "react-icons/md";
 import GeneralLayout from "../GeneralLayout/generalLayout";
 import { useWindowSize } from "@/data-helpers/hooks";
 import { useState, useEffect } from "react";
+import { useMainContext } from "@/context";
+import { useRouter } from "next/router";
 
-export default function AuthWrapper({ children }) {
+export default function AuthWrapper({ children, noFooter, isAuth }) {
   const [width, height] = useWindowSize();
   const [removeHeader, setRemoveHeader] = useState(false);
+  const {
+    state: { user },
+  } = useMainContext();
+  const { push } = useRouter();
 
   useEffect(() => {
     if (width <= 550) {
@@ -17,8 +23,14 @@ export default function AuthWrapper({ children }) {
     }
   }, [width]);
 
+  useEffect(() => {
+    if (user?.id) {
+      push("/");
+    }
+  }, [user]);
+
   return (
-    <GeneralLayout noFooter noHeader={removeHeader}>
+    <GeneralLayout noFooter={noFooter} noHeader={removeHeader}>
       <AuthWrapperBox>
         <FlexibleDiv
           flexWrap="nowrap"
@@ -26,6 +38,7 @@ export default function AuthWrapper({ children }) {
           alignItems="flex-start"
           flexDir="row"
           className="top__navigation"
+          onClick={() => history.back()}
         >
           <ArrowBack size={15} /> <p>Go Back</p>
         </FlexibleDiv>

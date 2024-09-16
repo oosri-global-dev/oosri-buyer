@@ -11,6 +11,7 @@ export const AuthWrapperBox = styled(FlexibleDiv)`
 
   .top__navigation {
     padding: 8px 0;
+    cursor: pointer;
     p {
       margin: 0px;
       font-size: 1rem;
@@ -40,5 +41,11 @@ export const AuthWrapperBox = styled(FlexibleDiv)`
         display: none;
       }
     }
+
+    .auth__content__wrapper {
+      padding: 80px 0;
+    }
   }
+
+
 `;

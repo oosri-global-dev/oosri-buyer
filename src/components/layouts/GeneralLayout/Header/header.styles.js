@@ -115,6 +115,29 @@ export const HeaderWrapper = styled(FlexibleDiv)`
         color: white;
       }
 
+      .profile__div__wrap {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        padding-bottom: 10px;
+
+        .profile__span {
+          font-size: 0.8rem;
+          width: 100%;
+          color: white;
+          opacity: 0.7;
+        }
+
+        .profile {
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+        }
+
+        .username {
+          color: #fff;
+          font-weight: 600;
+        }
+      }
+
       .auth__btn {
         display: flex;
         flex-direction: row;
@@ -143,6 +166,10 @@ export const HeaderWrapper = styled(FlexibleDiv)`
             height: 12px !important;
           }
         }
+      }
+
+      .active__auth__btn {
+        background: rgba(18, 18, 18, 0.16);
       }
     }
   }
