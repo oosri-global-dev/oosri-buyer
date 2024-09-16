@@ -59,12 +59,16 @@ export default function Login() {
         err?.response?.data?.message ===
         "Please verify your email before logging in"
       ) {
-        push(`/otp?email=${values?.email}`);
+        setTimeout(() => {
+          push(`/otp?email=${values?.email}`);
+        }, 3000);
         return;
       }
+
+      setLoadingBtn(false);
     }
 
-    setLoadingBtn(false);
+
   };
 
   return (
