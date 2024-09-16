@@ -3,6 +3,7 @@ import { Reducer } from "./reducer";
 
 export const MainContext = createContext({
   user: {},
+  toastbox: { type: "", message: "", duration: 5000 },
 });
 
 export const MainProvider = ({ children }) => {
@@ -15,3 +16,12 @@ export const MainProvider = ({ children }) => {
     </MainContext.Provider>
   );
 };
+
+export const useMainContext = () => {
+  const context = useContext(MainContext);
+  if (context === undefined) {
+    throw new Error("useMainContext must be used within a MainProvider");
+  }
+  return context;
+};
+

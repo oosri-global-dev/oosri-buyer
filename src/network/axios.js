@@ -1,3 +1,7 @@
+import {
+  getDataInCookie,
+  storeDataInCookie,
+} from "@/data-helpers/auth-session";
 import axios from "axios";
 
 let userToken = null;
@@ -5,17 +9,24 @@ let refreshToken = null;
 
 if (typeof window !== "undefined") {
   // Perform sessionStorage action
-  userToken = sessionStorage.getItem("user_token");
+  userToken = getDataInCookie("access_token");
   refreshToken = sessionStorage.getItem("refresh_token");
 }
 
-export const instance = axios.create({
+export const publicInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
+export const instance = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: userToken || "",
+  },
+});
 
 instance.interceptors.request.use(
   async (config) => {
@@ -34,46 +45,42 @@ instance.interceptors.response.use(
   (res) => res,
   async (err) => {
     const originalConfig = err.config;
+
     // Access Token was expired
-    if (err?.response?.status === 401 && !originalConfig._retry) {
+    if (
+      err?.response?.status === 401 &&
+      !originalConfig._retry &&
+      !!userToken
+    ) {
       originalConfig._retry = true;
 
-      if (!!userToken) {
-        await getRefreshToken(refreshToken, err);
-      }
+      await getRefreshToken(refreshToken, err);
     } else {
       return Promise.reject(err);
     }
   }
 );
 
-const getRefreshToken = async (token, err) => {
+export const getRefreshToken = async (token, err) => {
   try {
     const data = await axios.post(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/auth/auth/refresh-token`,
-      undefined,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/auth/buyer/refresh-token`,
       {
-        headers: {
-          authorization: `Bearer ${token}`,
-        },
+        refreshToken: token,
       }
     );
-    const { accessToken } = data?.tokens;
-    const { refreshToken } = data?.tokens;
-    sessionStorage.setItem("user_token", accessToken);
-    sessionStorage.setItem("refresh_token", refreshToken);
-    config.headers["Authorization"] = `Bearer ${accessToken}`;
 
-    return await instance(originalConfig);
+    storeDataInCookie.setItem("access_token", data?.data?.body?.accessToken);
+    // storeDataInCookie.setItem("refresh_token", data?.data?.body?.refreshToken);
+
+    userToken = data?.data?.body?.accessToken;
+    return await instance(err.config);
   } catch (_error) {
     if (
       _error?.response?.status === 401 &&
       window.location.pathname !== "/login"
     ) {
       window.location.pathname = "/login";
-      sessionStorage.removeItem("user_token");
-      sessionStorage.removeItem("refresh_token");
     }
-    return Promise.reject(err);
   }
 };

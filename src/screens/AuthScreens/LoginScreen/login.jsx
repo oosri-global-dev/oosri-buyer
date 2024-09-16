@@ -11,41 +11,64 @@ import AuthWrapper from "@/components/layouts/AuthWrapper/auth-wrapper";
 import { loginUser } from "@/network/user";
 import { validatePassword } from "@/data-helpers/validator";
 import toast, { Toaster } from "react-hot-toast";
+import { useMainContext } from "@/context";
+import { TOAST_BOX } from "@/context/types";
+import { useRouter } from "next/router";
+import { storeDataInCookie } from "@/data-helpers/auth-session";
 
 export default function Login() {
   const [form] = Form.useForm();
   const [loadingBtn, setLoadingBtn] = useState(false);
+  const { dispatch } = useMainContext();
+  const { push } = useRouter();
 
   const handleLoginSubmit = async (values) => {
     setLoadingBtn(true);
 
-    if (!validatePassword(values.password)) {
-      toast.error(
-        "Password must not be less than 8 characters and must contain at least one alpha (A-Z), (a-z), numeric (0-9)and a special character",
-        {
-          duration: "400",
-          position: "bottom-center",
-        }
-      );
+    if (values?.password?.length < 5) {
+      dispatch({
+        type: TOAST_BOX,
+        payload: {
+          type: "error",
+          message: "Password must not be less than 5 characters",
+        },
+      });
       setLoadingBtn(false);
       return;
     }
 
     try {
       const res = await loginUser(values);
-      console.log(res);
+
+      //store tokens
+      storeDataInCookie("access_token", res?.body?.accessToken);
+      storeDataInCookie("refresh_token", res?.body?.refreshToken);
+
+      //message
+      window.open(`/`, "_self");
     } catch (err) {
-      toast.error(`${err?.response?.data?.message}`, {
-        duration: "400",
-        position: "bottom-center",
+      dispatch({
+        type: TOAST_BOX,
+        payload: {
+          type: "error",
+          message: err?.response?.data?.message || "Sorry, an error occured",
+        },
       });
+
+      if (
+        err?.response?.data?.message ===
+        "Error: Please verify your email before logging in"
+      ) {
+        push(`/otp?email=${values?.email}`);
+        return;
+      }
     }
 
     setLoadingBtn(false);
   };
 
   return (
-    <AuthWrapper>
+    <AuthWrapper isAuth={false}>
       <LoginWrapper>
         <Toaster containerClassName="toaster__style" />
         <FlexibleDiv maxWidth="350px" gap="40px" flexDir="column">

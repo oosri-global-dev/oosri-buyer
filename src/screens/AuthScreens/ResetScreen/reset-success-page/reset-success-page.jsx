@@ -3,8 +3,10 @@ import { FlexibleDiv } from "@/components/lib/Box/styles";
 import { ResetSuccessPageWrapper } from "./reset-success-page.styles";
 import { FiCheck as CheckIcon } from "react-icons/fi";
 import Button from "@/components/lib/Button";
+import { useRouter } from "next/router";
 
 export default function ResetSuccessPage({ setStep }) {
+  const { push } = useRouter();
   return (
     <AuthWrapper>
       <ResetSuccessPageWrapper>
@@ -26,6 +28,7 @@ export default function ResetSuccessPage({ setStep }) {
           color="var(--orrsiWhite)"
           radius="10px"
           margin="10px 0 0 0"
+          onClick={() => push("/login")}
         >
           Login
         </Button>

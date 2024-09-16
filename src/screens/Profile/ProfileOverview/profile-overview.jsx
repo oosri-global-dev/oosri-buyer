@@ -5,7 +5,7 @@ import Image from "next/image";
 import { RiLock2Line as LockIcon } from "react-icons/ri";
 import { IoIosArrowRoundForward as ForwardArrowIcon } from "react-icons/io";
 
-export default function ProfileOverview({ setCurrentPage }) {
+export default function ProfileOverview({ setCurrentPage, user }) {
   return (
     <ProfileOverviewWrapper>
       <FlexibleDiv className="avatar__wrapper">
@@ -19,9 +19,9 @@ export default function ProfileOverview({ setCurrentPage }) {
           Edit Profile
         </span>
       </FlexibleDiv>
-      <p className="user__display__name">Ayebulu Eric</p>
-      <p className="small__span">testuser@oorsi.com</p>
-      <p className="small__span">08167724364</p>
+      <p className="user__display__name">{user?.fullName}</p>
+      <p className="small__span">{user?.email}</p>
+      <p className="small__span">{user?.phoneNumber}</p>
       <FlexibleDiv className="product__order__stat" flexDir="column" gap="6px">
         <p className="num__of__product__order">64</p>
         <p className="product__order__text">Product Order</p>

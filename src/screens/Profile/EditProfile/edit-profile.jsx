@@ -6,11 +6,11 @@ import { IoCameraOutline as CameraIcon } from "react-icons/io5";
 import { Form } from "antd";
 import TextField from "@/components/lib/TextField";
 import Button from "@/components/lib/Button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IoIosArrowBack as BackArrow } from "react-icons/io";
 import { Spin } from "antd";
 
-export default function EditProfile({ setCurrentPage }) {
+export default function EditProfile({ setCurrentPage, user }) {
   const [form] = Form.useForm();
   const [loadingBtn, setLoadingBtn] = useState(false);
   const [profileImageLoading, setProfileImageLoading] = useState(true);
@@ -67,6 +67,12 @@ export default function EditProfile({ setCurrentPage }) {
       setProfileImageLoading(false);
     }
   }
+
+  useEffect(() => {
+    form.setFieldValue("emailAddress", user?.email);
+    form.setFieldValue("name", user?.fullName);
+    form.setFieldValue("phoneNumber", user?.phoneNumber);
+  }, [user]);
 
   return (
     <EditProfileWrapper>

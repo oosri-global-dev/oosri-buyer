@@ -1,4 +1,4 @@
-import { CURRENT_USER, PAGE_TITLE } from "./types";
+import { CURRENT_USER, PAGE_TITLE, TOAST_BOX } from "./types";
 
 export const Reducer = (state, { type, payload }) => {
   switch (type) {
@@ -11,6 +11,11 @@ export const Reducer = (state, { type, payload }) => {
       return {
         ...state,
         pageTitle: payload || "",
+      };
+    case TOAST_BOX:
+      return {
+        ...state,
+        toastbox: payload || { type: "", message: "", duration: 4000 },
       };
 
     default:
