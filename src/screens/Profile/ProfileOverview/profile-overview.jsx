@@ -1,6 +1,6 @@
 import { ProfileOverviewWrapper } from "./profile-overview.styles";
 import { FlexibleDiv } from "@/components/lib/Box/styles";
-import ProfilePic from "@/assets/images/iphone16.png";
+import ProfilePic from "@/assets/images/profile/profile-1.svg";
 import Image from "next/image";
 import { RiLock2Line as LockIcon } from "react-icons/ri";
 import { IoIosArrowRoundForward as ForwardArrowIcon } from "react-icons/io";
@@ -9,7 +9,7 @@ export default function ProfileOverview({ setCurrentPage, user }) {
   return (
     <ProfileOverviewWrapper>
       <FlexibleDiv className="avatar__wrapper">
-        <Image src={ProfilePic} alt="avatar" />
+        <img src={user?.profileImage || ProfilePic} alt="avatar" />
         <span
           className="edit__profile__btn"
           onClick={() => {

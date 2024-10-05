@@ -9,18 +9,31 @@ export default function ProfileScreen() {
   const [currentPage, setCurrentPage] = useState("Profile Overview");
   const {
     state: { user },
+    dispatch,
   } = useMainContext();
 
   return (
     <AccountLayout>
       {currentPage === "Profile Overview" && (
-        <ProfileOverview user={user} setCurrentPage={setCurrentPage} />
+        <ProfileOverview
+          user={user}
+          setCurrentPage={setCurrentPage}
+          dispatch={dispatch}
+        />
       )}
       {currentPage === "Edit Profile" && (
-        <EditProfile setCurrentPage={setCurrentPage} user={user} />
+        <EditProfile
+          setCurrentPage={setCurrentPage}
+          user={user}
+          dispatch={dispatch}
+        />
       )}
       {currentPage === "Change Password" && (
-        <ChangePassword setCurrentPage={setCurrentPage} />
+        <ChangePassword
+          setCurrentPage={setCurrentPage}
+          user={user}
+          dispatch={dispatch}
+        />
       )}
     </AccountLayout>
   );

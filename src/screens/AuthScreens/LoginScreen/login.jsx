@@ -8,7 +8,7 @@ import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import Link from "next/link";
 import { useState } from "react";
 import AuthWrapper from "@/components/layouts/AuthWrapper/auth-wrapper";
-import { loginUser } from "@/network/user";
+import { loginUser } from "@/network/auth";
 import { validatePassword } from "@/data-helpers/validator";
 import toast, { Toaster } from "react-hot-toast";
 import { useMainContext } from "@/context";

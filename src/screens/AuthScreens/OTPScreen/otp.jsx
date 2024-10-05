@@ -8,7 +8,7 @@ import TextField from "@/components/lib/TextField";
 import Button from "@/components/lib/Button";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { confirmOTP, resendOTP } from "@/network/user";
+import { confirmOTP, resendOTP } from "@/network/auth";
 import { TOAST_BOX } from "@/context/types";
 import { useMainContext } from "@/context";
 import { storeDataInCookie } from "@/data-helpers/auth-session";

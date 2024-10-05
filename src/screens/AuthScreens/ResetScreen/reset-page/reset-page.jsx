@@ -6,7 +6,7 @@ import { Form } from "antd";
 import TextField from "@/components/lib/TextField";
 import Button from "@/components/lib/Button";
 import { useState } from "react";
-import { resetPassword } from "@/network/user";
+import { resetPassword } from "@/network/auth";
 import { useRouter } from "next/router";
 import { useMainContext } from "@/context";
 import { TOAST_BOX } from "@/context/types";

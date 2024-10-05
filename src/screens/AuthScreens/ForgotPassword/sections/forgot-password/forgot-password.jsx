@@ -5,7 +5,7 @@ import { GoLock as LockIcon } from "react-icons/go";
 import { Form } from "antd";
 import TextField from "@/components/lib/TextField";
 import Button from "@/components/lib/Button";
-import { forgotPassword } from "@/network/user";
+import { forgotPassword } from "@/network/auth";
 import { useState } from "react";
 import { TOAST_BOX } from "@/context/types";
 import { useMainContext } from "@/context";
