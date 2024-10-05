@@ -9,7 +9,7 @@ import Link from "next/link";
 import AuthWrapper from "@/components/layouts/AuthWrapper/auth-wrapper";
 import toast, { Toaster } from "react-hot-toast";
 import { useState } from "react";
-import { signUpUser } from "@/network/user";
+import { signUpUser } from "@/network/auth";
 import { useRouter } from "next/router";
 
 export default function Register() {

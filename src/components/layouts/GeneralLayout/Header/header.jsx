@@ -107,7 +107,7 @@ export default function Header() {
           <ProfileNav
             setShowDropdown={setShowDropdown}
             showDropdown={showDropdown}
-            profilePicture={user?.profilePicture || ProfileImage.src}
+            profilePicture={user?.profileImage || ProfileImage.src}
             loggedIn={user?.id ? true : false}
           />
 
@@ -132,7 +132,7 @@ export default function Header() {
                   >
                     <img
                       alt="user-profile"
-                      src={user?.profilePicture || ProfileImage.src}
+                      src={user?.profileImage || ProfileImage.src}
                       className="profile"
                     />
                     <FlexibleDiv

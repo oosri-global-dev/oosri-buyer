@@ -3,7 +3,7 @@ import Footer from "./Footer/footer";
 import { GeneralLayoutWrapper } from "./generalLayout.styles";
 import Header from "./Header/header";
 import { MainContext } from "@/context";
-import { fetchUser } from "@/network/user";
+import { fetchUser } from "@/network/auth";
 import { CURRENT_USER } from "@/context/types";
 import { getDataInCookie } from "@/data-helpers/auth-session";
 
