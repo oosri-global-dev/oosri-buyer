@@ -23,7 +23,7 @@ export default function ProfileOverview({ setCurrentPage, user }) {
       <p className="small__span">{user?.email}</p>
       <p className="small__span">{user?.phoneNumber}</p>
       <FlexibleDiv className="product__order__stat" flexDir="column" gap="6px">
-        <p className="num__of__product__order">64</p>
+        <p className="num__of__product__order">{user?.productOrdered || 0}</p>
         <p className="product__order__text">Product Order</p>
       </FlexibleDiv>
       <FlexibleDiv
