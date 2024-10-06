@@ -28,13 +28,7 @@ export const instance = axios.create({
   },
 });
 
-export const formInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BASE_URL,
-  headers: {
-    "Content-Type": "multipart/form-data",
-    Authorization: userToken || "",
-  },
-});
+
 
 instance.interceptors.request.use(
   async (config) => {
@@ -69,38 +63,6 @@ instance.interceptors.response.use(
   }
 );
 
-formInstance.interceptors.request.use(
-  async (config) => {
-    if (userToken) {
-      config.headers["Authorization"] = `Bearer ${userToken}` || null; // for Spring Boot back-end
-    }
-
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-formInstance.interceptors.response.use(
-  (res) => res,
-  async (err) => {
-    const originalConfig = err.config;
-
-    // Access Token was expired
-    if (
-      err?.response?.status === 401 &&
-      !originalConfig._retry &&
-      !!userToken
-    ) {
-      originalConfig._retry = true;
-
-      await getRefreshToken(refreshToken, err);
-    } else {
-      return Promise.reject(err);
-    }
-  }
-);
 
 export const getRefreshToken = async (token, err) => {
   try {

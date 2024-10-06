@@ -95,15 +95,15 @@ export default function EditProfile({ setCurrentPage, user, dispatch }) {
     setProfileImageLoading(true);
 
     const formData = new FormData();
-    formData.append("file", file, file.name);
+    formData.append("profileImage", file);
 
     try {
       const data = await updateProfileImage(formData);
 
-      // dispatch({
-      //   type: CURRENT_USER,
-      //   payload: { ...user, ...data.data },
-      // });
+      dispatch({
+        type: CURRENT_USER,
+        payload: { ...user, ...data?.body },
+      });
 
       dispatch({
         type: TOAST_BOX,
@@ -115,7 +115,6 @@ export default function EditProfile({ setCurrentPage, user, dispatch }) {
 
       setProfileImageLoading(false);
     } catch (error) {
-      console.error(error);
       dispatch({
         type: TOAST_BOX,
         payload: {
