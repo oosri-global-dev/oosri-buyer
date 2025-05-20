@@ -20,4 +20,10 @@ export const EmptyStateWrapper=styled(FlexibleDiv)`
   padding:48px 0px;
  }
 
+ @media screen and (max-width:564px){
+  button{
+  width:100%;  
+  }
+ }
+
 `

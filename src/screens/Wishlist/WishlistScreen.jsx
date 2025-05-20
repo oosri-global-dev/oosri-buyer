@@ -4,7 +4,8 @@ import { FlexibleDiv } from "@/components/lib/Box/styles";
 import { useState } from "react";
 import TextField from "@/components/lib/TextField";
 import { CiSearch as SearchIcon } from "react-icons/ci";
-import ProductCarousel from "@/components/lib/ProductCarousel/productCarousel";
+import { smartphoneDealsData } from "@/data-helpers/homepage-helper";
+import ProductCard from "@/components/lib/ProductCard/productCard";
 
 export default function WishlistPage() {
   const [isEmpty,setIsEmpty]=useState(false)
@@ -29,8 +30,19 @@ export default function WishlistPage() {
       <div className="content_wrap">
         {
           isEmpty?
-          <EmptyState />:
-          <ProductCarousel carouselTitle={""} />
+          <EmptyState title={"You haven’t saved an item yet!"}
+          paragraph={"Spotted something appealing? Simply tap the heart-shaped icon beside the item to save it to your wishlist! All your cherished items will be displayed here."}
+          />
+          :
+          <FlexibleDiv
+                    width="100%"
+                    justifyContent="space-between"
+                    margin="30px 0 0 0"
+                  >
+                    {smartphoneDealsData.map((sgn, idx) => (
+                      <ProductCard card={sgn} key={idx} />
+                    ))}
+          </FlexibleDiv>
         }
       </div>
     </WishListWrapper>
