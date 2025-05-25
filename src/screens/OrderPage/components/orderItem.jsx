@@ -5,7 +5,7 @@ import { RiDeleteBinLine } from "react-icons/ri";
 import Button from "@/components/lib/Button";
 import { Modal } from "antd";
 
-export default function OrderItem({ order }){
+export default function OrderItem({ order,showCancel }){
   const[modalOpen,setModalOpen]=useState(false)
 
   const handleCancel=()=>{
@@ -31,6 +31,8 @@ export default function OrderItem({ order }){
           </span>
         </div>
       </section>
+      {
+        showCancel &&
         <div className="cancel_wrapper">
           <button className="cancel__button" onClick={openModal}>
             <span>
@@ -39,6 +41,7 @@ export default function OrderItem({ order }){
             </span>
           </button>
         </div>
+      }
       <Modal
         footer={false}
         centered

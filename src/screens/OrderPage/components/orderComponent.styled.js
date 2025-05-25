@@ -5,7 +5,7 @@ border: 4px solid #FEDDDD;
 padding: 16px 24px;
 border-radius: 12px;
 margin-bottom: 16px;
-max-width:860px;
+max-width:809px;
 
  .wrapper{
    display: flex;
@@ -94,6 +94,20 @@ max-width:860px;
       align-items:center;
      }
  }
+
+ @media screen and (max-width:560px){
+  padding: 24px 12px;
+
+  .img_container{
+    max-width:100px;
+    max-height:100px;
+  }
+}
+  .cancel__button{
+    font-size: 11px;
+    margin-top:5px;
+  }
+
 `
 
 export const PickupStationWrapper=styled.div`
@@ -105,6 +119,7 @@ export const PickupStationWrapper=styled.div`
   display:flex;
   align-items:start;
   gap:8px;
+  max-width:860px;
 
   .title{
     font-size:16px;
@@ -144,6 +159,8 @@ export const PickupStationWrapper=styled.div`
 export const NameTagWrapper=styled.div`
   width:100%;
   border-top:1px solid #EEEEEE;
+  max-width:860px;
+
 
   .content{
    display:flex;

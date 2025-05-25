@@ -3,7 +3,11 @@ import styled from "styled-components";
 export const OrderDetailsWrapper=styled.div`
 width:100%;
 font-family:Inter;
+max-width:860px;
+margin:0 auto;
+
  .breadcrumb__paragraph {
+    width:fit-content;
     font-size: 0.95rem;
     color: var(--orrsiFadedWhite);
     cursor: pointer;
@@ -69,4 +73,128 @@ font-family:Inter;
   .total_text{
     color:#BBBBBB;
   }
+
+  @media screen and (max-width:560px){
+      .order_title{
+        flex-direction: column;
+        align-items: start
+    }
+  }
+`
+
+export const OrderMapWrapper =styled.div`
+  width:100%;
+  font-family: 'Inter';
+
+h1{
+  font-weight:400;
+  color:#333333;
+  font-size:30px;
+ }
+
+ .stat_title{
+  color:#999999;
+  font-weight:700;
+  font-size:16px;
+ }
+
+ p{
+  margin:0px;
+ }
+
+.stat_container{
+  gap:6px;
+  span{
+    display:flex;
+    flex-wrap:noWrap;
+  }
+}
+ 
+ .text_title{
+  color:#333333;
+  font-weight:700;
+  font-size:14px;
+ }
+
+ .span_text_brown{
+  color:#999999;
+  font-weight:700;
+  font-size:14px;
+  letter-spacing: 0px;
+ }
+
+ .span_text_black{
+  color:#333333;
+  font-weight:700;
+  font-size:14px;
+  letter-spacing: 0px;
+ }
+
+ .location_text_black{
+  font-size:14px;
+ }
+
+ .location_text_brown{
+  font-size:12px;
+ }
+
+ .location_bg{
+  background-color:#FFEEF3;
+  color:#FC5353;
+  border-radius:10000%;
+  padding:6px 6px;
+  width:14px;
+  height:14px;
+  
+  svg{
+    width:14px;
+    height:14px;
+  }
+ }
+
+ .delivery_options{
+  img{
+    width:45px;
+    height:40px;
+    object-fit:cover;
+    border-radius:1000%;
+  }
+
+  h3{
+    color:#333333;
+    font-size:16px;
+    font-weight:700;
+    }
+    
+  p{
+    font-weight:700;
+    color:#999999;
+    font-size:14px;
+  }
+ }
+
+ .phone-icon{
+    background-color:#FFFFFF;
+    padding:8px;
+    border-radius:1000%;
+    width:14px;
+    height:14px;
+ }
+
+ .phone_num{
+  color:#333333;
+  font-weight:700;
+  letter-spacing:0px;
+  font-size:16px;
+ }
+
+ .copy_icon{
+  color:#FC5353;
+
+  svg{
+    width:24px;
+    height:24px;
+    cursor:pointer;
+  }
+ }
 `

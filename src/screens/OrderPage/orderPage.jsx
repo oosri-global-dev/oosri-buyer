@@ -9,6 +9,7 @@ import { NameTag } from './components/nameTag'
 
 export default function OrderPage() {
   const[isEmpty,setIsEmpty]=useState(false)
+  const[activeTab,setActiveTab]=useState(false)
 
   const OrderItems={
     image:"https://placehold.co/600x400",
@@ -17,11 +18,12 @@ export default function OrderPage() {
     id:"73383",
     price:"N820,000",
   }
+
   return (
     <OrderPageWrapper>
-        <FlexibleDiv flexDir={"column"} gap={"16px"} alignItems={"start"}>
-            <h1>My Orders</h1>
-            <CustomTabs />
+        <h1>My Orders</h1>
+        <FlexibleDiv flexDir={"column"} margin={"14px 0px 0px 0px"} alignItems={"start"}>
+            <CustomTabs active={(e)=>{setActiveTab(e)}} />
         </FlexibleDiv>
         {
           isEmpty ?

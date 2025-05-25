@@ -25,7 +25,7 @@ export default function OrderDetailsScreen() {
         <p className='time_frame'>Today @ 12:30PM</p>
         <div>
             <NameTag />
-            <OrderItem />
+            <OrderItem showCancel={false} />
             <span className='total_amount'>
                 <p className='total_text'>Sub Total:</p>
                 <p>N820,000</p>
