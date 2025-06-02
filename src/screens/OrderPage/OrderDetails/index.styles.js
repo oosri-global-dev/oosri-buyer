@@ -77,7 +77,14 @@ margin:0 auto;
   @media screen and (max-width:560px){
       .order_title{
         flex-direction: column;
-        align-items: start
+        align-items: start;
+        h3{
+          font-size:24px;
+        }
+    }
+
+    .order_status{
+      font-size:12px;
     }
   }
 `
@@ -197,4 +204,15 @@ h1{
     cursor:pointer;
   }
  }
+
+ @media screen and (max-width:600px){
+ 
+  .items_container{
+    flex-direction:column;
+    gap:3rem;
+    justify-content:center; 
+    margin-top:3rem;
+  }
+ }
+
 `

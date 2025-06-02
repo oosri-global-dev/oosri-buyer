@@ -47,6 +47,7 @@ max-width:809px;
    }
 
    .bottom_bar{
+    position:relative;
       h3{
         font-weight:600;
         font-size:16px;
@@ -64,6 +65,7 @@ max-width:809px;
     display: flex;
     justify-content:space-between;
     flex-direction:column;
+    max-width:300px;
 
     @media screen and (max-width:560px){
       h3{
@@ -95,12 +97,34 @@ max-width:809px;
      }
  }
 
+ .delivered_wrapper{
+  background-color:#55D352E5;
+  padding:8px 18px;
+  color:white;
+  width:fit-content;
+  // width: 100%;
+  justify-content: end;
+  display: flex;
+  border-radius:1000px;
+  font-size:13px;
+
+  p{
+    margin:0px;
+  }
+ }
+
  @media screen and (max-width:560px){
-  padding: 24px 12px;
+  padding: 24px 8px;
+
+   .wrapper{
+      gap: 4px;
+      padding-top: 12px;
+    }
 
   .img_container{
-    max-width:100px;
-    max-height:100px;
+  padding: 10px 8px;
+    max-width:90px;
+    max-height:90px;
   }
 }
   .cancel__button{

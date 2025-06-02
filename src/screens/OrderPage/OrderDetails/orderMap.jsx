@@ -26,7 +26,7 @@ export default function OrderMap() {
           <h1>Track Order</h1>
 
             {/* <Map zoom={10} center={{lat: 53.54992, lng: 10.00678}} /> */}
-            <FlexibleDiv width={"100%"} flexWrap={"noWrap"} alignItems={"start"}>
+            <FlexibleDiv width={"100%"} flexWrap={"noWrap"} alignItems={"start"} className='items_container'>
               <FlexibleDiv width="100%" flexDir={"column"} gap={"5px"} alignItems={"start"}>
                 <h3 className='stat_title'>Order Status</h3>
                 <p className='text_title'>Your order is on the way</p>

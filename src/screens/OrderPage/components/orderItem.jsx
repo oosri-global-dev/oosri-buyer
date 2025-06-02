@@ -4,8 +4,9 @@ import React, { useState } from "react";
 import { RiDeleteBinLine } from "react-icons/ri";
 import Button from "@/components/lib/Button";
 import { Modal } from "antd";
+import iPhoneImage1 from '@/assets/images/iphone16.png'
 
-export default function OrderItem({ order,showCancel }){
+export default function OrderItem({ order,showCancel=true,delivered=false }){
   const[modalOpen,setModalOpen]=useState(false)
 
   const handleCancel=()=>{
@@ -18,7 +19,7 @@ export default function OrderItem({ order,showCancel }){
     <OrderItemWrapper>
       <section className="wrapper">
         <div className="img_container">
-        <img className="avatar_img" src="https://placehold.co/600x400" alt="product" />
+        <img className="avatar_img" src={iPhoneImage1.src}alt="product" />
         </div>
         <div className="text_container">
           <span className="top_bar">
@@ -34,12 +35,19 @@ export default function OrderItem({ order,showCancel }){
       {
         showCancel &&
         <div className="cancel_wrapper">
+          {
+            delivered?
+                    <div className="delivered_wrapper">
+            <p>Delivered</p>
+          </div>
+            :
           <button className="cancel__button" onClick={openModal}>
             <span>
               <RiDeleteBinLine />
               CANCEL ORDER
             </span>
           </button>
+          }
         </div>
       }
       <Modal
