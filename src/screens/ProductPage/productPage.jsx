@@ -15,7 +15,7 @@ import StickyBox from "react-sticky-box";
 import ProductDescription from "./sections/product-desc/productDescription";
 import ProductReviewBox from "./sections/product-reviews/productReview";
 import Link from "next/link";
-import SmartphoneDeals from "../HomeScreens/Homepage/SmartphoneDeals/smartphoneDeals";
+import ProductsGridBox from "../HomeScreens/Homepage/ProductsGridBox/ProductsGridBox";
 import { smartphoneDealsData } from "@/data-helpers/homepage-helper";
 
 function NoOfProductReviews({ numOfReviews }) {
@@ -259,7 +259,7 @@ export default function ProductPage() {
           alignItems="flex-start"
           margin="20px 0"
         >
-          <SmartphoneDeals
+          <ProductsGridBox
             content={smartphoneDealsData.slice(0, 5)}
             sectionTitle="More Products"
             showViewAll={false}

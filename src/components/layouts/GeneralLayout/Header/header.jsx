@@ -67,13 +67,13 @@ export default function Header() {
       </FlexibleDiv>
       <FlexibleDiv className="middle__section" flexWrap="nowrap">
         {menuItems.map((sgn, idx) => (
-          <Link
-            href={sgn.url.toLowerCase()}
+          <button
+            onClick={() => push(`${sgn.url.toLowerCase()}`)}
             key={idx}
             id={`${asPath === sgn.url ? "active__link" : ""}`}
           >
             {sgn.link}
-          </Link>
+          </button>
         ))}
       </FlexibleDiv>
 

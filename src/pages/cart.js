@@ -1,5 +1,18 @@
+import GeneralLayout from "@/components/layouts/GeneralLayout/generalLayout";
 import CartPage from "@/screens/Cart/cart";
+import Head from "next/head";
 
-export default function CartScreen() {
-  return <CartPage />;
-}
+const Cart = () => {
+  return (
+    <>
+      <Head>
+        <title>Cart | Oosri</title>
+      </Head>
+      <CartPage />
+    </>
+  );
+};
+
+Cart.getLayout = (page) => <GeneralLayout>{page}</GeneralLayout>;
+
+export default Cart;

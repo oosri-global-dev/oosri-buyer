@@ -95,8 +95,9 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
     .seller__text {
       width: fit-content;
       text-align: left;
-      font-size: 0.65rem;
+      font-size: 0.85rem;
       color: #bdbdbd;
+      margin-top: 3px;
     }
   }
 

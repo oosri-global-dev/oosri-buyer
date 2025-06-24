@@ -26,12 +26,12 @@ export default function HeroCarousel({ content }) {
         <Slider className="carousel__slider">
           {content.map((sgn, idx) => (
             <Slide key={idx} index={idx}>
-              <BannerBox bgimage={sgn.image.src}>
+              <BannerBox bgimage={sgn.image}>
                 <FlexibleDiv className="text__section">
-                  <h1 className="hero__text">{sgn.heroText}</h1>
-                  <p className="hero__sub__text">{sgn.heroSubText}</p>
+                  {/* <h1 className="hero__text">{sgn.heroText}</h1> */}
+                  {/* <p className="hero__sub__text">{sgn.heroSubText}</p> */}
                 </FlexibleDiv>
-                <Button
+                {/* <Button
                   backgroundColor="var(--orrsiWhite)"
                   radius="10px"
                   padding="0px 50px"
@@ -43,7 +43,7 @@ export default function HeroCarousel({ content }) {
                   }
                 >
                   {sgn.btnText}
-                </Button>
+                </Button> */}
               </BannerBox>
               <DotGroup className="custom__carousel__dot" />
             </Slide>
