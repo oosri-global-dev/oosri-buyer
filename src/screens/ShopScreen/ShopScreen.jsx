@@ -214,7 +214,7 @@ export default function ShopPage() {
             </>
           ) : (
             <>
-              {products?.body?.products.slice(0, 8).map((sgn, idx) => (
+              {products?.body?.products.map((sgn, idx) => (
                 <ProductCard card={sgn} key={idx} />
               ))}
             </>
