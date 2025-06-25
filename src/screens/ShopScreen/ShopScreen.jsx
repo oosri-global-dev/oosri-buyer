@@ -90,7 +90,7 @@ export default function ShopPage() {
 
   return (
     <>
-      <Breadcrumb numOfProducts={19233} />
+      <Breadcrumb numOfProducts={products?.body?.products?.length} />
       <ShopPageWrapper>
         <hr />
         <FlexibleDiv
