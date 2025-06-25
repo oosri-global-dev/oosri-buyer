@@ -14,6 +14,7 @@ import { smartphoneDealsData } from "@/data-helpers/homepage-helper";
 import ProductCard from "@/components/lib/ProductCard/productCard";
 import { useRef } from "react";
 import { nairaFormatter } from "@/data-helpers/hooks";
+import { useProductsQuery } from "@/network/product";
 
 export default function ShopPage() {
   const [showFilter, setShowFilter] = useState(false);
@@ -77,6 +78,12 @@ export default function ShopPage() {
       </FlexibleDiv>
     );
   };
+
+  const { data: products, isLoading: isLoadingProducts } = useProductsQuery(
+    "",
+    10,
+    "products"
+  );
 
   //This hook helps hide the filter if an outside click is noticed
   useOutsideAlerter(popupRef, showFilter, setShowFilter);
@@ -197,10 +204,21 @@ export default function ShopPage() {
           width="100%"
           justifyContent="space-between"
           margin="30px 0 0 0"
+          className="products__grid"
         >
-          {/* {smartphoneDealsData.map((sgn, idx) => (
-            <ProductCard card={sgn} key={idx} />
-          ))} */}
+          {isLoadingProducts ? (
+            <>
+              {Array.from({ length: 8 }).map((_, idx) => (
+                <ProductCard key={idx} isLoading={true} />
+              ))}
+            </>
+          ) : (
+            <>
+              {products?.body?.products.slice(0, 8).map((sgn, idx) => (
+                <ProductCard card={sgn} key={idx} />
+              ))}
+            </>
+          )}
         </FlexibleDiv>
       </ShopPageWrapper>
     </>

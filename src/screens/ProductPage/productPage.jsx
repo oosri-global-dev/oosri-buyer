@@ -207,7 +207,7 @@ export default function ProductPage({ product, loading, relatedProducts }) {
           >
             <p className="item__name">{product?.productName}</p>
             <h1 className="item__price">
-              {nairaFormatter.format(product?.salesPrice)}
+              {nairaFormatter.format(product?.regularPrice)}
             </h1>
             <FlexibleDiv
               flexDir="row"

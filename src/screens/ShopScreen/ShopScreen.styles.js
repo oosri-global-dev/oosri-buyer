@@ -159,4 +159,20 @@ export const ShopPageWrapper = styled(FlexibleDiv)`
   .hide__box {
     display: none;
   }
+
+  .products__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 24px;
+    justify-items: start;
+    justify-content: start;
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  @media (max-width: 600px) {
+    .products__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
 `;
