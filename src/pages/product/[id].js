@@ -32,72 +32,36 @@ const Product = ({ product, id }) => {
   const productData = data?.body?.product;
   const showError = isError || !productData;
 
+  // Use server-side product for meta tags to ensure correct SSR for social sharing
+  const metaProduct = product || {};
+  const metaTitle = metaProduct.productName
+    ? `${metaProduct.productName} | Oosri`
+    : showError
+    ? "No product found | Oosri"
+    : "Loading product... | Oosri";
+  const metaDescription = metaProduct.description
+    ? metaProduct.description
+    : showError
+    ? "No product found."
+    : "Loading product details...";
+  const metaImage = metaProduct.images?.[0] || "/favicon.ico";
+  const metaUrl = `${process.env.NEXT_PUBLIC_WEBSITE_URL}/product/${id}`;
+
   return (
     <>
       <Head>
-        <title>
-          {isLoading
-            ? "Loading product... | Oosri"
-            : showError
-            ? "No product found | Oosri"
-            : `${productData?.productName || "Product"} | Oosri`}
-        </title>
+        <title>{metaTitle}</title>
         {/* Open Graph Meta Tags for Social Sharing */}
         <meta property="og:type" content="product" />
-        <meta
-          property="og:title"
-          content={
-            isLoading
-              ? "Loading product... | Oosri"
-              : showError
-              ? "No product found | Oosri"
-              : `${productData?.productName || "Product"} | Oosri`
-          }
-        />
-        <meta
-          property="og:description"
-          content={
-            isLoading
-              ? "Loading product details..."
-              : showError
-              ? "No product found."
-              : productData?.description || "Product details on Oosri."
-          }
-        />
-        <meta
-          property="og:image"
-          content={productData?.images?.[0] || "/images/product/loader.gif"}
-        />
-        <meta
-          property="og:url"
-          content={`${process.env.NEXT_PUBLIC_WEBSITE_URL}/product/${id}`}
-        />
+        <meta property="og:title" content={metaTitle} />
+        <meta property="og:description" content={metaDescription} />
+        <meta property="og:image" content={metaImage} />
+        <meta property="og:url" content={metaUrl} />
         {/* Twitter Card Meta Tags */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta
-          name="twitter:title"
-          content={
-            isLoading
-              ? "Loading product... | Oosri"
-              : showError
-              ? "No product found | Oosri"
-              : `${productData?.productName || "Product"} | Oosri`
-          }
-        />
-        <meta
-          name="twitter:description"
-          content={
-            isLoading
-              ? "Loading product details..."
-              : showError
-              ? "No product found."
-              : productData?.description || "Product details on Oosri."
-          }
-        />
-        <meta
-          name="twitter:image"
-          content={productData?.images?.[0] || "/images/product/loader.gif"}
-        />
+        <meta name="twitter:title" content={metaTitle} />
+        <meta name="twitter:description" content={metaDescription} />
+        <meta name="twitter:image" content={metaImage} />
       </Head>
       <ProductPage
         product={productData}
