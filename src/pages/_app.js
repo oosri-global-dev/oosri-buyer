@@ -1,41 +1,37 @@
 import "@/styles/globals.css";
 import "@/styles/vars.css";
+import "@/styles/nprogress-custom.css";
 import Head from "next/head";
-import GeneralLayout from "@/components/layouts/GeneralLayout/generalLayout";
 import { useRouter } from "next/router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MainProvider } from "@/context";
 import CustomToastBox from "@/components/lib/ToastBox";
+import { useEffect } from "react";
+import NProgress from "nprogress";
 
 const queryClient = new QueryClient();
 
 export default function App({ Component, pageProps }) {
-  const unauthorizedLinks = [
-    "/login",
-    "/reset-password",
-    "/forgot-password",
-    "/register",
-    "/otp",
-  ];
+  const getLayout = Component.getLayout || ((page) => page);
   const router = useRouter();
 
   // Extract the pathname from asPath
   const pathname = router.asPath.split("?")[0];
 
-  const pages = [
-    { name: "Search", path: "/search", useContextTitle: false },
-    { name: "Cart", path: "/cart", useContextTitle: true },
-  ];
+  useEffect(() => {
+    const handleStart = () => NProgress.start();
+    const handleStop = () => NProgress.done();
 
-  const fetchPageTitle = (path) => {
-    const item = pages.find((page) => page.path === path);
-    return item ? item.name : "";
-  };
+    router.events.on("routeChangeStart", handleStart);
+    router.events.on("routeChangeComplete", handleStop);
+    router.events.on("routeChangeError", handleStop);
 
-  const fetchContextTitle = (path) => {
-    const item = pages.find((page) => page.path === path);
-    return item ? item.useContextTitle : false;
-  };
+    return () => {
+      router.events.off("routeChangeStart", handleStart);
+      router.events.off("routeChangeComplete", handleStop);
+      router.events.off("routeChangeError", handleStop);
+    };
+  }, [router]);
 
   return (
     <>
@@ -55,17 +51,7 @@ export default function App({ Component, pageProps }) {
       <MainProvider>
         <QueryClientProvider client={queryClient}>
           <CustomToastBox />
-          {unauthorizedLinks.includes(pathname) ? (
-            <Component {...pageProps} />
-          ) : (
-            <GeneralLayout
-              title={fetchPageTitle(pathname)}
-              contextTitle={fetchContextTitle(pathname)}
-              isAuth={true}
-            >
-              <Component {...pageProps} />
-            </GeneralLayout>
-          )}
+          {getLayout(<Component {...pageProps} />)}
         </QueryClientProvider>
       </MainProvider>
     </>

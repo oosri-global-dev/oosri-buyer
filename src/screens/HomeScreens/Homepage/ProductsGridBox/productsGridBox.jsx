@@ -1,14 +1,15 @@
 import { FlexibleDiv } from "@/components/lib/Box/styles";
-import { SDWrapper, CardWrapper } from "./smartphoneDeals.styles";
+import { SDWrapper, CardWrapper } from "./productsGridBox.styles";
 import ProductCard from "@/components/lib/ProductCard/productCard";
 import { useState, useEffect } from "react";
 import { useWindowSize } from "@/data-helpers/hooks";
 import Link from "next/link";
 
-export default function SmartphoneDeals({
+export default function ProductsGridBox({
   content,
-  sectionTitle = "SmartPhone Deals",
+  sectionTitle = "",
   showViewAll = true,
+  loading = false,
 }) {
   const [isMobile, setIsMobile] = useState(false);
   const [width, height] = useWindowSize();
@@ -20,6 +21,7 @@ export default function SmartphoneDeals({
       setIsMobile(false);
     }
   }, [width]);
+
 
   return (
     <SDWrapper>
@@ -35,15 +37,26 @@ export default function SmartphoneDeals({
           </Link>
         )}
       </FlexibleDiv>
-      {content.map((card, idx) => (
+
+      {loading ? (
         <>
-          {isMobile ? (
-            <>{idx < 4 && <ProductCard card={card} key={idx} />}</>
-          ) : (
-            <ProductCard card={card} key={idx} />
-          )}
+          {Array.from({ length: isMobile ? 4 : 8 }).map((_, idx) => (
+            <ProductCard key={idx} isLoading={true} />
+          ))}
         </>
-      ))}
+      ) : (
+        <>
+          {content.map((card, idx) => (
+            <>
+              {isMobile ? (
+                <>{idx < 4 && <ProductCard card={card} key={idx} />}</>
+              ) : (
+                <ProductCard card={card} key={idx} />
+              )}
+            </>
+          ))}
+        </>
+      )}
     </SDWrapper>
   );
 }

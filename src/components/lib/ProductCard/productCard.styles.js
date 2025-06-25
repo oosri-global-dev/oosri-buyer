@@ -13,6 +13,9 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
     object-fit: cover;
     height: 250px;
     border-radius: 15px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
   }
 
   .product__info {
@@ -20,6 +23,7 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
     margin-top: 10px;
     align-items: flex-start;
     margin-bottom: 4px;
+    cursor: pointer;
 
     .product__name {
       font-size: 0.9rem;
@@ -95,13 +99,21 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
     .seller__text {
       width: fit-content;
       text-align: left;
-      font-size: 0.65rem;
+      font-size: 0.85rem;
       color: #bdbdbd;
-    }
-  }
+      margin-top: 3px;
 
-  &:hover {
-    cursor: pointer;
+      span {
+        text-decoration: underline;
+        text-underline-offset: 2px;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+
+        &:hover {
+          color: var(--orrsiPrimary);
+        }
+      }
+    }
   }
 
   @media (max-width: 1300px) {

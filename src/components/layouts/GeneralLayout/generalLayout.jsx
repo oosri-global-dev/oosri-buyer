@@ -46,9 +46,8 @@ export default function GeneralLayout({
       <GeneralLayoutWrapper>
         {!noHeader && <Header />}
         {contextTitle && <h1 className="page__title">{pageTitle}</h1>}
-        {!contextTitle && (
-          <> {title && <h1 className="page__title">{title}</h1>}</>
-        )}
+        <> {title && <h1 className="page__title">{title}</h1>}</>
+
         {children}
       </GeneralLayoutWrapper>
       {!noFooter && <Footer />}

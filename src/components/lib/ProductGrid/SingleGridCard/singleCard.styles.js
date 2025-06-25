@@ -47,6 +47,13 @@ export const SingleCardWrapper = styled(FlexibleDiv)`
   .img__wrapper {
     width: 120px;
     height: 100%;
+    position: relative;
+    overflow: hidden;
+
+    > span[aria-live="polite"] {
+      width: 100%;
+      height: 100%;
+    }
 
     @media (max-width: 280px) {
       width: 70px;
@@ -65,6 +72,10 @@ export const SingleCardWrapper = styled(FlexibleDiv)`
     justify-content: space-evenly;
     height: 100%;
     margin-left: 12px;
+
+    > span[aria-live="polite"] {
+      width: 100%;
+    }
 
     @media (max-width: 280px) {
       width: fit-content;

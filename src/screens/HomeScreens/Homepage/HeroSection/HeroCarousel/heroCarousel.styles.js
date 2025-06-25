@@ -161,7 +161,7 @@ export const BannerBox = styled(FlexibleDiv)`
   background-image: ${({ bgimage }) => (bgimage ? `url(${bgimage})` : "white")};
   background-position: center;
   background-size: cover;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0.1);
   background-blend-mode: multiply;
   flex-direction: column;
 

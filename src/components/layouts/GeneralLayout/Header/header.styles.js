@@ -33,10 +33,12 @@ export const HeaderWrapper = styled(FlexibleDiv)`
     flex-direction: row;
     width: fit-content;
 
-    a {
+    button {
       cursor: pointer;
       text-decoration: none;
       color: var(--orrsiBlack);
+      background: none;
+      border: none;
     }
 
     :hover {

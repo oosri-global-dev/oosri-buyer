@@ -24,7 +24,7 @@ export const HeroSectionWrapper = styled(FlexibleSection)`
   .category__wrapper {
     flex-direction: row;
     width: 100%;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: flex-start;
     gap: 1.8%;
     flex-wrap: wrap;
