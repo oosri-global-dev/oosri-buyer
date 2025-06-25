@@ -206,13 +206,26 @@ export const ProductBreadcrumbsWrapper = styled(FlexibleDiv)`
   margin: 15px 0;
   justify-content: flex-start;
   border-bottom: 1px solid #f5f5f5;
-  p {
+
+  a,
+  span {
     color: #9e9e9e;
-    font-size: 0.85rem;
+    font-size: 1rem;
     margin-right: 5px;
+    text-decoration: none;
+
+    &:hover {
+      color: var(--orrsiPrimary);
+    }
   }
 
   .product__text {
     color: black;
+  }
+
+  .no__hover {
+    &:hover {
+      color: black;
+    }
   }
 `;

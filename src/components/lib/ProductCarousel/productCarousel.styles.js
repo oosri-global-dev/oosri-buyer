@@ -58,8 +58,11 @@ export const PCWrapper = styled(FlexibleDiv)`
 
     .button__wrapper {
       position: absolute;
+      z-index: 2;
+      pointer-events: none;
 
       button {
+        pointer-events: auto;
         border: 1px solid rgba(255, 255, 255, 0.3);
         width: 45px;
         height: 45px;
@@ -72,6 +75,7 @@ export const PCWrapper = styled(FlexibleDiv)`
         top: 50%;
         transform: translateY(-50%);
         cursor: pointer;
+        z-index: 3;
 
         @media (max-width: 1100px) {
           width: 40px;

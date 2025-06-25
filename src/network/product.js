@@ -9,16 +9,16 @@ if (typeof window !== "undefined") {
   userToken = getDataInCookie("access_token");
 }
 
-export const handleFetchProducts = async (category = "", limit) => {
-  const params = { category, limit };
-  if (!category) {
-    delete params.category;
+export const handleFetchProducts = async (category = [], limit) => {
+  const params = {};
+  if (Array.isArray(category) && category.length > 0) {
+    params["category[]"] = category;
+  } else if (typeof category === "string" && category) {
+    params["category[]"] = [category];
   }
-
-  if (!limit) {
-    delete params.limit;
+  if (limit) {
+    params.limit = limit;
   }
-
   const { data } = await publicInstance.get(`/products/buyer`, { params });
   return data;
 };
@@ -28,10 +28,20 @@ export const handleFetchCategories = async () => {
   return data;
 };
 
-export function useProductsQuery(category, limit) {
+export const handleGetSingleProduct = async (productId) => {
+  const { data } = await publicInstance.get(`/products/buyer/${productId}`);
+  return data;
+};
+
+export function useProductsQuery(category, limit, key = "products") {
   return useQuery({
-    queryKey: ["products"],
+    queryKey: [key],
     queryFn: () => handleFetchProducts(category, limit),
+    staleTime: 1000 * 60 * 5, // 5 minutes, adjust as needed
+    cacheTime: 1000 * 60 * 10, // 10 minutes, adjust as needed
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
   });
 }
 
@@ -39,5 +49,20 @@ export function useProductCategoriesQuery() {
   return useQuery({
     queryKey: ["product-categories"],
     queryFn: handleFetchCategories,
+    staleTime: 1000 * 60 * 5, // 5 minutes, adjust as needed
+    cacheTime: 1000 * 60 * 10, // 10 minutes, adjust as needed
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+  });
+}
+
+export function useProductQuery(productId) {
+  return useQuery({
+    queryKey: ["product", productId],
+    queryFn: () => handleGetSingleProduct(productId),
+    enabled: !!productId,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 }

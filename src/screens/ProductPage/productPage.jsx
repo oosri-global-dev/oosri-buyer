@@ -1,4 +1,4 @@
-import GeneralLayout from "@/components/layouts/GeneralLayout/generalLayout";
+import React, { useEffect } from "react";
 import {
   ProductPageWrapper,
   ProductBreadcrumbsWrapper,
@@ -15,8 +15,10 @@ import StickyBox from "react-sticky-box";
 import ProductDescription from "./sections/product-desc/productDescription";
 import ProductReviewBox from "./sections/product-reviews/productReview";
 import Link from "next/link";
-import ProductsGridBox from "../HomeScreens/Homepage/ProductsGridBox/ProductsGridBox";
-import { smartphoneDealsData } from "@/data-helpers/homepage-helper";
+import ProductsGridBox from "../HomeScreens/Homepage/ProductsGridBox/productsGridBox";
+import { useRouter } from "next/router";
+import OorsiLoader from "@/components/lib/Loader/loader";
+import { nairaFormatter } from "@/data-helpers/hooks";
 
 function NoOfProductReviews({ numOfReviews }) {
   return (
@@ -27,24 +29,27 @@ function NoOfProductReviews({ numOfReviews }) {
   );
 }
 
-export default function ProductPage() {
-  const convertIntToArray = (num) => {
-    let res = [];
-
-    for (let i = 0; i < num; i++) {
-      res.push(["0"]);
-    }
-
-    return res;
-  };
+export default function ProductPage({ product, loading, relatedProducts }) {
+  const { push, query } = useRouter();
   const [idxOfSelectedImage, setIdxOfSelectedImage] = useState(0);
   const [selectedImage, setSelectedImage] = useState("");
   const [numOfProduct, setNumOfProduct] = useState(1);
-  const [previousLinks, setPreviousLink] = useState([
-    "Home",
-    "Smartphone Deals",
-    "iPhone 14 Pro Max",
-  ]);
+
+  // functions
+  function getBreadcrumbArray(categoryName, productName) {
+    return [
+      { label: "Home", link: "/" },
+      { label: categoryName, link: "/" },
+      { label: productName, link: "#" },
+    ];
+  }
+  const convertIntToArray = (num) => {
+    let res = [];
+    for (let i = 0; i < num; i++) {
+      res.push(["0"]);
+    }
+    return res;
+  };
   const {
     token: { colorBgContainer },
   } = theme.useToken();
@@ -94,7 +99,9 @@ export default function ProductPage() {
     {
       label: "Product Description",
       key: 1,
-      children: <ProductDescription />,
+      children: (
+        <ProductDescription content={product?.productDescription || ""} />
+      ),
       style: {},
     },
     {
@@ -105,16 +112,42 @@ export default function ProductPage() {
     },
   ];
 
+  // SSR: use product prop
+  useEffect(() => {
+    if (product && product.images && product.images.length > 0) {
+      setSelectedImage(product.images[0]);
+      setIdxOfSelectedImage(0);
+    }
+  }, [product]);
+
+  if (loading) {
+    return <OorsiLoader />;
+  }
+
   return (
     <>
       {/* Breacrumb starts here */}
       <ProductBreadcrumbsWrapper>
-        {previousLinks.map((sgn, idx) => (
-          <p className={`${idx === 2 ? "product__text" : ""}`} key={idx}>
-            {" "}
-            {sgn} {idx === 2 ? "" : " / "}
-          </p>
-        ))}
+        {getBreadcrumbArray(
+          product?.category || "",
+          product?.productName || ""
+        ).map((sgn, idx) =>
+          idx < 2 ? (
+            <React.Fragment key={idx}>
+              <Link
+                href={sgn.link}
+                className={idx === 2 ? "product__text" : ""}
+              >
+                {sgn.label}
+              </Link>
+              {idx < 2 && <span className="breadcrumb__slash"> / </span>}
+            </React.Fragment>
+          ) : (
+            <span className="product__text no__hover" key={idx}>
+              {sgn.label}
+            </span>
+          )
+        )}
       </ProductBreadcrumbsWrapper>
       {/* Breacrumb ends here */}
       <ProductPageWrapper>
@@ -133,7 +166,7 @@ export default function ProductPage() {
             gap="20px"
           >
             <FlexibleDiv className="image__section" flexDir="column" gap="10px">
-              {iPhone14ProMax.images.map((sgn, idx) => (
+              {product?.images?.map((sgn, idx) => (
                 <img
                   src={sgn}
                   className={`${
@@ -159,7 +192,7 @@ export default function ProductPage() {
               ) : (
                 <img
                   className="main__image"
-                  src={iPhone14ProMax.images[0]}
+                  src={product?.images?.[0] || ""}
                   alt={`main__1`}
                 />
               )}
@@ -172,8 +205,10 @@ export default function ProductPage() {
             justifyContent="flex-start"
             gap="10px"
           >
-            <p className="item__name">{iPhone14ProMax?.name}</p>
-            <h1 className="item__price">{iPhone14ProMax?.price}</h1>
+            <p className="item__name">{product?.productName}</p>
+            <h1 className="item__price">
+              {nairaFormatter.format(product?.salesPrice)}
+            </h1>
             <FlexibleDiv
               flexDir="row"
               justifyContent="flex-start"
@@ -185,20 +220,22 @@ export default function ProductPage() {
                 justifyContent="flex-start"
                 flexWrap="nowrap"
               >
-                {convertIntToArray(iPhone14ProMax?.likes).map((sgn, idx) => (
-                  <LikeIcon color="#FCCB1B" key={idx} />
-                ))}
-                <p>{iPhone14ProMax?.likes}.0</p>
+                {convertIntToArray(product?.productRating || 0).map(
+                  (sgn, idx) => (
+                    <LikeIcon color="#FCCB1B" key={idx} />
+                  )
+                )}
+                <p>{product?.productRating || 0}.0</p>
               </FlexibleDiv>
 
               <p className="other__details__text reviews__text">
-                {iPhone14ProMax?.numOfReviews} reviews
+                {product?.numOfReviews} reviews
               </p>
               <p className="other__details__text">
-                {iPhone14ProMax?.numOfPurchase} reviews
+                {product?.numOfPurchase} purchases
               </p>
               <p className="other__details__text">
-                Shipping Fee: {iPhone14ProMax?.shippingFee} reviews
+                Shipping Fee: {nairaFormatter.format(product?.shippingFee || 0)}
               </p>
             </FlexibleDiv>
             {/* The carting options */}
@@ -260,7 +297,7 @@ export default function ProductPage() {
           margin="20px 0"
         >
           <ProductsGridBox
-            content={smartphoneDealsData.slice(0, 5)}
+            content={relatedProducts || []}
             sectionTitle="More Products"
             showViewAll={false}
           />
@@ -269,6 +306,3 @@ export default function ProductPage() {
     </>
   );
 }
-
-
-

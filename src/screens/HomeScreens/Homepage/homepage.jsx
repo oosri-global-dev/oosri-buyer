@@ -4,16 +4,18 @@ import HeroSection from "./HeroSection/heroSection";
 import ProductsGridBox from "./ProductsGridBox/productsGridBox";
 import ProductCarousel from "@/components/lib/ProductCarousel/productCarousel";
 import ProductGrid from "@/components/lib/ProductGrid/productGrid";
-import { smartphoneDealsData } from "@/data-helpers/homepage-helper";
 import { useProductCategoriesQuery, useProductsQuery } from "@/network/product";
 
 export default function Homepage() {
-  // const { data: products, isLoading, error } = useProductsQuery();
   const { data: productCategories, isLoading } = useProductCategoriesQuery();
   const { data: topJewelryDeals, isLoading: isLoadingTopJewelryDeals } =
-    useProductsQuery("", 10);
-
-  console.log("Top Jewelry Deals:", topJewelryDeals);
+    useProductsQuery(["Jewelry"], 10, "top-jewelry-deals");
+  const { data: topTextilesDeals, isLoading: isLoadingTopTextilesDeals } =
+    useProductsQuery(["Textiles/Fabrics"], 10, "top-textiles-deals");
+  const { data: paintingDeals, isLoading: isLoadingPaintingDeals } =
+    useProductsQuery(["Paintings"], 10, "painting-deals");
+  const { data: sculptureDeals, isLoading: isLoadingSculptureDeals } =
+    useProductsQuery(["Sculpture"], 10, "sculpture-deals");
 
   return (
     <HomepageWrapper>
@@ -26,9 +28,22 @@ export default function Homepage() {
         sectionTitle={"Top Jewelry Deals"}
         loading={isLoadingTopJewelryDeals}
       />
-      {/* <ProductCarousel carouselTitle={`Today's Deals`} />
-      <ProductCarousel carouselTitle={`Top Phones Deals`} />
-      <ProductGrid gridTitle={"Best Prices For You"} /> */}
+      <ProductCarousel
+        content={topTextilesDeals?.body?.products || []}
+        carouselTitle={`Textiles & Fabrics Deals`}
+        loading={isLoadingTopTextilesDeals}
+      />
+      <ProductCarousel
+        content={paintingDeals?.body?.products || []}
+        carouselTitle={`Paintings`}
+        hideIfEmpty={true}
+        loading={isLoadingPaintingDeals}
+      />
+      <ProductGrid
+        gridTitle={"Sculpture Deals"}
+        loading={isLoadingSculptureDeals}
+        content={sculptureDeals?.body?.products || []}
+      />
     </HomepageWrapper>
   );
 }
