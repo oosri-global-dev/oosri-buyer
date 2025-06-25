@@ -198,9 +198,9 @@ export default function ShopPage() {
           justifyContent="space-between"
           margin="30px 0 0 0"
         >
-          {smartphoneDealsData.map((sgn, idx) => (
+          {/* {smartphoneDealsData.map((sgn, idx) => (
             <ProductCard card={sgn} key={idx} />
-          ))}
+          ))} */}
         </FlexibleDiv>
       </ShopPageWrapper>
     </>
