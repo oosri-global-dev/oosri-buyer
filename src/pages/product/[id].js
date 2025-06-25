@@ -39,8 +39,8 @@ const Product = ({ product, id }) => {
     : showError
     ? "No product found | Oosri"
     : "Loading product... | Oosri";
-  const metaDescription = metaProduct.description
-    ? metaProduct.description
+  const metaDescription = metaProduct.productDescription
+    ? metaProduct.productDescription
     : showError
     ? "No product found."
     : "Loading product details...";
