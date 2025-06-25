@@ -68,7 +68,10 @@ const Product = ({ product, id }) => {
           property="og:image"
           content={productData?.images?.[0] || "/images/product/loader.gif"}
         />
-        <meta property="og:url" content={`https://oosri.com/product/${id}`} />
+        <meta
+          property="og:url"
+          content={`${process.env.NEXT_PUBLIC_WEBSITE_URL}/product/${id}`}
+        />
         {/* Twitter Card Meta Tags */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta
