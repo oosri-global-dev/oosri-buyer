@@ -161,7 +161,7 @@ export const ProductPageWrapper = styled(FlexibleDiv)`
     }
   }
 
-  @media (max-width: 1000px){
+  @media (max-width: 1000px) {
     .top__section {
       .top__right__section {
         .cart__options {
@@ -190,6 +190,11 @@ export const ProductPageWrapper = styled(FlexibleDiv)`
           flex-direction: row;
           width: 100%;
           flex-wrap: nowrap;
+          justify-content: flex-start;
+
+          img {
+            margin: 0;
+          }
         }
       }
 
