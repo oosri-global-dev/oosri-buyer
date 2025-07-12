@@ -9,7 +9,7 @@ if (typeof window !== "undefined") {
   userToken = getDataInCookie("access_token");
 }
 
-export const handleFetchProducts = async (category = [], limit) => {
+export const handleFetchProducts = async (category = [], limit, page) => {
   const params = {};
   if (Array.isArray(category) && category.length > 0) {
     params["category[]"] = category;
@@ -18,6 +18,10 @@ export const handleFetchProducts = async (category = [], limit) => {
   }
   if (limit) {
     params.limit = limit;
+  }
+
+  if (page) {
+    params.page = page;
   }
   const { data } = await publicInstance.get(`/products/buyer`, { params });
   return data;
@@ -33,10 +37,10 @@ export const handleGetSingleProduct = async (productId) => {
   return data;
 };
 
-export function useProductsQuery(category, limit, key = "products") {
+export function useProductsQuery(category, limit, key = "products", page) {
   return useQuery({
     queryKey: [key],
-    queryFn: () => handleFetchProducts(category, limit),
+    queryFn: () => handleFetchProducts(category, limit, page),
     staleTime: 1000 * 60 * 5, // 5 minutes, adjust as needed
     cacheTime: 1000 * 60 * 10, // 10 minutes, adjust as needed
     refetchOnWindowFocus: false,

@@ -39,6 +39,10 @@ export const HeroSectionWrapper = styled(FlexibleSection)`
     .introductory__subText {
       margin: 6px 0;
     }
+
+    .category__wrapper {
+      margin: 15px 0;
+    }
   }
 
   @media (max-width: 280px) {
