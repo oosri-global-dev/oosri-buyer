@@ -41,8 +41,14 @@ export const ShopPageWrapper = styled(FlexibleDiv)`
 
         .price__filter {
           width: 100%;
+          margin: 0.9rem 0;
+
           label {
             font-weight: 500;
+          }
+
+          small {
+            color: var(--orrsiPrimary);
           }
         }
 
@@ -125,6 +131,17 @@ export const ShopPageWrapper = styled(FlexibleDiv)`
       flex: 1;
       max-width: initial;
       align-items: flex-start;
+    }
+  }
+
+  .loader_wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    .ant-spin-dot-item {
+      background-color: var(--oosriPrimary);
     }
   }
 
