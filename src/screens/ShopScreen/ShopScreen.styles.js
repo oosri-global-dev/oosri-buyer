@@ -27,18 +27,74 @@ export const ShopPageWrapper = styled(FlexibleDiv)`
           display: flex;
           flex-direction: column;
           gap: 10px;
-          .ant-checkbox-wrapper-checked {
-            color: var(--orrsiPrimary);
+
+          .ant-checkbox-wrapper-checked .ant-checkbox-inner {
+            background-color: var(--orrsiPrimary);
+            border-color: var(--orrsiPrimary);
+          }
+          .ant-checkbox-wrapper:hover .ant-checkbox-inner,
+          .ant-checkbox:hover .ant-checkbox-inner,
+          .ant-checkbox-input:focus + .ant-checkbox-inner {
+            border-color: var(--orrsiPrimary);
+          }
+        }
+
+        .price__filter {
+          width: 100%;
+          label {
+            font-weight: 500;
           }
         }
 
         .price__range {
           width: 100%;
+          -webkit-appearance: none;
+          appearance: none;
+          height: 8px;
+          background: #ddd;
+          outline: none;
+          opacity: 0.7;
+          -webkit-transition: 0.2s;
+          transition: opacity 0.2s;
+          border-radius: 5px;
+
+          &:hover {
+            opacity: 1;
+          }
+
+          &::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--orrsiPrimary);
+            cursor: pointer;
+            border-radius: 50%;
+          }
+
+          &::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: var(--orrsiPrimary);
+            cursor: pointer;
+            border-radius: 50%;
+          }
         }
 
         .subcategory__select {
           width: 100%;
           margin-top: 10px;
+          .ant-select-selector {
+            &:hover {
+              border-color: var(--orrsiPrimary) !important;
+            }
+          }
+          .ant-select-focused .ant-select-selector,
+          .ant-select-selector:focus,
+          .ant-select-selector:active {
+            border-color: var(--orrsiPrimary) !important;
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+          }
 
           label {
             display: block;

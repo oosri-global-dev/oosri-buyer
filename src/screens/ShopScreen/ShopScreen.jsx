@@ -9,7 +9,7 @@ import { useProductsQuery, useProductCategoriesQuery } from "@/network/product";
 export default function ShopPage() {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedSubCategories, setSelectedSubCategories] = useState({});
-  const [sliderPrice, setSliderPrice] = useState(50000);
+  const [sliderPrice, setSliderPrice] = useState(500000);
   const [currentPage, setCurrentPage] = useState(1);
 
   const {
@@ -21,7 +21,7 @@ export default function ShopPage() {
   const { data: products, isLoading: isLoadingProducts } = useProductsQuery(
     "",
     12,
-    "products",
+    "products"
   );
 
   const formatCategory = (cat = []) => {
@@ -71,6 +71,14 @@ export default function ShopPage() {
       : [];
   }, [productCategories]);
 
+  const filteredProducts = useMemo(() => {
+    if (!products?.body?.products) return [];
+    return products.body.products.filter((product) => {
+      const price = parseFloat(product?.productPrice);
+      return price <= sliderPrice;
+    });
+  }, [products, sliderPrice]);
+
   return (
     <>
       <Breadcrumb numOfProducts={products?.body?.products?.length} />
@@ -107,18 +115,21 @@ export default function ShopPage() {
                     value={selectedCategories}
                   />
 
-                  <input
-                    type="range"
-                    id="price-range"
-                    name="price-range"
-                    className="price__range"
-                    min="1000"
-                    max="50000"
-                    defaultValue={sliderPrice}
-                    onChange={({ target }) => {
-                      setSliderPrice(target.value);
-                    }}
-                  />
+                  <div className="price__filter">
+                    <label htmlFor="price-range">
+                      Price: ₦1,000 - ₦{Number(sliderPrice).toLocaleString()}
+                    </label>
+                    <input
+                      type="range"
+                      id="price-range"
+                      name="price-range"
+                      className="price__range"
+                      min="1000"
+                      max="500000"
+                      value={sliderPrice}
+                      onChange={({ target }) => setSliderPrice(target.value)}
+                    />
+                  </div>
 
                   {selectedCategories.map((categoryName) => {
                     const category = productCategories?.data.find(
@@ -181,7 +192,7 @@ export default function ShopPage() {
               </>
             ) : (
               <>
-                {products?.body?.products.map((sgn, idx) => (
+                {filteredProducts.map((sgn, idx) => (
                   <ProductCard card={sgn} key={idx} />
                 ))}
               </>
