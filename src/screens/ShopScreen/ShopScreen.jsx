@@ -1,224 +1,192 @@
-import GeneralLayout from "@/components/layouts/GeneralLayout/generalLayout";
 import Breadcrumb from "../../components/lib/Breadcrumb/breadcrumb";
 import { ShopPageWrapper } from "./ShopScreen.styles";
 import { FlexibleDiv } from "@/components/lib/Box/styles";
-import Filter from "@/assets/images/filter.svg";
-import { AiOutlineClose as CloseIcon } from "react-icons/ai";
-import { useEffect, useState } from "react";
-import { MdKeyboardArrowDown as ArrowDown } from "react-icons/md";
-import { Checkbox } from "antd";
-import Button from "@/components/lib/Button";
-import { Select } from "antd";
-import useOutsideAlerter from "@/data-helpers/hooks";
-import { smartphoneDealsData } from "@/data-helpers/homepage-helper";
+import { useMemo, useState } from "react";
+import { Checkbox, Select, Tag } from "antd";
 import ProductCard from "@/components/lib/ProductCard/productCard";
-import { useRef } from "react";
-import { nairaFormatter } from "@/data-helpers/hooks";
-import { useProductsQuery } from "@/network/product";
+import { useProductsQuery, useProductCategoriesQuery } from "@/network/product";
 
 export default function ShopPage() {
-  const [showFilter, setShowFilter] = useState(false);
-  const [categories, setCategories] = useState(null);
-  const popupRef = useRef(null);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedSubCategories, setSelectedSubCategories] = useState({});
   const [sliderPrice, setSliderPrice] = useState(50000);
-  const [subCategories, setSubCategories] = useState([
-    {
-      name: "Colour",
-      options: ["Blue", "Red", "Gold", "Black"],
-    },
-    {
-      name: "Brand",
-      options: ["Samsung", "iPhone 13", "Fly", "Bontel"],
-    },
-  ]);
-  const options = [
-    { label: "Mobile Phones", value: "Mobile Phones" },
-    { label: "Wristwatch", value: "Wristwatch" },
-    { label: "Tablet", value: "Tablet" },
-    { label: "Computer Accessories", value: "Computer Accessories" },
-  ];
-  const phoneOptions = [
-    { label: "128 GB", value: "128 GB" },
-    { label: "64 GB", value: "64 GB" },
-    { label: "32 GB", value: "32GB" },
-  ];
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const ratingOptions = [
-    { label: "Rating", value: "Rating" },
-    { label: "Most Purchased", value: "Most Purchased" },
-    { label: "High to Low Priced", value: "High to Low Priced" },
-    { label: "Low to High Price", value: "Low to High Price" },
-    { label: "All", value: "All" },
-  ];
-
-  function onChangeCategory(checkedValues) {
-    //set the category to be shown
-    console.log("checked = ", checkedValues);
-
-    //update the category state
-    setCategories(checkedValues);
-  }
-
-  function onChangeSubCategory(checkedValues) {
-    //set the category to be shown
-    console.log("checked = ", checkedValues);
-
-    //update the category state
-  }
-
-  const categoryBox = (categoryName) => {
-    return (
-      <FlexibleDiv
-        className="category__box"
-        justifyContent="space-between"
-        alignItems="center"
-      >
-        <p>{categoryName}</p>
-        <ArrowDown color="#BDBDBD" />
-      </FlexibleDiv>
-    );
-  };
+  const {
+    data: productCategories,
+    isLoading,
+    isSuccess,
+  } = useProductCategoriesQuery();
 
   const { data: products, isLoading: isLoadingProducts } = useProductsQuery(
     "",
-    10,
-    "products"
+    12,
+    "products",
   );
 
-  //This hook helps hide the filter if an outside click is noticed
-  useOutsideAlerter(popupRef, showFilter, setShowFilter);
+  const formatCategory = (cat = []) => {
+    return cat.map((ct) => ({ label: ct.name, value: ct.name }));
+  };
+
+  const handleCategoryChange = (checkedValues) => {
+    setSelectedCategories(checkedValues);
+    const newSelectedSubCategories = { ...selectedSubCategories };
+    Object.keys(newSelectedSubCategories).forEach((category) => {
+      if (!checkedValues.includes(category)) {
+        delete newSelectedSubCategories[category];
+      }
+    });
+    setSelectedSubCategories(newSelectedSubCategories);
+  };
+
+  const handleSubCategoryChange = (categoryName, values) => {
+    setSelectedSubCategories((prev) => ({
+      ...prev,
+      [categoryName]: values,
+    }));
+  };
+
+  const handleRemoveSubCategory = (removedTag) => {
+    const newSelectedSubCategories = { ...selectedSubCategories };
+    for (const category in newSelectedSubCategories) {
+      const index = newSelectedSubCategories[category].indexOf(removedTag);
+      if (index > -1) {
+        newSelectedSubCategories[category].splice(index, 1);
+        if (newSelectedSubCategories[category].length === 0) {
+          delete newSelectedSubCategories[category];
+        }
+        break;
+      }
+    }
+    setSelectedSubCategories(newSelectedSubCategories);
+  };
+
+  const allSelectedSubCategories = useMemo(() => {
+    return Object.values(selectedSubCategories).flat();
+  }, [selectedSubCategories]);
+
+  const categoryOptions = useMemo(() => {
+    return productCategories?.data
+      ? formatCategory(productCategories.data)
+      : [];
+  }, [productCategories]);
 
   return (
     <>
       <Breadcrumb numOfProducts={products?.body?.products?.length} />
       <ShopPageWrapper>
         <hr />
+
         <FlexibleDiv
-          justifyContent="space-between"
-          width="100%"
+          className="products__section"
+          alignItems="flex-start"
+          gap="22px"
           flexWrap="nowrap"
-          margin="15px 0 0 0"
         >
           <FlexibleDiv
-            justifyContent="flex-start"
-            gap="15px"
-            flexWrap="nowrap"
-            width="fit-content"
-          >
-            <FlexibleDiv
-              justifyContent="flex-start"
-              className="top__wrapper"
-              width="fit-content"
-            >
-              <div
-                className="single__item__wrapper"
-                onClick={() => setShowFilter(!showFilter)}
-              >
-                <img src={Filter.src} alt="filter" />
-                <p>Filter</p>
-              </div>
-            </FlexibleDiv>
-            <Select
-              style={{ width: 90 }}
-              placeholder="Size"
-              options={phoneOptions}
-            />
-          </FlexibleDiv>
-
-          <div>
-            <Select
-              style={{ width: 150 }}
-              placeholder="Sort by"
-              options={ratingOptions}
-            />
-          </div>
-
-          {/* The popup for product filter */}
-          <FlexibleDiv
-            className={`filter__wrapper ${showFilter ? "" : "hide__box"}`}
+            className="filter__box"
             flexDir="column"
             justifyContent="flex-start"
-            ref={popupRef}
+            alignItems="flex-start"
           >
+            <p>CATEGORY</p>
             <FlexibleDiv
-              justifyContent="space-between"
-              className="filter__wrapper__top__section"
-            >
-              <div className="top__section__filter__box">
-                <img src={Filter.src} alt="filter" /> <p>Filter</p>
-              </div>
-              <CloseIcon
-                color="#616161"
-                size={15}
-                style={{ cursor: "pointer" }}
-                onClick={() => setShowFilter(false)}
-              />
-            </FlexibleDiv>
-            {categoryBox("Category")}
-            <Checkbox.Group options={options} onChange={onChangeCategory} />
-            {/* Category filtering starts here */}
-            {categories?.length === 1 &&
-              subCategories.map((sgn, idx) => (
-                <div key={idx}>
-                  {categoryBox(sgn.name)}
-                  <Checkbox.Group
-                    options={sgn.options}
-                    onChange={onChangeSubCategory}
-                  />
-                </div>
-              ))}
-            {categoryBox("Price Range")}
-            <FlexibleDiv
-              className="price__range__wrapper"
-              flexDir="column"
               width="100%"
+              className="category__filters"
+              justifyContent="flex-start"
+              alignItems="flex-start"
+              flexDir="column"
+              gap="15px"
             >
-              <input
-                type="range"
-                id="price-range"
-                name="price-range"
-                className="price__range"
-                min="1000"
-                max="50000"
-                defaultValue={sliderPrice}
-                onChange={({ target }) => {
-                  setSliderPrice(target.value);
-                }}
-              />
-              <FlexibleDiv
-                width="100%"
-                justifyContent="space-between"
-                flexWrap="nowrap"
-                className="price__slider"
-              >
-                <p>{nairaFormatter.format(sliderPrice)}</p>
-                <p>of</p>
-                <p>{nairaFormatter.format(50000)}</p>
-              </FlexibleDiv>
+              {isSuccess && (
+                <>
+                  <Checkbox.Group
+                    className="custom__checkbox__group"
+                    options={categoryOptions}
+                    onChange={handleCategoryChange}
+                    value={selectedCategories}
+                  />
+
+                  <input
+                    type="range"
+                    id="price-range"
+                    name="price-range"
+                    className="price__range"
+                    min="1000"
+                    max="50000"
+                    defaultValue={sliderPrice}
+                    onChange={({ target }) => {
+                      setSliderPrice(target.value);
+                    }}
+                  />
+
+                  {selectedCategories.map((categoryName) => {
+                    const category = productCategories?.data.find(
+                      (cat) => cat.name === categoryName
+                    );
+                    if (
+                      !category ||
+                      !category.subcategories ||
+                      category.subcategories.length === 0
+                    )
+                      return null;
+
+                    return (
+                      <div key={categoryName} className="subcategory__select">
+                        <label>{categoryName}</label>
+                        <Select
+                          mode="multiple"
+                          allowClear
+                          style={{ width: "100%" }}
+                          placeholder={`Select from ${categoryName}`}
+                          onChange={(values) =>
+                            handleSubCategoryChange(categoryName, values)
+                          }
+                          value={selectedSubCategories[categoryName] || []}
+                          options={formatCategory(category.subcategories)}
+                        />
+                      </div>
+                    );
+                  })}
+
+                  {allSelectedSubCategories.length > 0 && (
+                    <div className="selected__tags">
+                      <p>Selected Filters:</p>
+                      {allSelectedSubCategories.map((tag) => (
+                        <Tag
+                          closable
+                          key={tag}
+                          onClose={() => handleRemoveSubCategory(tag)}
+                        >
+                          {tag}
+                        </Tag>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
             </FlexibleDiv>
-            <Button>Apply Filter</Button>
           </FlexibleDiv>
-        </FlexibleDiv>
-        {/* The page content */}
-        <FlexibleDiv
-          width="100%"
-          justifyContent="space-between"
-          margin="30px 0 0 0"
-          className="products__grid"
-        >
-          {isLoadingProducts ? (
-            <>
-              {Array.from({ length: 8 }).map((_, idx) => (
-                <ProductCard key={idx} isLoading={true} />
-              ))}
-            </>
-          ) : (
-            <>
-              {products?.body?.products.map((sgn, idx) => (
-                <ProductCard card={sgn} key={idx} />
-              ))}
-            </>
-          )}
+          {/* The page content */}
+          <FlexibleDiv
+            width="100%"
+            justifyContent="space-between"
+            className="products__grid"
+          >
+            {isLoadingProducts ? (
+              <>
+                {Array.from({ length: 8 }).map((_, idx) => (
+                  <ProductCard key={idx} isLoading={true} />
+                ))}
+              </>
+            ) : (
+              <>
+                {products?.body?.products.map((sgn, idx) => (
+                  <ProductCard card={sgn} key={idx} />
+                ))}
+              </>
+            )}
+          </FlexibleDiv>
         </FlexibleDiv>
       </ShopPageWrapper>
     </>

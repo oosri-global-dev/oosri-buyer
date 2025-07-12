@@ -39,7 +39,10 @@ export default function ProductPage({ product, loading, relatedProducts }) {
   function getBreadcrumbArray(categoryName, productName) {
     return [
       { label: "Home", link: "/" },
-      { label: categoryName, link: "/" },
+      {
+        label: categoryName,
+        link: `/shop?category=${encodeURIComponent(categoryName)}`,
+      },
       { label: productName, link: "#" },
     ];
   }

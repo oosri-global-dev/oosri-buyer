@@ -48,7 +48,11 @@ export const PCWrapper = styled(FlexibleDiv)`
       }
 
       @media (max-width: 440px) {
-        min-width: 48%;
+        min-width: 42%;
+
+        .card__image {
+          height: 160px;
+        }
       }
     }
 
