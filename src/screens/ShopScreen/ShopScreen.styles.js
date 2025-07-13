@@ -147,9 +147,44 @@ export const ShopPageWrapper = styled(FlexibleDiv)`
     }
   }
 
+  .floating__filter__btn {
+    display: none;
+  }
+
   @media (max-width: 600px) {
-    .products__grid {
-      grid-template-columns: repeat(2, 1fr);
+    .products__section {
+      flex-direction: column;
+    }
+
+    .filter__box {
+      display: none;
+    }
+
+    .products__section {
+      .products__grid {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      }
+    }
+
+    .floating__filter__btn {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 1000;
+      background-color: var(--orrsiPrimary);
+      padding: 25px;
+    }
+  }
+
+  @media (max-width: 390px) {
+    .products__section {
+      .products__grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      }
     }
   }
 `;

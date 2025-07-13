@@ -2,9 +2,10 @@ import Breadcrumb from "../../components/lib/Breadcrumb/breadcrumb";
 import { ShopPageWrapper } from "./ShopScreen.styles";
 import { FlexibleDiv } from "@/components/lib/Box/styles";
 import { useMemo, useState } from "react";
-import { Checkbox, Select, Tag, Spin, Alert } from "antd";
+import { Checkbox, Select, Tag, Spin, Alert, Modal, Button } from "antd";
 import ProductCard from "@/components/lib/ProductCard/productCard";
 import { useProductsQuery, useProductCategoriesQuery } from "@/network/product";
+import { FaFilter } from "react-icons/fa";
 
 export default function ShopPage() {
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -12,6 +13,7 @@ export default function ShopPage() {
   const [sliderPrice, setSliderPrice] = useState(500000);
   const [currentPage, setCurrentPage] = useState(1);
   const [openSelects, setOpenSelects] = useState({});
+  const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
 
   const {
     data: productCategories,
@@ -85,6 +87,117 @@ export default function ShopPage() {
     });
   }, [products, sliderPrice]);
 
+  const showFilterModal = () => {
+    setIsFilterModalVisible(true);
+  };
+
+  const handleFilterModalCancel = () => {
+    setIsFilterModalVisible(false);
+  };
+
+  const FilterContent = () => (
+    <FlexibleDiv
+      width="100%"
+      className="category__filters"
+      justifyContent="flex-start"
+      alignItems="flex-start"
+      flexDir="column"
+      gap="15px"
+    >
+      {isLoadingCategories ? (
+        <div className="loader_wrapper">
+          <Spin />
+        </div>
+      ) : isErrorCategories ? (
+        <Alert message="Error loading categories" type="error" />
+      ) : (
+        isSuccessCategories && (
+          <>
+            <Checkbox.Group
+              className="custom__checkbox__group"
+              options={categoryOptions}
+              onChange={handleCategoryChange}
+              value={selectedCategories}
+            />
+
+            <div className="price__filter">
+              <label htmlFor="price-range">
+                Price: ₦1,000 - ₦{Number(sliderPrice).toLocaleString()}
+              </label>
+              <input
+                type="range"
+                id="price-range"
+                name="price-range"
+                className="price__range"
+                min="1000"
+                max="500000"
+                value={sliderPrice}
+                onChange={({ target }) => setSliderPrice(target.value)}
+              />
+              <small>
+                price filters only the currently viewed products by their prices
+              </small>
+            </div>
+
+            {selectedCategories.map((categoryName) => {
+              const category = productCategories?.data.find(
+                (cat) => cat.name === categoryName
+              );
+              if (
+                !category ||
+                !category.subcategories ||
+                category.subcategories.length === 0
+              )
+                return null;
+
+              return (
+                <div key={categoryName} className="subcategory__select">
+                  <label>{categoryName}</label>
+                  <Select
+                    mode="multiple"
+                    allowClear
+                    style={{ width: "100%" }}
+                    placeholder={`Select from ${categoryName}`}
+                    onChange={(values) =>
+                      handleSubCategoryChange(categoryName, values)
+                    }
+                    onSelect={() =>
+                      handleDropdownVisibleChange(false, categoryName)
+                    }
+                    onDeselect={() =>
+                      handleDropdownVisibleChange(false, categoryName)
+                    }
+                    onDropdownVisibleChange={(open) =>
+                      handleDropdownVisibleChange(open, categoryName)
+                    }
+                    open={openSelects[categoryName]}
+                    value={selectedSubCategories[categoryName] || []}
+                    options={formatCategory(category.subcategories)}
+                  />
+                </div>
+              );
+            })}
+
+            {allSelectedSubCategories.length > 0 && (
+              <div className="selected__tags">
+                <p>Selected Filters:</p>
+                {allSelectedSubCategories.map((tag) => (
+                  <Tag
+                    closable
+                    key={tag}
+                    onClose={() => handleRemoveSubCategory(tag)}
+                  >
+                    {tag}
+                  </Tag>
+                ))}
+              </div>
+            )}
+          </>
+        )
+      )}
+    </FlexibleDiv>
+  );
+
   return (
     <>
       <Breadcrumb numOfProducts={products?.body?.products?.length} />
@@ -104,108 +217,9 @@ export default function ShopPage() {
             alignItems="flex-start"
           >
             <p>CATEGORY</p>
-            <FlexibleDiv
-              width="100%"
-              className="category__filters"
-              justifyContent="flex-start"
-              alignItems="flex-start"
-              flexDir="column"
-              gap="15px"
-            >
-              {isLoadingCategories ? (
-                <div className="loader_wrapper">
-                  <Spin />
-                </div>
-              ) : isErrorCategories ? (
-                <Alert message="Error loading categories" type="error" />
-              ) : (
-                isSuccessCategories && (
-                  <>
-                    <Checkbox.Group
-                      className="custom__checkbox__group"
-                      options={categoryOptions}
-                      onChange={handleCategoryChange}
-                      value={selectedCategories}
-                    />
-
-                    <div className="price__filter">
-                      <label htmlFor="price-range">
-                        Price: ₦1,000 - ₦{Number(sliderPrice).toLocaleString()}
-                      </label>
-                      <input
-                        type="range"
-                        id="price-range"
-                        name="price-range"
-                        className="price__range"
-                        min="1000"
-                        max="500000"
-                        value={sliderPrice}
-                        onChange={({ target }) => setSliderPrice(target.value)}
-                      />
-                      <small>
-                        price filters only the currently viewed products by
-                        their prices
-                      </small>
-                    </div>
-
-                    {selectedCategories.map((categoryName) => {
-                      const category = productCategories?.data.find(
-                        (cat) => cat.name === categoryName
-                      );
-                      if (
-                        !category ||
-                        !category.subcategories ||
-                        category.subcategories.length === 0
-                      )
-                        return null;
-
-                      return (
-                        <div key={categoryName} className="subcategory__select">
-                          <label>{categoryName}</label>
-                          <Select
-                            mode="multiple"
-                            allowClear
-                            style={{ width: "100%" }}
-                            placeholder={`Select from ${categoryName}`}
-                            onChange={(values) =>
-                              handleSubCategoryChange(categoryName, values)
-                            }
-                            onSelect={() =>
-                              handleDropdownVisibleChange(false, categoryName)
-                            }
-                            onDeselect={() =>
-                              handleDropdownVisibleChange(false, categoryName)
-                            }
-                            onDropdownVisibleChange={(open) =>
-                              handleDropdownVisibleChange(open, categoryName)
-                            }
-                            open={openSelects[categoryName]}
-                            value={selectedSubCategories[categoryName] || []}
-                            options={formatCategory(category.subcategories)}
-                          />
-                        </div>
-                      );
-                    })}
-
-                    {allSelectedSubCategories.length > 0 && (
-                      <div className="selected__tags">
-                        <p>Selected Filters:</p>
-                        {allSelectedSubCategories.map((tag) => (
-                          <Tag
-                            closable
-                            key={tag}
-                            onClose={() => handleRemoveSubCategory(tag)}
-                          >
-                            {tag}
-                          </Tag>
-                        ))}
-                      </div>
-                    )}
-                  </>
-                )
-              )}
-            </FlexibleDiv>
+            <FilterContent />
           </FlexibleDiv>
+
           {/* The page content */}
           <FlexibleDiv
             width="100%"
@@ -243,6 +257,24 @@ export default function ShopPage() {
             )}
           </FlexibleDiv>
         </FlexibleDiv>
+
+        <Button
+          className="floating__filter__btn"
+          type="primary"
+          shape="circle"
+          icon={<FaFilter size="20px" />}
+          onClick={showFilterModal}
+        />
+
+        <Modal
+          title="Filters"
+          visible={isFilterModalVisible}
+          onCancel={handleFilterModalCancel}
+          footer={null}
+          width={300}
+        >
+          <FilterContent />
+        </Modal>
       </ShopPageWrapper>
     </>
   );

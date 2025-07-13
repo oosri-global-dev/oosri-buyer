@@ -5,8 +5,9 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
   flex-direction: column;
   flex-basis: 18.5%;
   overflow: hidden;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   position: relative;
+  display: flex;
 
   .card__image {
     width: 100%;
@@ -179,11 +180,12 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
 
   /* media query for mobiles */
   @media (max-width: 440px) {
-    flex-basis: 48%;
+    margin-bottom: 20px;
+    flex-basis: 44%;
     gap: 3px;
 
     .card__image {
-      height: 200px;
+      height: 160px;
 
       @media (max-width: 280px) {
         height: 140px;
