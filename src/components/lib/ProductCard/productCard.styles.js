@@ -11,7 +11,7 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
   .card__image {
     width: 100%;
     object-fit: cover;
-    height: 220px;
+    height: 185px;
     border-radius: 15px;
     cursor: pointer;
     position: relative;

@@ -48,12 +48,8 @@ export default function ShopPage() {
     }));
   };
 
-  const handleSelectFocus = (categoryName) => {
-    setOpenSelects((prev) => ({ ...prev, [categoryName]: true }));
-  };
-
-  const handleSelectBlur = (categoryName) => {
-    setOpenSelects((prev) => ({ ...prev, [categoryName]: false }));
+  const handleDropdownVisibleChange = (open, categoryName) => {
+    setOpenSelects((prev) => ({ ...prev, [categoryName]: open }));
   };
 
   const handleRemoveSubCategory = (removedTag) => {
@@ -174,9 +170,15 @@ export default function ShopPage() {
                             onChange={(values) =>
                               handleSubCategoryChange(categoryName, values)
                             }
-                            onSelect={() => handleSelectBlur(categoryName)}
-                            onFocus={() => handleSelectFocus(categoryName)}
-                            onBlur={() => handleSelectBlur(categoryName)}
+                            onSelect={() =>
+                              handleDropdownVisibleChange(false, categoryName)
+                            }
+                            onDeselect={() =>
+                              handleDropdownVisibleChange(false, categoryName)
+                            }
+                            onDropdownVisibleChange={(open) =>
+                              handleDropdownVisibleChange(open, categoryName)
+                            }
                             open={openSelects[categoryName]}
                             value={selectedSubCategories[categoryName] || []}
                             options={formatCategory(category.subcategories)}
@@ -216,7 +218,10 @@ export default function ShopPage() {
             className={
               !isLoadingProducts && !isErrorProducts ? "products__grid" : ""
             }
-            style={{ flex: 1, display: isLoadingProducts ? "block" : "" }}
+            style={{
+              flex: 1,
+              display: isLoadingProducts || isErrorProducts ? "block" : "",
+            }}
           >
             {isLoadingProducts ? (
               <div className="loader_wrapper">
