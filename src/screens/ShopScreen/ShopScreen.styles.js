@@ -140,8 +140,10 @@ export const ShopPageWrapper = styled(FlexibleDiv)`
     align-items: center;
     width: 100%;
     height: 100%;
+    min-height: 250px;
+
     .ant-spin-dot-item {
-      background-color: var(--oosriPrimary);
+      background-color: var(--orrsiPrimary);
     }
   }
 

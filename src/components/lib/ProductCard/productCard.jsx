@@ -49,9 +49,11 @@ export default function ProductCard({ card, key, isLoading = false }) {
 
         <FlexibleDiv
           className="product__info"
-          justifyContent="space-between"
-          flexDir="row"
+          justifyContent="flex-start"
+          alignItems="flex-start"
+          flexDir="column"
           flexWrap="nowrap"
+          gap="4px"
           onClick={() => push(`/product/${card?._id}`)}
         >
           <p className="product__name">{card?.productName || ""}</p>

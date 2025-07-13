@@ -33,7 +33,7 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
 
     .likes__wrapper {
       display: flex;
-      justify-content: flex-end;
+      justify-content: flex-start;
       align-items: center;
       height: fit-content;
       width: 85px;

@@ -146,7 +146,10 @@ export default function ShopPage() {
                         value={sliderPrice}
                         onChange={({ target }) => setSliderPrice(target.value)}
                       />
-                      <small>price filters only the currently viewed products by their prices</small>
+                      <small>
+                        price filters only the currently viewed products by
+                        their prices
+                      </small>
                     </div>
 
                     {selectedCategories.map((categoryName) => {
@@ -213,11 +216,11 @@ export default function ShopPage() {
             className={
               !isLoadingProducts && !isErrorProducts ? "products__grid" : ""
             }
-            style={{ flex: 1 }}
+            style={{ flex: 1, display: isLoadingProducts ? "block" : "" }}
           >
             {isLoadingProducts ? (
               <div className="loader_wrapper">
-                <Spin size="large" />
+                <Spin style={{ color: "red" }} size="large" color="red" />
               </div>
             ) : isErrorProducts ? (
               <Alert
