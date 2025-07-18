@@ -147,7 +147,12 @@ export const ProductPageWrapper = styled(FlexibleDiv)`
   .product__description {
     position: relative;
 
+    .see__more_btn{
+      
+    }
+
     .see__more__reviews {
+      display:block;
       background: var(--orrsiPrimary);
       padding: 8px 10px;
       border-radius: 15px;
