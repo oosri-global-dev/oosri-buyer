@@ -41,6 +41,7 @@ export const ProductReviewWrapper = styled(FlexibleDiv)`
     }
   }
 
+
   @media (max-width: 550px) {
     border-bottom: ${({ isLastElem }) =>
       isLastElem ? "" : "1px solid rgba(187, 187, 187, 0.2);"};

@@ -111,8 +111,7 @@ export default function ProductPage() {
       <ProductBreadcrumbsWrapper>
         {previousLinks.map((sgn, idx) => (
           <p className={`${idx === previousLinks.length -1 ? "product__text" : ""}`} key={idx}>
-            {" "}
-            {sgn} {idx === 2 ? "" : " / "}
+            {sgn} {idx === previousLinks.length -1  ? "" : " / "}
           </p>
         ))}
       </ProductBreadcrumbsWrapper>
