@@ -4,17 +4,37 @@ import { Reducer } from "./reducer";
 export const MainContext = createContext({
   user: {},
   toastbox: { type: "", message: "", duration: 5000 },
+  cart: [],
 });
 
 export const MainProvider = ({ children }) => {
   const initialState = useContext(MainContext);
   const [state, dispatch] = useReducer(Reducer, initialState);
 
-  return (
-    <MainContext.Provider value={{ state, dispatch }}>
-      {children}
-    </MainContext.Provider>
-  );
+  const addToCart = (item) => {
+    dispatch({
+      type: "ADD_TO_CART",
+      payload: item,
+    });
+  };
+
+  const removeFromCart = (item) => {
+    dispatch({
+      type: "REMOVE_FROM_CART",
+      payload: item,
+    });
+  };
+
+  const value = {
+    user: state.user,
+    toastbox: state.toastbox,
+    cart: state.cart,
+    addToCart,
+    removeFromCart,
+    dispatch,
+  };
+
+  return <MainContext.Provider value={value}>{children}</MainContext.Provider>;
 };
 
 export const useMainContext = () => {
@@ -24,4 +44,3 @@ export const useMainContext = () => {
   }
   return context;
 };
-

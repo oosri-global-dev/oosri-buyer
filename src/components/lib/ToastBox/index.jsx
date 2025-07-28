@@ -7,10 +7,7 @@ import { MainContext } from "@/context";
 import { TOAST_BOX } from "@/context/types";
 
 export default function Customtoastbox() {
-  const {
-    dispatch,
-    state: { toastbox },
-  } = useContext(MainContext);
+  const { dispatch, toastbox } = useContext(MainContext);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {

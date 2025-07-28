@@ -1,26 +1,33 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState } from "react";
 import { CartPageWrapper } from "./cart.styles";
 import { FlexibleDiv } from "@/components/lib/Box/styles";
 import { IoCartOutline as CartIcon } from "react-icons/io5";
 import Button from "@/components/lib/Button";
 import ProductCarousel from "@/components/lib/ProductCarousel/productCarousel";
-import { MainContext } from "@/context";
+import { useMainContext } from "@/context";
 import { PAGE_TITLE } from "@/context/types";
 import SingleCartProduct from "@/components/lib/SingleCartProduct/single-cart-product";
-import { cartItemsHelper } from "@/data-helpers/cart-helper";
 import RemoveFromCartModal from "@/components/lib/Modals/remove-from-cart";
 
 export default function CartPage() {
-  const [cartIsEmpty, setCartIsEmpty] = useState(false);
-  const { dispatch } = useContext(MainContext);
+  const { cart, dispatch } = useMainContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const cartIsEmpty = cart.length === 0;
+
+  const subTotal = cart.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0
+  );
+  const shippingFee = 500;
+  const total = subTotal + shippingFee;
 
   useEffect(() => {
     if (!cartIsEmpty) {
       async function SetPageTitle() {
         await dispatch({
           type: PAGE_TITLE,
-          payload: "My Cart (3 Items)",
+          payload: `My Cart (${cart.length} Items)`,
         });
       }
       SetPageTitle();
@@ -33,7 +40,7 @@ export default function CartPage() {
       }
       SetPageTitle();
     }
-  }, [cartIsEmpty]);
+  }, [cart.length, cartIsEmpty, dispatch]);
 
   return (
     <CartPageWrapper>
@@ -67,8 +74,13 @@ export default function CartPage() {
       ) : (
         <>
           <FlexibleDiv className="cart__section">
-            {cartItemsHelper.map((item, idx) => (
-              <SingleCartProduct item={item} key={idx} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
+            {cart.map((item, idx) => (
+              <SingleCartProduct
+                item={item}
+                key={idx}
+                isModalOpen={isModalOpen}
+                setIsModalOpen={setIsModalOpen}
+              />
             ))}
             <FlexibleDiv
               className="summary__box"
@@ -86,10 +98,10 @@ export default function CartPage() {
               >
                 <h2>Cart Summary</h2>
                 <p className="shipping__fee__text">
-                  Shipping Fee: <span>N500</span>
+                  Shipping Fee: <span>N{shippingFee}</span>
                 </p>
                 <p className="shipping__fee__text">
-                  Sub Total: <span>N500,000</span>
+                  Sub Total: <span>N{subTotal.toLocaleString()}</span>
                 </p>
                 <Button
                   backgroundColor="var(--orrsiPrimary)"
@@ -98,7 +110,7 @@ export default function CartPage() {
                   color="var(--orrsiWhite)"
                   padding="0px 45px"
                 >
-                  Checkout (N550,000)
+                  Checkout (N{total.toLocaleString()})
                 </Button>
               </FlexibleDiv>
             </FlexibleDiv>

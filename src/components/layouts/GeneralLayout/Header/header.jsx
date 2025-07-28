@@ -47,9 +47,7 @@ export default function Header() {
       icon: <LogoutIcon color="white" size={12} />,
     },
   ];
-  const {
-    state: { user },
-  } = useMainContext();
+  const { user } = useMainContext();
 
   //This hook helps hide the filter if an outside click is noticed
   useOutsideAlerter(dropdownRef, showDropdown, setShowDropdown);

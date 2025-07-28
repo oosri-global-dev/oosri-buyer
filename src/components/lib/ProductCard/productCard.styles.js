@@ -5,9 +5,34 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
   flex-direction: column;
   flex-basis: 18.5%;
   overflow: hidden;
-  margin-bottom: 20px;
   position: relative;
+  margin-bottom: 20px;
   display: flex;
+  justify-content: space-between;
+  height: 100%;
+  padding: 6px;
+  border-radius: 15px;
+
+  button {
+    visibility: hidden;
+    opacity: 0;
+    transition: all 0.3s ease-in-out;
+  }
+
+  &:hover {
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+    button {
+      visibility: visible;
+      opacity: 1;
+    }
+    .card__image img {
+      transform: scale(1.05);
+    }
+  }
+
+  .card__wrap {
+    width: 100%;
+  }
 
   .card__image {
     width: 100%;
@@ -17,6 +42,10 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
     cursor: pointer;
     position: relative;
     overflow: hidden;
+
+    img {
+      transition: transform 0.3s ease-in-out;
+    }
   }
 
   .product__info {
@@ -30,6 +59,11 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
       font-size: 0.9rem;
       font-weight: 500;
       margin: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .likes__wrapper {
@@ -175,6 +209,10 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
 
     .card__image {
       height: 180px;
+    }
+    button {
+      visibility: visible;
+      opacity: 1;
     }
   }
 

@@ -15,10 +15,7 @@ export default function GeneralLayout({
   contextTitle = false,
   isAuth = false,
 }) {
-  const {
-    dispatch,
-    state: { pageTitle, user },
-  } = useContext(MainContext);
+  const { dispatch, pageTitle } = useContext(MainContext);
 
   useEffect(() => {
     const userToken = getDataInCookie("access_token");
