@@ -9,6 +9,7 @@ import { nairaFormatter } from "@/data-helpers/hooks";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import Button from "../Button";
+import { useMainContext } from "@/context";
 
 export function LoadingCard({ key }) {
   return (
@@ -32,6 +33,11 @@ export function LoadingCard({ key }) {
 export default function ProductCard({ card, key, isLoading = false }) {
   const maxLikes = ["", "", "", "", ""];
   const { push } = useRouter();
+  const { cart, addToCart, removeFromCart } = useMainContext();
+
+  const isProductInCart = (productId) => {
+    return cart.some((item) => item._id === productId);
+  };
 
   if (isLoading) {
     return <LoadingCard key={key} />;
@@ -102,16 +108,37 @@ export default function ProductCard({ card, key, isLoading = false }) {
             {/* <ReactCountryFlag countryCode={card.countryAbbrv} /> */}
           </FlexibleDiv>
         </div>
-        <Button
-          width="100%"
-          color="var(--orrsiWhite)"
-          backgroundColor="var(--orrsiPrimary)"
-          radius="5px"
-          height="40px"
-          fontSize="0.85rem"
-        >
-          Add to cart
-        </Button>
+        {isProductInCart(card?._id) ? (
+          <Button
+            width="100%"
+            color="#000"
+            backgroundColor="var(--orrsiSecondary)"
+            hoverBg="var(--orrsiSecondary)"
+            borderColor="#000"
+            hoverColor="#000"
+            radius="5px"
+            height="40px"
+            fontSize="0.85rem"
+            border="1px solid #000"
+            onClick={() => removeFromCart(card)}
+            className="remove-from-cart-btn"
+          >
+            Remove from cart
+          </Button>
+        ) : (
+          <Button
+            width="100%"
+            color="var(--orrsiWhite)"
+            backgroundColor="var(--orrsiPrimary)"
+            radius="5px"
+            height="40px"
+            fontSize="0.85rem"
+            onClick={() => addToCart(card)}
+            className="add-to-cart-btn"
+          >
+            Add to cart
+          </Button>
+        )}
       </ProductCardWrapper>
     );
   }

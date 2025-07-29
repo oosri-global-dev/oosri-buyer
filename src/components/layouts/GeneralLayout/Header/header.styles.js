@@ -70,6 +70,26 @@ export const HeaderWrapper = styled(FlexibleDiv)`
       cursor: pointer;
     }
 
+    .cart-icon-container {
+      position: relative;
+    }
+
+    .cart-badge {
+      position: absolute;
+      top: -5px;
+      right: -10px;
+      background-color: red;
+      color: white;
+      border-radius: 50%;
+      height: 16px;
+      width: 16px;
+      font-size: 8px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     .selected__icon {
       background: var(--orrsiPrimary);
       width: 30px;

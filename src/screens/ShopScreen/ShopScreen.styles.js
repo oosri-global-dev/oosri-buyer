@@ -11,6 +11,7 @@ export const ShopPageWrapper = styled(FlexibleDiv)`
 
   .products__section {
     margin-top: 25px;
+    box-sizing: border-box;
 
     .filter__box {
       width: 25%;
@@ -133,6 +134,7 @@ export const ShopPageWrapper = styled(FlexibleDiv)`
       max-width: initial;
       align-items: flex-start;
       grid-auto-rows: 350px;
+      overflow: hidden;
     }
   }
 
@@ -151,6 +153,12 @@ export const ShopPageWrapper = styled(FlexibleDiv)`
 
   .floating__filter__btn {
     display: none;
+  }
+
+  .pagination__wrapper {
+    width: 100%;
+    height: 100px;
+    background: red;
   }
 
   @media (max-width: 600px) {

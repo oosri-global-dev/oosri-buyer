@@ -14,7 +14,7 @@ export default function ShopPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [openSelects, setOpenSelects] = useState({});
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
-
+  const [] = useState([])
   const {
     data: productCategories,
     isLoading: isLoadingCategories,
@@ -198,6 +198,8 @@ export default function ShopPage() {
     </FlexibleDiv>
   );
 
+  console.log("cart");
+
   return (
     <>
       <Breadcrumb numOfProducts={products?.body?.products?.length} />
@@ -255,6 +257,7 @@ export default function ShopPage() {
                 ))}
               </>
             )}
+            <FlexibleDiv className="pagination__wrapper"></FlexibleDiv>
           </FlexibleDiv>
         </FlexibleDiv>
 

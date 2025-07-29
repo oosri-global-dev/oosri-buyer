@@ -32,13 +32,13 @@ export const Reducer = (state, { type, payload }) => {
     case REMOVE_FROM_CART:
       return {
         ...state,
-        cart: state.cart.filter((item) => item.id !== payload.id),
+        cart: state.cart.filter((item) => item._id !== payload._id),
       };
     case UPDATE_QUANTITY:
       return {
         ...state,
         cart: state.cart.map((item) =>
-          item.id === payload.id
+          item._id === payload._id
             ? { ...item, quantity: payload.quantity }
             : item
         ),

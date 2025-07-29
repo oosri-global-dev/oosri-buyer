@@ -12,16 +12,23 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
   height: 100%;
   padding: 6px;
   border-radius: 15px;
+  box-sizing: border-box;
 
-  button {
+  .add-to-cart-btn {
     visibility: hidden;
     opacity: 0;
     transition: all 0.3s ease-in-out;
   }
 
+  .remove-from-cart-btn {
+    visibility: visible;
+    opacity: 1;
+    transition: all 0.3s ease-in-out;
+  }
+
   &:hover {
     box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
-    button {
+    .add-to-cart-btn {
       visibility: visible;
       opacity: 1;
     }
@@ -209,10 +216,6 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
 
     .card__image {
       height: 180px;
-    }
-    button {
-      visibility: visible;
-      opacity: 1;
     }
   }
 
