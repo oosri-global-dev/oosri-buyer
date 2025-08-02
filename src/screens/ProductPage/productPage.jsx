@@ -4,7 +4,6 @@ import {
   ProductBreadcrumbsWrapper,
 } from "./productPage.styles";
 import { FlexibleDiv, FlexibleSection } from "@/components/lib/Box/styles";
-import { iPhone14ProMax } from "@/data-helpers/product-page-helper";
 import { AiFillStar as LikeIcon } from "react-icons/ai";
 import { useState } from "react";
 import { FiPlus as PlusIcon } from "react-icons/fi";
@@ -19,6 +18,7 @@ import ProductsGridBox from "../HomeScreens/Homepage/ProductsGridBox/productsGri
 import { useRouter } from "next/router";
 import OorsiLoader from "@/components/lib/Loader/loader";
 import { nairaFormatter } from "@/data-helpers/hooks";
+import Image from "next/image";
 
 function NoOfProductReviews({ numOfReviews }) {
   return (
@@ -170,18 +170,21 @@ export default function ProductPage({ product, loading, relatedProducts }) {
           >
             <FlexibleDiv className="image__section" flexDir="column" gap="10px">
               {product?.images?.map((sgn, idx) => (
-                <img
-                  src={sgn}
-                  className={`${
-                    idxOfSelectedImage === idx ? "selected__image" : ""
-                  }`}
-                  onClick={() => {
-                    setIdxOfSelectedImage(idx);
-                    setSelectedImage(sgn);
-                  }}
-                  alt={`phone__${idx}`}
-                  key={idx}
-                />
+                <div key={idx} className="images__wrapper">
+                  <Image
+                    src={sgn}
+                    onClick={() => {
+                      setIdxOfSelectedImage(idx);
+                      setSelectedImage(sgn);
+                    }}
+                    className={`${
+                      idxOfSelectedImage === idx ? "selected__image" : ""
+                    }`}
+                    alt={`phone__${idx}`}
+                    fill
+                    objectFit="cover"
+                  />
+                </div>
               ))}
             </FlexibleDiv>
             <FlexibleDiv className="main__image__wrapper">
@@ -264,6 +267,7 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                 backgroundColor="var(--orrsiPrimary)"
                 color="#fff"
                 className="checkout__btn"
+                onClick={() => push("/cart")}
               >
                 Checkout
               </Button>

@@ -22,7 +22,7 @@ export default function CartPage() {
   const shippingFee = 500;
   const total = subTotal + shippingFee;
 
-
+  console.log(cart);
 
   return (
     <CartPageWrapper>

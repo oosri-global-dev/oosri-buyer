@@ -3,10 +3,10 @@ import { FlexibleDiv } from "../Box/styles";
 import { SCProductWrapper } from "./single-cart-product.styles";
 import ProductImage from "@/assets/images/iphone19.png";
 import { BsTrash as TrashIcon } from "react-icons/bs";
-import RemoveFromCartModal from "../Modals/remove-from-cart";
 import { nairaFormatter } from "@/data-helpers/hooks";
 import Image from "next/image";
 import { useMainContext } from "@/context";
+import { useRouter } from "next/router";
 
 export default function SingleCartProduct({
   item,
@@ -16,6 +16,7 @@ export default function SingleCartProduct({
 }) {
   const { updateQuantity, removeFromCart } = useMainContext();
   const [numOfProduct, setNumOfProduct] = useState(item.quantity);
+  const { push } = useRouter();
 
   return (
     <SCProductWrapper>
@@ -31,6 +32,7 @@ export default function SingleCartProduct({
             alt={`${item?._id} product image`}
             layout="fill"
             objectFit="cover"
+            onClick={() => push(`/product/${item?._id}`)}
           />
         </div>
         <FlexibleDiv

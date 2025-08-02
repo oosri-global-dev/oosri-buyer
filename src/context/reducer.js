@@ -4,6 +4,7 @@ import {
   ADD_TO_CART,
   REMOVE_FROM_CART,
   UPDATE_QUANTITY,
+  CART,
 } from "./types";
 
 export const Reducer = (state, { type, payload }) => {
@@ -22,6 +23,11 @@ export const Reducer = (state, { type, payload }) => {
       return {
         ...state,
         cart: [...state.cart, payload],
+      };
+    case CART:
+      return {
+        ...state,
+        cart: payload || [],
       };
     case REMOVE_FROM_CART:
       return {

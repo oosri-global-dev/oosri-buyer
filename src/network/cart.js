@@ -26,16 +26,16 @@ export const handleRemoveFromCart = async (itemId, cartKey) => {
     config.params = { cartKey }; // Add params to config
   }
 
-  const { data } = await instance.delete(
-    `/buyer/cart/item/${itemId}`,
-    config 
-  );
+  const { data } = await instance.delete(`/buyer/cart/item/${itemId}`, config);
 
   return data;
 };
 
-export const handleGetCartItems = async () => {
-  const { data } = await instance.get(`/buyer/cart`);
+export const handleGetCartItems = async (cartKey) => {
+  const params = {
+    ...(cartKey && { cartKey }),
+  };
 
+  const { data } = await instance.get("/buyer/cart", { params });
   return data;
 };

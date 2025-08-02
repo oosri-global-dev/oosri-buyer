@@ -23,58 +23,7 @@ export default function GeneralLayout({
   const { dispatch, pageTitle, user } = useContext(MainContext);
   const effectRan = useRef(false);
 
-  useEffect(() => {
-    if (effectRan.current === false) {
-      const userToken = getDataInCookie("access_token");
-      const publicCartKey = getDataInCookie("public__cart__key");
-      if (userToken) {
-        const FetchCurrentUser = async () => {
-          try {
-            const currentUser = await fetchUser();
-            //dispatch the user function
-            dispatch({
-              type: CURRENT_USER,
-              payload: {
-                ...currentUser?.body?.user,
-                lastLogin: currentUser?.body?.lastLogin,
-              },
-            });
-          } catch (err) {}
-        };
 
-        FetchCurrentUser();
-      }
-
-      //if user is not logged in
-      if (_.isEmpty(user)) {
-        if (!publicCartKey) {
-          try {
-            const handlePublicUser = async () => {
-              //if it fails, generate a cart key for public user
-              const res = await handleGenerateUniqueCartKey();
-
-              if (res?.body?.cartKey) {
-                storeDataInCookie("public__cart__key", res?.body?.cartKey);
-              }
-            };
-
-            handlePublicUser();
-          } catch (err) {
-            dispatch({
-              type: TOAST_BOX,
-              payload: {
-                type: "error",
-                message: "Error generating a cart key on your device",
-              },
-            });
-          }
-        }
-      }
-    }
-    return () => {
-      effectRan.current = true;
-    };
-  }, [dispatch, user]);
 
   return (
     <>

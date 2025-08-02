@@ -1,9 +1,17 @@
-import { createContext, useContext, useReducer } from "react";
+import { createContext, useContext, useEffect, useReducer } from "react";
 import { Reducer } from "./reducer";
-import { handleAddToCart, handleRemoveFromCart } from "@/network/cart";
-import { TOAST_BOX, UPDATE_QUANTITY } from "./types";
-import { getDataInCookie } from "@/data-helpers/auth-session";
+import {
+  handleAddToCart,
+  handleGetCartItems,
+  handleRemoveFromCart,
+} from "@/network/cart";
+import { CURRENT_USER, TOAST_BOX, UPDATE_QUANTITY } from "./types";
+import {
+  getDataInCookie,
+  storeDataInCookie,
+} from "@/data-helpers/auth-session";
 import _ from "lodash";
+import { fetchUser } from "@/network/auth";
 
 export const MainContext = createContext({
   user: {},
@@ -88,7 +96,73 @@ export const MainProvider = ({ children }) => {
     });
   };
 
-  
+  const handleUpdateCartItemsInContext = async (cartKey) => {
+
+    try {
+      const res = await handleGetCartItems(cartKey || "");
+      const remoteCart = res?.body?.cartItems;
+
+      dispatch({
+        type: "CART",
+        payload: [...res?.body?.cartItems] || [],
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleUpdateCurrentUser = async () => {
+    //update the user object
+    try {
+      const currentUser = await fetchUser();
+      //dispatch the user function
+      dispatch({
+        type: CURRENT_USER,
+        payload: {
+          ...currentUser?.body?.user,
+          lastLogin: currentUser?.body?.lastLogin,
+        },
+      });
+    } catch (err) {}
+
+    //update the user cart
+  };
+
+  const handleGenerateCartKeyForVisitor = async () => {
+    try {
+      const res = await handleGenerateUniqueCartKey();
+
+      if (res?.body?.cartKey) {
+        storeDataInCookie("public__cart__key", res?.body?.cartKey);
+      }
+    } catch (err) {
+      dispatch({
+        type: TOAST_BOX,
+        payload: {
+          type: "error",
+          message: "Error generating a cart key on your device",
+        },
+      });
+    }
+  };
+
+  useEffect(() => {
+    const userToken = getDataInCookie("access_token");
+    const publicCartKey = getDataInCookie("public__cart__key");
+    if (userToken) {
+      handleUpdateCurrentUser();
+    }
+
+    //if user is not logged in
+    if (_.isEmpty(state.user)) {
+      if (!publicCartKey) {
+        handleGenerateCartKeyForVisitor();
+      } else {
+        //update the cart
+        handleUpdateCartItemsInContext(publicCartKey);
+      }
+    }
+  }, [state.user]);
 
   const value = {
     user: state.user,
