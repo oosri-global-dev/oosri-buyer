@@ -20,10 +20,20 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
     transition: all 0.3s ease-in-out;
   }
 
+  .loading-btn {
+    visibility: visible;
+    background-color: var(--orrsiPrimary);
+    border: none !important;
+  }
+
   .remove-from-cart-btn {
     visibility: visible;
     opacity: 1;
     transition: all 0.3s ease-in-out;
+
+    &:hover {
+      border: none !important;
+    }
   }
 
   &:hover {

@@ -5,46 +5,32 @@ import { IoCartOutline as CartIcon } from "react-icons/io5";
 import Button from "@/components/lib/Button";
 import ProductCarousel from "@/components/lib/ProductCarousel/productCarousel";
 import { useMainContext } from "@/context";
-import { PAGE_TITLE } from "@/context/types";
 import SingleCartProduct from "@/components/lib/SingleCartProduct/single-cart-product";
 import RemoveFromCartModal from "@/components/lib/Modals/remove-from-cart";
 
 export default function CartPage() {
   const { cart, dispatch } = useMainContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const cartIsEmpty = cart.length === 0;
 
   const subTotal = cart.reduce(
-    (acc, item) => acc + item.price * item.quantity,
+    (acc, item) => acc + item.productPrice * item.quantity,
     0
   );
   const shippingFee = 500;
   const total = subTotal + shippingFee;
 
-  useEffect(() => {
-    if (!cartIsEmpty) {
-      async function SetPageTitle() {
-        await dispatch({
-          type: PAGE_TITLE,
-          payload: `My Cart (${cart.length} Items)`,
-        });
-      }
-      SetPageTitle();
-    } else {
-      async function SetPageTitle() {
-        await dispatch({
-          type: PAGE_TITLE,
-          payload: "My Cart",
-        });
-      }
-      SetPageTitle();
-    }
-  }, [cart.length, cartIsEmpty, dispatch]);
+
 
   return (
     <CartPageWrapper>
-      <RemoveFromCartModal isOpen={isModalOpen} setIsOpen={setIsModalOpen} />
+      <RemoveFromCartModal
+        isOpen={isModalOpen}
+        setIsOpen={setIsModalOpen}
+        item={selectedItem}
+      />
       {cartIsEmpty ? (
         <FlexibleDiv
           className="empty__cart__box"
@@ -78,8 +64,8 @@ export default function CartPage() {
               <SingleCartProduct
                 item={item}
                 key={idx}
-                isModalOpen={isModalOpen}
                 setIsModalOpen={setIsModalOpen}
+                setSelectedItem={setSelectedItem}
               />
             ))}
             <FlexibleDiv

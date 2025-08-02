@@ -1,6 +1,5 @@
 import {
   CURRENT_USER,
-  PAGE_TITLE,
   TOAST_BOX,
   ADD_TO_CART,
   REMOVE_FROM_CART,
@@ -13,11 +12,6 @@ export const Reducer = (state, { type, payload }) => {
       return {
         ...state,
         user: payload || undefined,
-      };
-    case PAGE_TITLE:
-      return {
-        ...state,
-        pageTitle: payload || "",
       };
     case TOAST_BOX:
       return {

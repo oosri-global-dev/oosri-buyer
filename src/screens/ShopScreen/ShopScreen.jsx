@@ -198,8 +198,6 @@ export default function ShopPage() {
     </FlexibleDiv>
   );
 
-  console.log("cart");
-
   return (
     <>
       <Breadcrumb numOfProducts={products?.body?.products?.length} />

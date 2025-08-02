@@ -1,5 +1,9 @@
 import { createContext, useContext, useReducer } from "react";
 import { Reducer } from "./reducer";
+import { handleAddToCart, handleRemoveFromCart } from "@/network/cart";
+import { TOAST_BOX, UPDATE_QUANTITY } from "./types";
+import { getDataInCookie } from "@/data-helpers/auth-session";
+import _ from "lodash";
 
 export const MainContext = createContext({
   user: {},
@@ -11,19 +15,80 @@ export const MainProvider = ({ children }) => {
   const initialState = useContext(MainContext);
   const [state, dispatch] = useReducer(Reducer, initialState);
 
-  const addToCart = (item) => {
+  const addToCart = async (item, setIsLoadingBtn) => {
+    const cartKey = getDataInCookie("public__cart__key");
+    setIsLoadingBtn(true);
+
+    //api to add to cart before dispatching
+    try {
+      const res = await handleAddToCart({
+        items: [{ productId: item?._id, quantity: 1 }],
+        ...(_.isEmpty(state.user) && { cartKey }), //add cartkey is user is empty
+      });
+
+      dispatch({
+        type: "ADD_TO_CART",
+        payload: { ...item, quantity: item?.quantity ? item?.quantity : 1 },
+      });
+    } catch (err) {
+      dispatch({
+        type: TOAST_BOX,
+        payload: {
+          type: "error",
+          message: err?.response?.data?.message || "Sorry, an error occured",
+        },
+      });
+    } finally {
+      setIsLoadingBtn(false);
+    }
+  };
+
+  const removeFromCart = async (
+    item,
+    setIsLoadingBtn,
+    setModalLoadingBtn = false
+  ) => {
+    const cartKey = getDataInCookie("public__cart__key");
+
+    setIsLoadingBtn(true);
+
+    try {
+      const params = {};
+      if (_.isEmpty(state.user) && cartKey) {
+        params.cartKey = cartKey;
+      }
+
+      const res = await handleRemoveFromCart(
+        item?._id,
+        params.cartKey // will be undefined if conditions aren't met
+      );
+
+      dispatch({
+        type: "REMOVE_FROM_CART",
+        payload: item,
+      });
+    } catch (err) {
+      dispatch({
+        type: TOAST_BOX,
+        payload: {
+          type: "error",
+          message: err?.response?.data?.message || "Sorry, an error occurred",
+        },
+      });
+    } finally {
+      setIsLoadingBtn(false);
+      setModalLoadingBtn?.(false); // Optional chaining for safety
+    }
+  };
+
+  const updateQuantity = (item, quantity) => {
     dispatch({
-      type: "ADD_TO_CART",
-      payload: item,
+      type: UPDATE_QUANTITY,
+      payload: { ...item, quantity },
     });
   };
 
-  const removeFromCart = (item) => {
-    dispatch({
-      type: "REMOVE_FROM_CART",
-      payload: item,
-    });
-  };
+  
 
   const value = {
     user: state.user,
@@ -31,6 +96,7 @@ export const MainProvider = ({ children }) => {
     cart: state.cart,
     addToCart,
     removeFromCart,
+    updateQuantity,
     dispatch,
   };
 
