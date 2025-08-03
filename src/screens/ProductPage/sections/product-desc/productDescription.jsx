@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { ProductDescWrapper } from "./productDescription.styles";
 
 export default function ProductDescription({ content = "" }) {

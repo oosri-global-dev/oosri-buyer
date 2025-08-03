@@ -14,7 +14,10 @@ export default function ProductReviewBox({ reviews }) {
           isLastElem={index === elements?.length - 1 ? true : false}
         >
           <FlexibleDiv className="reviewer__image__wrapper">
-            <Image alt="reviewer__dp" src={ReviewerImage} />
+            <Image alt="reviewer__dp"  
+              width={50}
+              height={50}
+            src={review?.reviewerImage} />
           </FlexibleDiv>
           <FlexibleDiv
             className="reviewer__content__wrapper"
@@ -30,16 +33,19 @@ export default function ProductReviewBox({ reviews }) {
               alignItems="flex-start"
             >
               <FlexibleDiv className="reviewer__image__wrapper__mobile">
-                <Image alt="reviewer__dp" src={ReviewerImage} />
+                <Image alt="reviewer__dp" 
+                  width={50}
+                  height={50}
+                src={review?.reviewerImage} />
               </FlexibleDiv>
               <FlexibleDiv
                 flexDir="column"
                 justifyContent="flex-start"
                 alignItems="flex-start"
               >
-                <p className="reviewer__name">{review?.reviewerName}</p>
+                <p className="reviewer__name">{review?.reviewer}</p>
                 <FlexibleDiv flexWrap="nowrap" justifyContent="flex-start">
-                  {new Array(review?.likes || 1).fill(null).map((sgn, idx) => (
+                  {new Array(review?.productRating || 1).fill(null).map((sgn, idx) => (
                     <LikeIcon color="#FCCB1B" key={idx} />
                   ))}
                 </FlexibleDiv>

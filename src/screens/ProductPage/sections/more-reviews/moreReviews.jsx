@@ -7,32 +7,17 @@ import { ConfigProvider, Pagination, Slider } from 'antd';
 import ReviewDetails from './reviewDetails';
 import { getAllReviews } from '@/network/reviews';
 
-export const MoreReviews = () => {
+export const MoreReviews = ({id,reviewData,starData}) => {
   const [currentPage,setCurrentPage]=useState(1)
   const [totalPages,setTotalPages]=useState(10)
-  const [reviewData,setReviewData]=useState([])
+  const [newReviewData,setNewReviewData]=useState([])
 
-  const fetchReviews = async (id) => {
-    const data = await getAllReviews({ id });
-    setReviewData(data);
+  const fetchReviews = async () => {
+    const data = await getAllReviews(id);
+    setNewReviewData(data);
   };
 
-  useEffect(() => {
-    fetchReviews("67b1a362b48f754a83d1a152");
-  }, [currentPage]);
 
-
-  useEffect(()=>{
-    const handlefetch=async()=>{
-      try{
-        const data=await getAllReviews()
-        console.log(data)
-      }catch(errors){
-        console.log(errors)
-      }
-    }
-    handlefetch()
-  },[])
 
   const StarRating = ({ rating, totalStars = 5, fontSize,justifyContent="center", gap="4px" }) => {
       const filledStars = Math.round(rating); // Round to nearest integer
@@ -139,7 +124,7 @@ export const MoreReviews = () => {
               <FlexibleDiv flexDir={"column"} gap={"8px"}>
                 <h1>4.0</h1>
                 <StarRating rating={4} />
-                <p>180 reviews</p>
+                <p>{reviewData?.length> 1?`${reviewData?.length} reviews`:`${reviewData?.length} review`}</p>
               </FlexibleDiv>
               {/* Input */}
               <FlexibleDiv>
