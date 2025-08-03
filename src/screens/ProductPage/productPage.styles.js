@@ -220,4 +220,8 @@ export const ProductBreadcrumbsWrapper = styled(FlexibleDiv)`
   .product__text {
     color: black;
   }
+
+  @media screen and (max-width: 550px) {
+      display:none;
+  }
 `;

@@ -6,6 +6,14 @@ export const MoreReviewsWrapper=styled.div`
     align-items:start;
     flex-wrap:noWrap;
 
+    .mobile_header{
+        display:none;
+
+        h2{
+            font-weight:400;
+        }
+    }
+
     .left__section{
         max-width:340px;
     }
@@ -75,10 +83,30 @@ export const MoreReviewsWrapper=styled.div`
     }
         flex-direction:column;
 
-        .mobile_header{
-            display:flex;
-            flex-wrap:noWrap;
+        .desktop_header{
+            display:none;
         }
+
+        .ant-slider-horizontal {
+            padding-block: 10px !important;
+            height: 30px !important;
+        }   
+
+        .mobile_header{
+            display:block;
+        }
+
+        .slider_percent{
+            max-width:200px;
+        }
+    }
+
+    .ant-pagination-item-active:hover a {
+         color: #333333;
+    }
+
+    .ant-pagination-item-active:hover {
+        border-color: #FC5353;
     }
 `   
 
