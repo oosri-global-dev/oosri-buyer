@@ -24,7 +24,7 @@ export const HeroSectionWrapper = styled(FlexibleSection)`
   .category__wrapper {
     flex-direction: row;
     width: 100%;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: flex-start;
     gap: 1.8%;
     flex-wrap: wrap;
@@ -38,6 +38,10 @@ export const HeroSectionWrapper = styled(FlexibleSection)`
 
     .introductory__subText {
       margin: 6px 0;
+    }
+
+    .category__wrapper {
+      margin: 15px 0;
     }
   }
 

@@ -4,16 +4,9 @@ import { HeroSectionWrapper } from "./heroSection.styles";
 import { heroBannerFiles } from "@/data-helpers/homepage-helper";
 import WelcomeImage from '@/assets/images/homepage/welcome.gif'
 import SingleCategoryBox from "@/components/lib/SingleCategoryBox/single-category-box";
-import { homepageCategoryData } from "@/data-helpers/homepage-helper";
+import { LoadingCategoryBox } from "@/components/lib/SingleCategoryBox/loading-category-box";
 
-export default function HeroSection() {
-  const categories = [
-    "Phones",
-    "Wristwatches",
-    "Computer Accessories",
-    "Tablets",
-  ];
-
+export default function HeroSection({ productCategories, loadingCategories }) {
   return (
     <HeroSectionWrapper>
       <FlexibleDiv flexDir="column">
@@ -25,11 +18,21 @@ export default function HeroSection() {
       </FlexibleDiv>
       <HeroCarousel content={heroBannerFiles} />
       {/* categories */}
-      <FlexibleDiv className="category__wrapper">
-        {homepageCategoryData.map((catg, idx) => (
-          <SingleCategoryBox data={catg} key={idx} />
-        ))}
-      </FlexibleDiv>
+      {loadingCategories ? (
+        <FlexibleDiv className="category__wrapper">
+          {[...Array(5)].map((_, idx) => (
+            <LoadingCategoryBox key={idx} />
+          ))}
+        </FlexibleDiv>
+      ) : (
+        !!productCategories && (
+          <FlexibleDiv className="category__wrapper">
+            {productCategories.map((catg, idx) => (
+              <SingleCategoryBox data={catg} key={idx} />
+            ))}
+          </FlexibleDiv>
+        )
+      )}
     </HeroSectionWrapper>
   );
 }

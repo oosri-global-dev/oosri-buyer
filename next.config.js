@@ -4,6 +4,9 @@ const nextConfig = {
   experimental: {
     styledComponents: true,
   },
+  images: {
+    domains: ["oosri.com"],
+  },
 };
 
 module.exports = nextConfig

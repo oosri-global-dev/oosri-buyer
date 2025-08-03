@@ -47,9 +47,7 @@ export default function Header() {
       icon: <LogoutIcon color="white" size={12} />,
     },
   ];
-  const {
-    state: { user },
-  } = useMainContext();
+  const { user, cart } = useMainContext();
 
   //This hook helps hide the filter if an outside click is noticed
   useOutsideAlerter(dropdownRef, showDropdown, setShowDropdown);
@@ -67,13 +65,13 @@ export default function Header() {
       </FlexibleDiv>
       <FlexibleDiv className="middle__section" flexWrap="nowrap">
         {menuItems.map((sgn, idx) => (
-          <Link
-            href={sgn.url.toLowerCase()}
+          <button
+            onClick={() => push(`${sgn.url.toLowerCase()}`)}
             key={idx}
             id={`${asPath === sgn.url ? "active__link" : ""}`}
           >
             {sgn.link}
-          </Link>
+          </button>
         ))}
       </FlexibleDiv>
 
@@ -88,11 +86,16 @@ export default function Header() {
         </div>
         <div
           onClick={() => push("/cart")}
-          className={`single__menu ${
+          className={`single__menu cart-icon-container ${
             asPath === "/cart" ? "selected__icon" : ""
           }`}
         >
           <CartIcon />
+          {cart?.length > 0 && (
+            <span className="cart-badge">
+              {cart.length > 99 ? "99+" : cart.length}
+            </span>
+          )}
         </div>
         <div
           onClick={() => push("/wishlist")}

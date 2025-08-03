@@ -7,10 +7,7 @@ import { useMainContext } from "@/context";
 
 export default function ProfileScreen() {
   const [currentPage, setCurrentPage] = useState("Profile Overview");
-  const {
-    state: { user },
-    dispatch,
-  } = useMainContext();
+  const { user, dispatch } = useMainContext();
 
   return (
     <AccountLayout>

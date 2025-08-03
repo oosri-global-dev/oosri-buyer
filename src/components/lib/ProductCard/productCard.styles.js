@@ -5,14 +5,54 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
   flex-direction: column;
   flex-basis: 18.5%;
   overflow: hidden;
-  margin-bottom: 30px;
   position: relative;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  height: 100%;
+  padding: 6px;
+  border-radius: 15px;
+  box-sizing: border-box;
+
+  .add-to-cart-btn {
+    visibility: hidden;
+    opacity: 0;
+    transition: all 0.3s ease-in-out;
+  }
+
+  .remove-from-cart-btn {
+    visibility: visible;
+    opacity: 1;
+    transition: all 0.3s ease-in-out;
+  }
+
+  &:hover {
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+    .add-to-cart-btn {
+      visibility: visible;
+      opacity: 1;
+    }
+    .card__image img {
+      transform: scale(1.05);
+    }
+  }
+
+  .card__wrap {
+    width: 100%;
+  }
 
   .card__image {
     width: 100%;
     object-fit: cover;
-    height: 250px;
+    height: 185px;
     border-radius: 15px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+
+    img {
+      transition: transform 0.3s ease-in-out;
+    }
   }
 
   .product__info {
@@ -20,16 +60,22 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
     margin-top: 10px;
     align-items: flex-start;
     margin-bottom: 4px;
+    cursor: pointer;
 
     .product__name {
       font-size: 0.9rem;
       font-weight: 500;
       margin: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .likes__wrapper {
       display: flex;
-      justify-content: flex-end;
+      justify-content: flex-start;
       align-items: center;
       height: fit-content;
       width: 85px;
@@ -95,13 +141,21 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
     .seller__text {
       width: fit-content;
       text-align: left;
-      font-size: 0.65rem;
+      font-size: 0.85rem;
       color: #bdbdbd;
-    }
-  }
+      margin-top: 3px;
 
-  &:hover {
-    cursor: pointer;
+      span {
+        text-decoration: underline;
+        text-underline-offset: 2px;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+
+        &:hover {
+          color: var(--orrsiPrimary);
+        }
+      }
+    }
   }
 
   @media (max-width: 1300px) {
@@ -167,11 +221,12 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
 
   /* media query for mobiles */
   @media (max-width: 440px) {
-    flex-basis: 48%;
+    margin-bottom: 20px;
+    flex-basis: 44%;
     gap: 3px;
 
     .card__image {
-      height: 200px;
+      height: 160px;
 
       @media (max-width: 280px) {
         height: 140px;

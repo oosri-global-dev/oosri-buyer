@@ -15,10 +15,7 @@ export default function GeneralLayout({
   contextTitle = false,
   isAuth = false,
 }) {
-  const {
-    dispatch,
-    state: { pageTitle, user },
-  } = useContext(MainContext);
+  const { dispatch, pageTitle } = useContext(MainContext);
 
   useEffect(() => {
     const userToken = getDataInCookie("access_token");
@@ -46,9 +43,8 @@ export default function GeneralLayout({
       <GeneralLayoutWrapper>
         {!noHeader && <Header />}
         {contextTitle && <h1 className="page__title">{pageTitle}</h1>}
-        {!contextTitle && (
-          <> {title && <h1 className="page__title">{title}</h1>}</>
-        )}
+        <> {title && <h1 className="page__title">{title}</h1>}</>
+
         {children}
       </GeneralLayoutWrapper>
       {!noFooter && <Footer />}
