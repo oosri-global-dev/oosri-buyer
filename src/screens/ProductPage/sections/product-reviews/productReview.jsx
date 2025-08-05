@@ -8,15 +8,15 @@ import { AiFillStar as LikeIcon } from "react-icons/ai";
 export default function ProductReviewBox({ reviews }) {
   return (
     <>
-      {reviews.map((review, index, elements) => (
+      {reviews?.map((review, index, elements) => (
         <ProductReviewWrapper
           key={index}
           isLastElem={index === elements?.length - 1 ? true : false}
         >
           <FlexibleDiv className="reviewer__image__wrapper">
             <Image alt="reviewer__dp"  
-              width={50}
-              height={50}
+              width={35}
+              height={35}
             src={review?.reviewerImage} />
           </FlexibleDiv>
           <FlexibleDiv
@@ -34,8 +34,8 @@ export default function ProductReviewBox({ reviews }) {
             >
               <FlexibleDiv className="reviewer__image__wrapper__mobile">
                 <Image alt="reviewer__dp" 
-                  width={50}
-                  height={50}
+                  width={35}
+                  height={35}
                 src={review?.reviewerImage} />
               </FlexibleDiv>
               <FlexibleDiv

@@ -5,6 +5,7 @@ export const MoreReviewsWrapper=styled.div`
     gap:48px;
     align-items:start;
     flex-wrap:noWrap;
+    width:100%;
 
     .mobile_header{
         display:none;
@@ -77,6 +78,10 @@ export const MoreReviewsWrapper=styled.div`
         height: 40px !important;
     }   
 
+        .pagination{
+            // display:none;
+        }
+
     @media screen and (max-width: 768px) {
     .left__section{
         max-width:100%;
@@ -94,10 +99,20 @@ export const MoreReviewsWrapper=styled.div`
 
         .mobile_header{
             display:block;
+
+            .heading__text__wrapper{
+                padding-bottom:12px;
+                margin-bottom:12px;
+                border-bottom: 1px solid #CFCFCF;
+            }
         }
 
         .slider_percent{
             max-width:200px;
+        }
+
+        .pagination{
+            display:block;
         }
     }
 
@@ -106,6 +121,15 @@ export const MoreReviewsWrapper=styled.div`
     }
 
     .ant-pagination-item-active:hover {
+        border-color: #FC5353;
+    }
+        
+    .ant-pagination-item-active a {
+        color: #FC5353;
+        border-color: #FC5353;
+    }
+    .ant-pagination-item-active{
+        color: #FC5353;
         border-color: #FC5353;
     }
 `   

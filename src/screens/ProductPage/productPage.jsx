@@ -99,15 +99,6 @@ export default function ProductPage({ product, loading, relatedProducts }) {
   //   },
   // ];
 
-  const handleSeeMoreReviews = (key) => {
-    const seeMoreBtn = document.getElementsByClassName("see__more__reviews")[0];
-    if (key === 1) {
-      seeMoreBtn.style.display = "none";
-    } else {
-      seeMoreBtn.style.display = "block";
-    }
-  };
-
   const items = [
     {
       label: "Product Description",
@@ -118,7 +109,7 @@ export default function ProductPage({ product, loading, relatedProducts }) {
       style: {},
     },
     {
-      label: <NoOfProductReviews numOfReviews={reviewData.length} />,
+      label: <NoOfProductReviews numOfReviews={reviewData?.length} />,
       key: 2,
       children: <ProductReviewBox reviews={reviewData} />,
       style: {},
@@ -316,14 +307,16 @@ export default function ProductPage({ product, loading, relatedProducts }) {
               items={items}
              onChange={(key) => setActiveTab(key)}
             />
-            {activeTab === 2 &&(
+            {activeTab === 2  &&(
+               reviewData?.length >0 ? 
               <div className="see__more_btn" style={{ cursor: "pointer" }} onClick={handleMoreReviews}>
                 <p className="see__more__reviews">See more reviews</p>
               </div>
+              :
+              <FlexibleDiv>
+                <p>No review Here</p>
+              </FlexibleDiv>
             )}
-            <Link href={"/"}>
-              <p className="see__more__reviews">See more reviews</p>
-            </Link>
           </FlexibleDiv>
           {/* Related Products Section */}
           <FlexibleDiv
@@ -340,7 +333,7 @@ export default function ProductPage({ product, loading, relatedProducts }) {
         </>
         :
           <FlexibleDiv>
-              <MoreReviews id={product?._id}  reviewData={reviewData}/>
+              <MoreReviews id={product?._id} starData={starData}  reviewData={reviewData}/>
           </FlexibleDiv>
         }
       </ProductPageWrapper>
