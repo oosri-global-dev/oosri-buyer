@@ -6,8 +6,9 @@ import { MoreReviewsWrapper } from './moreReviews.styles';
 import { ConfigProvider, Pagination, Slider } from 'antd';
 import ReviewDetails from './reviewDetails';
 import { getAllReviews } from '@/network/reviews';
+import { IoIosArrowRoundBack } from "react-icons/io";
 
-export const MoreReviews = ({id,reviewData,starData}) => {
+export const MoreReviews = ({id,reviewData,starData,setMoreReviewsActive}) => {
   const [currentPage,setCurrentPage]=useState(1)
   const [totalPages,setTotalPages]=useState(10)
   const [newReviewData,setNewReviewData]=useState(reviewData)
@@ -122,12 +123,14 @@ export const MoreReviews = ({id,reviewData,starData}) => {
     },
   ]
 
+
+
   return (
     <MoreReviewsWrapper>
           <FlexibleDiv className='left__section' gap={"16px"} >
             <div className='desktop_header'>
               <FlexibleDiv gap={"8px"}>
-                <h1 className='customer__review'>Customer Reviews</h1>
+                 <h1 className='customer__review'>Customer Reviews</h1>
                 <p >Here is what our customers are saying</p>
               </FlexibleDiv>
               <FlexibleDiv flexDir={"column"} gap={"8px"}>
@@ -145,15 +148,18 @@ export const MoreReviews = ({id,reviewData,starData}) => {
               </FlexibleDiv>
             </div>
             <div className='mobile_header'>
-              <FlexibleDiv justifyContent={"start"}  className='heading__text__wrapper'>
+              <FlexibleDiv justifyContent={"start"}  className='heading__text__wrapper' gap={"12px"}>
+                <FlexibleDiv onClick={setMoreReviewsActive} width={"fit-content"} style={{fontSize:"34px"}}>
+                 <IoIosArrowRoundBack />
+                </FlexibleDiv>
                 <h2 className='heading__text'>Custom Reviews</h2>
               </FlexibleDiv>
                 <FlexibleDiv flexWrap={"noWrap"}>
                   <FlexibleDiv flexDir={"column"} gap={"12px"} alignItems={"start"}>
                     <p>Here is what our customers are saying</p>
                     <h3>{totalRatings}/5</h3>
-                   <StarRating rating={4} fontSize={"18px"} justifyContent={"start"} gap={"0px"} />
-                   <p>{newReviewData?.length} reviews</p>
+                   <StarRating rating={totalRatings} fontSize={"18px"} justifyContent={"start"} gap={"0px"} />
+                    <p>{newReviewData?.length> 1?`${newReviewData?.length} reviews`:`${newReviewData?.length} review`}</p>
                   </FlexibleDiv>
                   <FlexibleDiv>
                     {
@@ -166,8 +172,10 @@ export const MoreReviews = ({id,reviewData,starData}) => {
             </div>
           </FlexibleDiv>
           {/*  right section*/}
-          <FlexibleDiv>
+          <FlexibleDiv margin={"0px 12px"}>
+            <div className='mobile__review__container'>
               <ReviewDetails reviews={newReviewData} />
+            </div>
               <FlexibleDiv flexWrap={"noWrap"} className='pagination'>
               <Pagination 
                 // showTotal={(total) => `Page ${currentPage} of ${total}`}

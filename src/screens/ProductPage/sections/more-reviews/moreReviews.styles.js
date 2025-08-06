@@ -101,7 +101,7 @@ export const MoreReviewsWrapper=styled.div`
             display:block;
 
             .heading__text__wrapper{
-                padding-bottom:12px;
+                padding:0px 0px 12px 12px;
                 margin-bottom:12px;
                 border-bottom: 1px solid #CFCFCF;
             }
@@ -113,6 +113,12 @@ export const MoreReviewsWrapper=styled.div`
 
         .pagination{
             display:block;
+            margin-top:12px;
+        }
+
+        .mobile__review__container{
+            width:100%;
+            padding:0px 16px 0px 12px;
         }
     }
 
@@ -135,3 +141,9 @@ export const MoreReviewsWrapper=styled.div`
 `   
 
 
+
+export const ReviewDetailWrapper=styled.div`
+    border-bottom:1px solid #BBBBBB80;
+    width:100%;
+    margin:12px 0px;
+`

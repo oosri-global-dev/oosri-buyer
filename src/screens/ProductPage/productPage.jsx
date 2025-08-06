@@ -137,6 +137,10 @@ export default function ProductPage({ product, loading, relatedProducts }) {
   }
   }, [product]);
 
+  const handleBack=()=>{
+    setMoreReviewsActive(false)
+    setActiveTab(1)
+  }
 
   if (loading) {
     return <OorsiLoader />;
@@ -333,7 +337,7 @@ export default function ProductPage({ product, loading, relatedProducts }) {
         </>
         :
           <FlexibleDiv>
-              <MoreReviews id={product?._id} starData={starData}  reviewData={reviewData}/>
+              <MoreReviews id={product?._id} starData={starData}  reviewData={reviewData} setMoreReviewsActive={handleBack}/>
           </FlexibleDiv>
         }
       </ProductPageWrapper>
