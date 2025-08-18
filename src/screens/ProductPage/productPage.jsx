@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import {
   ProductPageWrapper,
   ProductBreadcrumbsWrapper,
@@ -6,6 +6,8 @@ import {
 import { FlexibleDiv, FlexibleSection } from "@/components/lib/Box/styles";
 import { AiFillStar as LikeIcon } from "react-icons/ai";
 import { useState } from "react";
+import { useMainContext } from "@/context";
+import _ from "lodash";
 import { FiPlus as PlusIcon } from "react-icons/fi";
 import { HiOutlineMinusSmall as MinusIcon } from "react-icons/hi2";
 import Button from "@/components/lib/Button";
@@ -31,9 +33,24 @@ function NoOfProductReviews({ numOfReviews }) {
 
 export default function ProductPage({ product, loading, relatedProducts }) {
   const { push, query } = useRouter();
+  const { cart, addToCart, removeFromCart, updateQuantity } = useMainContext();
+  const [isLoadingBtn, setIsLoadingBtn] = useState(false);
   const [idxOfSelectedImage, setIdxOfSelectedImage] = useState(0);
   const [selectedImage, setSelectedImage] = useState("");
   const [numOfProduct, setNumOfProduct] = useState(1);
+
+  const productInCart = useMemo(
+    () => cart.find((item) => item._id === product._id),
+    [cart, product]
+  );
+
+  useEffect(() => {
+    if (productInCart) {
+      setNumOfProduct(productInCart.quantity);
+    } else {
+      setNumOfProduct(1);
+    }
+  }, [productInCart]);
 
   // functions
   function getBreadcrumbArray(categoryName, productName) {
@@ -126,6 +143,8 @@ export default function ProductPage({ product, loading, relatedProducts }) {
   if (loading) {
     return <OorsiLoader />;
   }
+
+  console.log(product)
 
   return (
     <>
@@ -252,7 +271,11 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                   size={18}
                   onClick={() => {
                     if (numOfProduct > 1) {
-                      setNumOfProduct(numOfProduct - 1);
+                      if (productInCart) {
+                        updateQuantity(product, numOfProduct - 1);
+                      } else {
+                        setNumOfProduct(numOfProduct - 1);
+                      }
                     }
                   }}
                 />
@@ -260,7 +283,13 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                 <PlusIcon
                   className="icon__class"
                   size={18}
-                  onClick={() => setNumOfProduct(numOfProduct + 1)}
+                  onClick={() => {
+                    if (productInCart) {
+                      updateQuantity(product, numOfProduct + 1);
+                    } else {
+                      setNumOfProduct(numOfProduct + 1);
+                    }
+                  }}
                 />
               </FlexibleDiv>
               <Button
@@ -275,8 +304,19 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                 backgroundColor="#fff"
                 color="var(--orrsiPrimary)"
                 className="cart__btn"
+                onClick={() => {
+                  if (productInCart) {
+                    removeFromCart(product, setIsLoadingBtn);
+                  } else {
+                    addToCart(
+                      { product, quantity: numOfProduct, _id: product?.Id },
+                      setIsLoadingBtn
+                    );
+                  }
+                }}
+                isLoading={isLoadingBtn}
               >
-                Add to Cart
+                {productInCart ? "Remove from Cart" : "Add to Cart"}
               </Button>
             </FlexibleDiv>
           </FlexibleDiv>

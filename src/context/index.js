@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useReducer } from "react";
 import { Reducer } from "./reducer";
 import {
   handleAddToCart,
+  handleGenerateUniqueCartKey,
   handleGetCartItems,
   handleRemoveFromCart,
 } from "@/network/cart";
@@ -97,14 +98,13 @@ export const MainProvider = ({ children }) => {
   };
 
   const handleUpdateCartItemsInContext = async (cartKey) => {
-
     try {
       const res = await handleGetCartItems(cartKey || "");
       const remoteCart = res?.body?.cartItems;
 
       dispatch({
         type: "CART",
-        payload: [...res?.body?.cartItems] || [],
+        payload: remoteCart || [],
       });
     } catch (err) {
       console.log(err);

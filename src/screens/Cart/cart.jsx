@@ -6,7 +6,7 @@ import Button from "@/components/lib/Button";
 import ProductCarousel from "@/components/lib/ProductCarousel/productCarousel";
 import { useMainContext } from "@/context";
 import SingleCartProduct from "@/components/lib/SingleCartProduct/single-cart-product";
-import RemoveFromCartModal from "@/components/lib/Modals/remove-from-cart";
+import RemoveFromCartModal from "@/components/lib/RemoveFromCartModal/remove-from-cart";
 
 export default function CartPage() {
   const { cart, dispatch } = useMainContext();
