@@ -16,13 +16,11 @@ export default function CartPage() {
   const cartIsEmpty = cart.length === 0;
 
   const subTotal = cart.reduce(
-    (acc, item) => acc + item.productPrice * item.quantity,
+    (acc, item) => acc + item.price * item.quantity,
     0
   );
   const shippingFee = 500;
   const total = subTotal + shippingFee;
-
-  console.log(cart);
 
   return (
     <CartPageWrapper>

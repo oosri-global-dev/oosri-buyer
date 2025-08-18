@@ -40,7 +40,7 @@ export default function ProductPage({ product, loading, relatedProducts }) {
   const [numOfProduct, setNumOfProduct] = useState(1);
 
   const productInCart = useMemo(
-    () => cart.find((item) => item._id === product._id),
+    () => cart.find((item) => item?._id === product?._id),
     [cart, product]
   );
 
@@ -134,8 +134,8 @@ export default function ProductPage({ product, loading, relatedProducts }) {
 
   // SSR: use product prop
   useEffect(() => {
-    if (product && product.images && product.images.length > 0) {
-      setSelectedImage(product.images[0]);
+    if (product && product.productImages && product.productImages.length > 0) {
+      setSelectedImage(product.productImages[0]);
       setIdxOfSelectedImage(0);
     }
   }, [product]);
@@ -143,8 +143,6 @@ export default function ProductPage({ product, loading, relatedProducts }) {
   if (loading) {
     return <OorsiLoader />;
   }
-
-  console.log(product)
 
   return (
     <>
@@ -188,7 +186,7 @@ export default function ProductPage({ product, loading, relatedProducts }) {
             gap="20px"
           >
             <FlexibleDiv className="image__section" flexDir="column" gap="10px">
-              {product?.images?.map((sgn, idx) => (
+              {product?.productImages?.map((sgn, idx) => (
                 <div key={idx} className="images__wrapper">
                   <Image
                     src={sgn}
@@ -217,7 +215,7 @@ export default function ProductPage({ product, loading, relatedProducts }) {
               ) : (
                 <img
                   className="main__image"
-                  src={product?.images?.[0] || ""}
+                  src={product?.productImages?.[0] || ""}
                   alt={`main__1`}
                 />
               )}

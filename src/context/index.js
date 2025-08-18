@@ -104,14 +104,13 @@ export const MainProvider = ({ children }) => {
   };
 
   const handleUpdateCartItemsInContext = async (cartKey) => {
+    dispatch({
+      type: LOADING_MODAL,
+      payload: true,
+    });
     try {
       const res = await handleGetCartItems(cartKey || "");
       const remoteCart = res?.body?.cartItems;
-
-      dispatch({
-        type: LOADING_MODAL,
-        payload: true,
-      });
 
       dispatch({
         type: "CART",
@@ -119,6 +118,11 @@ export const MainProvider = ({ children }) => {
       });
     } catch (err) {
       console.log(err);
+    } finally {
+      dispatch({
+        type: LOADING_MODAL,
+        payload: false,
+      });
     }
   };
 

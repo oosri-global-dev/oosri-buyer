@@ -4,7 +4,7 @@ import "@/styles/nprogress-custom.css";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { MainProvider } from "@/context";
+import { MainProvider, useMainContext } from "@/context";
 import CustomToastBox from "@/components/lib/ToastBox";
 import { useEffect, useState } from "react";
 import NProgress from "nprogress";
@@ -13,21 +13,15 @@ import basketLottie from "@/assets/images/basket.json";
 
 const queryClient = new QueryClient();
 
-export default function App({ Component, pageProps }) {
-  const getLayout = Component.getLayout || ((page) => page);
-  const router = useRouter();
-  const [isModalOpen, setIsModalOpen] = useState(false); 
-  const [mounted, setMounted] = useState(false); 
+// New component to consume context
+function AppContent({ Component, pageProps, getLayout }) {
+  const [mounted, setMounted] = useState(false);
+  const { loadingModal } = useMainContext();
+  const router = useRouter(); 
 
   useEffect(() => {
-    setMounted(true); 
+    setMounted(true);
   }, []);
-
-  useEffect(() => {
-    if (mounted) {
-      setIsModalOpen(true); 
-    }
-  }, [mounted]); 
 
   // Extract the pathname from asPath
   const pathname = router.asPath.split("?")[0];
@@ -49,6 +43,26 @@ export default function App({ Component, pageProps }) {
 
   return (
     <>
+      <CustomToastBox />
+      {mounted && (
+        <CustomModal
+          isOpen={loadingModal}
+          content="Hang on a sec, we are setting up your basket for you."
+          icon={basketLottie}
+          isLottieIcon={true}
+          canClose={false}
+        />
+      )}
+      {getLayout(<Component {...pageProps} />)}
+    </>
+  );
+}
+
+export default function App({ Component, pageProps }) {
+  const getLayout = Component.getLayout || ((page) => page);
+
+  return (
+    <>
       <Head>
         <title>
           Oosri Global | Direct UK, US and Canadian used and new Phones, Gadgets
@@ -64,17 +78,7 @@ export default function App({ Component, pageProps }) {
       </Head>
       <MainProvider>
         <QueryClientProvider client={queryClient}>
-          <CustomToastBox />
-          {mounted && ( // Conditionally render modal only after client-side mount
-            <CustomModal
-              isOpen={isModalOpen}
-              content="We are setting up your basket for you."
-              icon={basketLottie}
-              isLottieIcon={true}
-              canClose={false}
-            />
-          )}
-          {getLayout(<Component {...pageProps} />)}
+          <AppContent Component={Component} pageProps={pageProps} getLayout={getLayout} />
         </QueryClientProvider>
       </MainProvider>
     </>

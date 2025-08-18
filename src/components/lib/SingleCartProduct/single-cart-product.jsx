@@ -62,7 +62,7 @@ export default function SingleCartProduct({
         justifyContent="space-evenly"
       >
         <p className="product__price">
-          {nairaFormatter.format(item?.productPrice || 0)}
+          {nairaFormatter.format(item?.price || 0)}
         </p>
         <FlexibleDiv className="right__box__controls">
           <p
