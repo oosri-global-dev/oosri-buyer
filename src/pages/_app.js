@@ -16,19 +16,18 @@ const queryClient = new QueryClient();
 export default function App({ Component, pageProps }) {
   const getLayout = Component.getLayout || ((page) => page);
   const router = useRouter();
-  const [isModalOpen, setIsModalOpen] = useState(false); // Initialize to false to prevent hydration errors
-  const [mounted, setMounted] = useState(false); // State to track if component is mounted on client
+  const [isModalOpen, setIsModalOpen] = useState(false); 
+  const [mounted, setMounted] = useState(false); 
 
   useEffect(() => {
-    setMounted(true); // Set mounted to true after client-side mount
+    setMounted(true); 
   }, []);
 
   useEffect(() => {
     if (mounted) {
-      // Only run this effect on the client after mount
-      setIsModalOpen(true); // Show modal after mount
+      setIsModalOpen(true); 
     }
-  }, [mounted]); // Depend on mounted state
+  }, [mounted]); 
 
   // Extract the pathname from asPath
   const pathname = router.asPath.split("?")[0];

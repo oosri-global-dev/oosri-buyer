@@ -5,6 +5,7 @@ import {
   REMOVE_FROM_CART,
   UPDATE_QUANTITY,
   CART,
+  LOADING_MODAL,
 } from "./types";
 
 export const Reducer = (state, { type, payload }) => {
@@ -33,6 +34,11 @@ export const Reducer = (state, { type, payload }) => {
       return {
         ...state,
         cart: state.cart.filter((item) => item._id !== payload._id),
+      };
+    case LOADING_MODAL:
+      return {
+        ...state,
+        loadingModal: payload || false,
       };
     case UPDATE_QUANTITY:
       return {

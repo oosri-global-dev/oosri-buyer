@@ -6,7 +6,12 @@ import {
   handleGetCartItems,
   handleRemoveFromCart,
 } from "@/network/cart";
-import { CURRENT_USER, TOAST_BOX, UPDATE_QUANTITY } from "./types";
+import {
+  CURRENT_USER,
+  LOADING_MODAL,
+  TOAST_BOX,
+  UPDATE_QUANTITY,
+} from "./types";
 import {
   getDataInCookie,
   storeDataInCookie,
@@ -18,6 +23,7 @@ export const MainContext = createContext({
   user: {},
   toastbox: { type: "", message: "", duration: 5000 },
   cart: [],
+  loadingModal: false,
 });
 
 export const MainProvider = ({ children }) => {
@@ -103,6 +109,11 @@ export const MainProvider = ({ children }) => {
       const remoteCart = res?.body?.cartItems;
 
       dispatch({
+        type: LOADING_MODAL,
+        payload: true,
+      });
+
+      dispatch({
         type: "CART",
         payload: remoteCart || [],
       });
@@ -172,6 +183,7 @@ export const MainProvider = ({ children }) => {
     removeFromCart,
     updateQuantity,
     dispatch,
+    loadingModal: state.loadingModal,
   };
 
   return <MainContext.Provider value={value}>{children}</MainContext.Provider>;
