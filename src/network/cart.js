@@ -39,3 +39,14 @@ export const handleGetCartItems = async (cartKey) => {
   const { data } = await instance.get("/buyer/cart", { params });
   return data;
 };
+
+export const handleMergeUserCartWithCartKey = async (payload, token) => {
+  const { data } = await instance.post(`/buyer/cart/merge`, payload, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return data;
+};

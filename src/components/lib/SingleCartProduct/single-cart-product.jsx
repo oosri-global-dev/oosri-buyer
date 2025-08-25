@@ -42,7 +42,7 @@ export default function SingleCartProduct({
           alignItems="flex-start"
         >
           <p className="product__name">{item.productName}</p>
-          <p className="product__discounted__price">{item.discountedPrice}</p>
+          <p className="product__discounted__price">{item.previousPrice}</p>
           <div
             className="remove__box"
             onClick={() => {
@@ -62,7 +62,7 @@ export default function SingleCartProduct({
         justifyContent="space-evenly"
       >
         <p className="product__price">
-          {nairaFormatter.format(item?.price || 0)}
+          {nairaFormatter.format(item?.productPrice || item?.price || 0)}
         </p>
         <FlexibleDiv className="right__box__controls">
           <p

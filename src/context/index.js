@@ -58,11 +58,7 @@ export const MainProvider = ({ children }) => {
     }
   };
 
-  const removeFromCart = async (
-    item,
-    setIsLoadingBtn,
-    setModalLoadingBtn = false
-  ) => {
+  const removeFromCart = async (item, setIsLoadingBtn, setModalLoadingBtn) => {
     const cartKey = getDataInCookie("public__cart__key");
 
     setIsLoadingBtn(true);
@@ -92,7 +88,7 @@ export const MainProvider = ({ children }) => {
       });
     } finally {
       setIsLoadingBtn(false);
-      setModalLoadingBtn?.(false); // Optional chaining for safety
+      setModalLoadingBtn?.(false);
     }
   };
 
@@ -164,13 +160,18 @@ export const MainProvider = ({ children }) => {
   useEffect(() => {
     const userToken = getDataInCookie("access_token");
     const publicCartKey = getDataInCookie("public__cart__key");
-    if (userToken) {
+
+    if (userToken && _.isEmpty(state.user)) {
+      //update user
       handleUpdateCurrentUser();
+
+      //update cart items
+      handleUpdateCartItemsInContext();
     }
 
     //if user is not logged in
     if (_.isEmpty(state.user)) {
-      if (!publicCartKey) {
+      if (!publicCartKey && !userToken) {
         handleGenerateCartKeyForVisitor();
       } else {
         //update the cart

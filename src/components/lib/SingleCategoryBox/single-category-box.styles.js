@@ -61,8 +61,11 @@ export const SingleCategoryBoxWrapper = styled(FlexibleDiv)`
 
   /* media query for mobiles */
   @media (max-width: 430px) {
-    flex-basis: 32%;
+    flex-basis: auto;
+    min-width: 30%;
     height: fit-content;
+    border: 0.5px solid rgba(0, 0, 0, 0.2);
+    box-shadow: none;
 
     .category__image {
       height: 75px;

@@ -7,7 +7,6 @@ import TextField from "@/components/lib/TextField";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import Link from "next/link";
 import { useState } from "react";
-import AuthWrapper from "@/components/layouts/AuthWrapper/auth-wrapper";
 import { loginUser } from "@/network/auth";
 import { validatePassword } from "@/data-helpers/validator";
 import toast, { Toaster } from "react-hot-toast";
@@ -15,12 +14,13 @@ import { useMainContext } from "@/context";
 import { TOAST_BOX } from "@/context/types";
 import { useRouter } from "next/router";
 import { storeDataInCookie } from "@/data-helpers/auth-session";
+import { loginActions } from "@/utils/user-actions";
 
 export default function Login() {
   const [form] = Form.useForm();
   const [loadingBtn, setLoadingBtn] = useState(false);
   const { dispatch } = useMainContext();
-  const { push } = useRouter();
+  const { push, query } = useRouter();
 
   const handleLoginSubmit = async (values) => {
     setLoadingBtn(true);
@@ -44,8 +44,18 @@ export default function Login() {
       storeDataInCookie("access_token", res?.body?.accessToken);
       storeDataInCookie("refresh_token", res?.body?.refreshToken);
 
-      //message
-      window.open(`/`, "_self");
+      //perform actions from url
+      if (query?.action) {
+        const action = loginActions[query?.action];
+        await action(res?.body?.accessToken);
+      }
+
+      //route to 'from' path if exists
+      if (query?.action) {
+        window.open(`${query?.from}`, "_self");
+      } else {
+        window.open(`/`, "_self");
+      }
     } catch (err) {
       dispatch({
         type: TOAST_BOX,
@@ -67,8 +77,6 @@ export default function Login() {
 
       setLoadingBtn(false);
     }
-
-
   };
 
   return (
