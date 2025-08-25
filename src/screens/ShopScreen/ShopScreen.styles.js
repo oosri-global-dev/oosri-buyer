@@ -134,7 +134,13 @@ export const ShopPageWrapper = styled(FlexibleDiv)`
       max-width: initial;
       align-items: flex-start;
       grid-auto-rows: 350px;
-      overflow: hidden;
+      /* overflow: hidden; */
+
+      @media (max-width: 1300px) {
+        .card__image {
+          height: 180px;
+        }
+      }
     }
   }
 
@@ -158,7 +164,6 @@ export const ShopPageWrapper = styled(FlexibleDiv)`
   .pagination__wrapper {
     width: 100%;
     height: 100px;
-    background: red;
   }
 
   @media (max-width: 600px) {

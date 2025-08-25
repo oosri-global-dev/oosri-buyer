@@ -92,11 +92,32 @@ export const MainProvider = ({ children }) => {
     }
   };
 
-  const updateQuantity = (item, quantity) => {
-    dispatch({
-      type: UPDATE_QUANTITY,
-      payload: { ...item, quantity },
-    });
+  const updateQuantity = async (item, quantity, setIsLoadingBtn = null) => {
+    const cartKey = getDataInCookie("public__cart__key");
+    setIsLoadingBtn(true);
+
+    //api to update prouct quantity before dispatching
+    try {
+      const res = await handleAddToCart({
+        items: [{ productId: item?._id, quantity }],
+        ...(_.isEmpty(state.user) && { cartKey }), //add cartkey is user is empty
+      });
+
+      dispatch({
+        type: UPDATE_QUANTITY,
+        payload: { ...item, quantity },
+      });
+    } catch (err) {
+      dispatch({
+        type: TOAST_BOX,
+        payload: {
+          type: "error",
+          message: err?.response?.data?.message || "Sorry, an error occured",
+        },
+      });
+    } finally {
+      setIsLoadingBtn(false);
+    }
   };
 
   const handleUpdateCartItemsInContext = async (cartKey) => {

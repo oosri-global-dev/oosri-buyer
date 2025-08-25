@@ -1,4 +1,5 @@
 import "@/styles/globals.css";
+import "../styles/pagination.css";
 import "@/styles/vars.css";
 import "@/styles/nprogress-custom.css";
 import Head from "next/head";
