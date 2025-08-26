@@ -1,10 +1,10 @@
 .react__custom__pagination {
-  display: flex !important;
-  list-style: none !important;
-  padding: 0 !important;
-  margin-top: 20px !important;
-  justify-content: center !important; 
-  width: 100% !important; 
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+  justify-content: center; 
+  width: 100%; 
 }
 
 .react__custom__pagination li {
@@ -14,13 +14,13 @@
 }
 
 .react__custom__pagination li a {
-  display: block !important;
-  padding: 8px 12px !important;
-  border: 1px solid #ddd !important;
-  border-radius: 4px !important;
-  color: var(--orrsiPrimary) !important;
-  text-decoration: none !important;
-  transition: background-color 0.3s !important;
+  display: block;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  color: var(--orrsiPrimary);
+  text-decoration: none;
+  transition: background-color 0.3s;
   font-family: "Inter", sans-serif !important;
 }
 
@@ -29,15 +29,15 @@
 }
 
 .react__custom__pagination li.active a {
-  background-color: var(--orrsiPrimary) !important;
-  color: white !important;
-  border-color: var(--orrsiPrimary) !important;
+  background-color: var(--orrsiPrimary);
+  color: white;
+  border-color: var(--orrsiPrimary);
 }
 
 .react__custom__pagination li.disabled a {
-  color: #6c757d !important;
-  pointer-events: none !important;
-  background-color: #f8f9fa !important;
+  color: #6c757d;
+  pointer-events: none;
+  background-color: #f8f9fa;
 }
 
 /* Desktop specific styles */
