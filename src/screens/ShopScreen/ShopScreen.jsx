@@ -282,7 +282,7 @@ export default function ShopPage() {
                   pageCount={pageCount}
                   previousLabel="<"
                   renderOnZeroPageCount={null}
-                  containerClassName="pagination"
+                  containerClassName="react__custom__pagination"
                   activeClassName="active"
                   pageLinkClassName="page-num"
                   previousLinkClassName="page-num"
