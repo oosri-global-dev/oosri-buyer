@@ -278,13 +278,16 @@ export default function ShopPage() {
                   breakLabel="..."
                   nextLabel=">"
                   onPageChange={handlePageClick}
+                  pageRangeDisplayed={5}
                   pageCount={pageCount}
                   previousLabel="<"
+                  renderOnZeroPageCount={null}
                   containerClassName="react__custom__pagination"
                   activeClassName="active"
                   pageLinkClassName="page-num"
                   previousLinkClassName="page-num"
                   nextLinkClassName="page-num"
+                  forcePage={currentPage - 1}
                 />
               </FlexibleDiv>
             )}

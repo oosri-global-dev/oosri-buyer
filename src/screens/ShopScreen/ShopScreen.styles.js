@@ -164,6 +164,55 @@ export const ShopPageWrapper = styled(FlexibleDiv)`
   .pagination__wrapper {
     width: 100%;
     height: 100px;
+
+    .react__custom__pagination {
+      display: flex;
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .react__custom__pagination li {
+      margin: 0 5px;
+      cursor: pointer;
+      font-family: "Inter", sans-serif !important;
+    }
+
+    .react__custom__pagination li a {
+      display: block;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      color: var(--orrsiPrimary);
+      text-decoration: none;
+      transition: background-color 0.3s;
+      font-family: "Inter", sans-serif !important;
+    }
+
+    .react__custom__pagination li a:hover {
+      background-color: #e9ecef;
+    }
+
+    .react__custom__pagination li.active a {
+      background-color: var(--orrsiPrimary);
+      color: white;
+      border-color: var(--orrsiPrimary);
+    }
+
+    .react__custom__pagination li.disabled a {
+      color: #6c757d;
+      pointer-events: none;
+      background-color: #f8f9fa;
+    }
+
+    /* Desktop specific styles */
+    @media (min-width: 768px) {
+      .react__custom__pagination {
+        justify-content: center !important;
+      }
+    }
   }
 
   @media (max-width: 600px) {
