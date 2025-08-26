@@ -1,4 +1,4 @@
-.pagination {
+.react__custom__pagination {
   display: flex;
   list-style: none;
   padding: 0;
@@ -7,13 +7,13 @@
   width: 100%; 
 }
 
-.pagination li {
+.react__custom__pagination li {
   margin: 0 5px;
   cursor: pointer;
   font-family: "Inter", sans-serif !important;
 }
 
-.pagination li a {
+.react__custom__pagination li a {
   display: block;
   padding: 8px 12px;
   border: 1px solid #ddd;
@@ -24,17 +24,17 @@
   font-family: "Inter", sans-serif !important;
 }
 
-.pagination li a:hover {
+.react__custom__pagination li a:hover {
   background-color: #e9ecef;
 }
 
-.pagination li.active a {
+.react__custom__pagination li.active a {
   background-color: var(--orrsiPrimary);
   color: white;
   border-color: var(--orrsiPrimary);
 }
 
-.pagination li.disabled a {
+.react__custom__pagination li.disabled a {
   color: #6c757d;
   pointer-events: none;
   background-color: #f8f9fa;

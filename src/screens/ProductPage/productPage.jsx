@@ -33,7 +33,8 @@ function NoOfProductReviews({ numOfReviews }) {
 
 export default function ProductPage({ product, loading, relatedProducts }) {
   const { push, query } = useRouter();
-  const { cart, addToCart, removeFromCart, updateQuantity } = useMainContext();
+  const { cart, addToCart, removeFromCart, updateQuantity, dispatch } =
+    useMainContext();
   const [isLoadingBtn, setIsLoadingBtn] = useState(false);
   const [idxOfSelectedImage, setIdxOfSelectedImage] = useState(0);
   const [selectedImage, setSelectedImage] = useState("");
@@ -273,12 +274,22 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                   width="fit-content"
                   onClick={async () => {
                     if (numOfProduct > 1 && !isLoadingDecrease) {
-                      await updateQuantity(
-                        product,
-                        numOfProduct - 1,
-                        setIsLoadingDecrease
-                      );
-                      setNumOfProduct(numOfProduct - 1);
+                      if (productInCart) {
+                        await updateQuantity(
+                          product,
+                          numOfProduct - 1,
+                          setIsLoadingDecrease
+                        );
+                        setNumOfProduct(numOfProduct - 1);
+                      } else {
+                        dispatch({
+                          type: "TOAST_BOX",
+                          payload: {
+                            type: "error",
+                            message: "Sorry, item is not in cart.",
+                          },
+                        });
+                      }
                     }
                   }}
                 >
@@ -294,12 +305,22 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                   width="fit-content"
                   onClick={async () => {
                     if (!isLoadingIncrease) {
-                      await updateQuantity(
-                        product,
-                        numOfProduct + 1,
-                        setIsLoadingIncrease
-                      );
-                      setNumOfProduct(numOfProduct + 1);
+                      if (productInCart) {
+                        await updateQuantity(
+                          product,
+                          numOfProduct + 1,
+                          setIsLoadingIncrease
+                        );
+                        setNumOfProduct(numOfProduct + 1);
+                      } else {
+                        dispatch({
+                          type: "TOAST_BOX",
+                          payload: {
+                            type: "error",
+                            message: "Sorry, item is not in cart.",
+                          },
+                        });
+                      }
                     }
                   }}
                 >
@@ -327,12 +348,12 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                     removeFromCart(product, setIsLoadingBtn);
                   } else {
                     addToCart(
-                      { product, quantity: numOfProduct, _id: product?.Id },
+                      { ...product, quantity: numOfProduct },
                       setIsLoadingBtn
                     );
                   }
                 }}
-                isLoading={isLoadingBtn}
+                loading={isLoadingBtn}
               >
                 {productInCart ? "Remove from Cart" : "Add to Cart"}
               </Button>
