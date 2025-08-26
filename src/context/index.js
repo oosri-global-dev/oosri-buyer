@@ -92,7 +92,11 @@ export const MainProvider = ({ children }) => {
     }
   };
 
-  const updateQuantity = async (item, quantity, setIsUpdatingQuantity = null) => {
+  const updateQuantity = async (
+    item,
+    quantity,
+    setIsUpdatingQuantity = null
+  ) => {
     const cartKey = getDataInCookie("public__cart__key");
     setIsUpdatingQuantity?.(true);
 
