@@ -15,17 +15,25 @@ export const ProductPageWrapper = styled(FlexibleDiv)`
 
       .image__section {
         width: fit-content;
-        img {
+        position: relative;
+
+        .images__wrapper {
           width: 80px;
           height: 75px;
-          object-fit: cover;
+          position: relative;
           cursor: pointer;
-          margin-left: auto;
-          margin-right: auto;
-        }
+          box-sizing: border-box;
 
-        .selected__image {
-          border: 2px solid var(--orrsiPrimary);
+          .selected__image {
+            border: 2px solid var(--orrsiPrimary);
+            overflow: hidden;
+            box-sizing: border-box;
+
+            img {
+              margin-left: auto;
+              margin-right: auto;
+            }
+          }
         }
       }
 

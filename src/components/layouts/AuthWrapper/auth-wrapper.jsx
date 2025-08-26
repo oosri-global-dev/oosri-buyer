@@ -10,9 +10,7 @@ import { useRouter } from "next/router";
 export default function AuthWrapper({ children, noFooter, isAuth }) {
   const [width, height] = useWindowSize();
   const [removeHeader, setRemoveHeader] = useState(false);
-  const {
-    state: { user },
-  } = useMainContext();
+  const { user } = useMainContext();
   const { push } = useRouter();
 
   useEffect(() => {

@@ -5,17 +5,64 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
   flex-direction: column;
   flex-basis: 18.5%;
   overflow: hidden;
-  margin-bottom: 30px;
   position: relative;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  height: 100%;
+  padding: 6px;
+  border-radius: 15px;
+  box-sizing: border-box;
+
+  .add-to-cart-btn {
+    visibility: hidden;
+    opacity: 0;
+    transition: all 0.3s ease-in-out;
+  }
+
+  .loading-btn {
+    visibility: visible;
+    background-color: var(--orrsiPrimary);
+    border: none !important;
+  }
+
+  .remove-from-cart-btn {
+    visibility: visible;
+    opacity: 1;
+    transition: all 0.3s ease-in-out;
+
+    &:hover {
+      border: none !important;
+    }
+  }
+
+  &:hover {
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+    .add-to-cart-btn {
+      visibility: visible;
+      opacity: 1;
+    }
+    .card__image img {
+      transform: scale(1.05);
+    }
+  }
+
+  .card__wrap {
+    width: 100%;
+  }
 
   .card__image {
     width: 100%;
     object-fit: cover;
-    height: 220px;
+    height: 185px;
     border-radius: 15px;
     cursor: pointer;
     position: relative;
     overflow: hidden;
+
+    img {
+      transition: transform 0.3s ease-in-out;
+    }
   }
 
   .product__info {
@@ -29,11 +76,16 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
       font-size: 0.9rem;
       font-weight: 500;
       margin: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .likes__wrapper {
       display: flex;
-      justify-content: flex-end;
+      justify-content: flex-start;
       align-items: center;
       height: fit-content;
       width: 85px;
@@ -130,10 +182,7 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
 
     .product__info {
       .product__name {
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        width: 150px;
-        overflow: hidden;
+        /* Removed specific width and white-space: nowrap to allow two lines */
       }
 
       .likes__wrapper {
@@ -156,10 +205,7 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
 
     .product__info {
       .product__name {
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        width: 130px;
-        overflow: hidden;
+        /* Removed specific width and white-space: nowrap to allow two lines */
       }
 
       .likes__wrapper {
@@ -179,11 +225,12 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
 
   /* media query for mobiles */
   @media (max-width: 440px) {
-    flex-basis: 48%;
+    margin-bottom: 20px;
+    flex-basis: 44%;
     gap: 3px;
 
     .card__image {
-      height: 200px;
+      height: 160px;
 
       @media (max-width: 280px) {
         height: 140px;
@@ -193,10 +240,7 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
     .product__info {
       height: fit-content;
       .product__name {
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        width: 130px;
-        overflow: hidden;
+        /* Removed specific width and white-space: nowrap to allow two lines */
       }
 
       .likes__wrapper {
@@ -214,6 +258,7 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
     }
 
     .seller__info {
+      margin-bottom: 18px;
       .seller__text {
         margin: 0;
       }
@@ -239,6 +284,11 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
           width: 14px;
         }
       }
+    }
+
+    .add-to-cart-btn {
+      visibility: visible;
+      opacity: 1;
     }
   }
 `;

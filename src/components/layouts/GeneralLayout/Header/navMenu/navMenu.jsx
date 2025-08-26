@@ -1,25 +1,30 @@
 import { FlexibleDiv } from "@/components/lib/Box/styles";
 import { NavMenuWrapper } from "./navMenu.styles";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
 export default function NavMenu({ menuItems }) {
   const [checked, setChecked] = useState(false);
   const { asPath } = useRouter();
+  const navMenuRef = useRef(null);
 
   useEffect(() => {
-    if (checked) {
-      //Apply style to disable scrolling background elements
-      document.getElementsByTagName("BODY")[0].style.overflow = "hidden";
-    } else {
-      document.getElementsByTagName("BODY")[0].style.overflow = "scroll";
+    function handleClickOutside(event) {
+      if (navMenuRef.current && !navMenuRef.current.contains(event.target)) {
+        setChecked(false);
+      }
     }
-  }, [checked]);
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [navMenuRef]);
 
   return (
-    <NavMenuWrapper inputChecked={checked}>
-      <label for="nav-check">
+    <NavMenuWrapper inputChecked={checked} ref={navMenuRef}>
+      <label htmlFor="nav-check">
         <input
           type="checkbox"
           className="nav__menu__input"
@@ -39,8 +44,9 @@ export default function NavMenu({ menuItems }) {
             key={idx}
             href={sgn.url}
             id={`${asPath === sgn.url ? "active__link" : ""}`}
+            onClick={() => setChecked(false)}
           >
-            <span onClick={() => setChecked(false)}>{sgn.link}</span>
+            <span>{sgn.link}</span>
           </Link>
         ))}
       </FlexibleDiv>

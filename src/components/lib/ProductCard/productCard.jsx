@@ -8,6 +8,9 @@ import "react-loading-skeleton/dist/skeleton.css";
 import { nairaFormatter } from "@/data-helpers/hooks";
 import { useRouter } from "next/router";
 import Image from "next/image";
+import Button from "../Button";
+import { useMainContext } from "@/context";
+import { useState } from "react";
 
 export function LoadingCard({ key }) {
   return (
@@ -31,71 +34,116 @@ export function LoadingCard({ key }) {
 export default function ProductCard({ card, key, isLoading = false }) {
   const maxLikes = ["", "", "", "", ""];
   const { push } = useRouter();
+  const { cart, addToCart, removeFromCart } = useMainContext();
+  const [isLoadingBtn, setIsLoadingBtn] = useState(false);
+
+  const isProductInCart = (productId) => {
+    return cart.some((item) => item._id === productId);
+  };
 
   if (isLoading) {
     return <LoadingCard key={key} />;
   } else {
     return (
       <ProductCardWrapper key={key}>
-        <div className="card__image">
-          <Image
-            src={card?.productImages[0]}
-            alt={`${card?._id} product image`}
-            layout="fill"
-            objectFit="cover"
-            onClick={() => push(`/product/${card?._id}`)}
-          />
-        </div>
-
-        <FlexibleDiv
-          className="product__info"
-          justifyContent="space-between"
-          flexDir="row"
-          flexWrap="nowrap"
-          onClick={() => push(`/product/${card?._id}`)}
-        >
-          <p className="product__name">{card?.productName || ""}</p>
-          <div className="likes__wrapper">
-            {maxLikes.map((like, idx) => (
-              <LikeIcon
-                className={`= ${maxLikes.length}`}
-                size={10}
-                fill={`${
-                  card?.productRating >= idx + 1 ? "#FCCB1B" : "#BDBDBD"
-                }`}
-                key={idx}
-              />
-            ))}
-            <p className="likes__number">{card?.productRating || 0}.0</p>
+        <div className="card__wrap">
+          <div className="card__image">
+            <Image
+              src={card?.productImages[0]}
+              alt={`${card?._id} product image`}
+              layout="fill"
+              objectFit="cover"
+              onClick={() => push(`/product/${card?._id}`)}
+            />
           </div>
-        </FlexibleDiv>
-        {/* <p className="phone__status">{card.deviceStatus}</p> */}
-        <FlexibleDiv className="product__price__section" justifyContent="start">
-          <p className="product__price">
-            {nairaFormatter.format(card?.productPrice || 0)}
-          </p>
-          {card?.previousPrice && (
-            <p className="discounted__price">
-              {nairaFormatter.format(card?.previousPrice || 0)}
-            </p>
-          )}
-        </FlexibleDiv>
 
-        <FlexibleDiv className="favorite__wrapper">
-          <HeartIcon
-            size={18}
-            fill={card.isFavorite ? "var(--orrsiPrimary)" : "transparent"}
-            onClick={() => {}}
-          />
-        </FlexibleDiv>
-        <FlexibleDiv className="seller__info" justifyContent="flex-start">
-          <p className="seller__text">
-            From <span>{card?.sellerName || ""}</span>
-          </p>
-          {/* <ReactCountryFlag countryCode={card.countryAbbrv} /> */}
-        </FlexibleDiv>
+          <FlexibleDiv
+            className="product__info"
+            justifyContent="flex-start"
+            alignItems="flex-start"
+            flexDir="column"
+            flexWrap="nowrap"
+            gap="4px"
+            onClick={() => push(`/product/${card?._id}`)}
+          >
+            <p className="product__name">{card?.productName || ""}</p>
+            <div className="likes__wrapper">
+              {maxLikes.map((like, idx) => (
+                <LikeIcon
+                  className={`= ${maxLikes.length}`}
+                  size={10}
+                  fill={`${
+                    card?.productRating >= idx + 1 ? "#FCCB1B" : "#BDBDBD"
+                  }`}
+                  key={idx}
+                />
+              ))}
+              <p className="likes__number">{card?.productRating || 0}.0</p>
+            </div>
+          </FlexibleDiv>
+          {/* <p className="phone__status">{card.deviceStatus}</p> */}
+          <FlexibleDiv
+            className="product__price__section"
+            justifyContent="start"
+          >
+            <p className="product__price">
+              {nairaFormatter.format(card?.productPrice || 0)}
+            </p>
+            {card?.previousPrice && (
+              <p className="discounted__price">
+                {nairaFormatter.format(card?.previousPrice || 0)}
+              </p>
+            )}
+          </FlexibleDiv>
+
+          <FlexibleDiv className="favorite__wrapper">
+            <HeartIcon
+              size={18}
+              fill={card.isFavorite ? "var(--orrsiPrimary)" : "transparent"}
+              onClick={() => {}}
+            />
+          </FlexibleDiv>
+          <FlexibleDiv className="seller__info" justifyContent="flex-start">
+            <p className="seller__text">
+              From <span>{card?.sellerName || ""}</span>
+            </p>
+            {/* <ReactCountryFlag countryCode={card.countryAbbrv} /> */}
+          </FlexibleDiv>
+        </div>
+        {isProductInCart(card?._id) ? (
+          <Button
+            width="100%"
+            color="#000"
+            backgroundColor="var(--orrsiSecondary)"
+            hoverBg="var(--orrsiPrimary)"
+            borderColor="#fff"
+            hoverColor="#fff"
+            radius="5px"
+            height="40px"
+            fontSize="0.85rem"
+            border="1px solid #000"
+            loading={isLoadingBtn}
+            onClick={() => removeFromCart(card, setIsLoadingBtn)}
+            className={!isLoadingBtn ? "remove-from-cart-btn" : "loading-btn"}
+          >
+            Remove from cart
+          </Button>
+        ) : (
+          <Button
+            width="100%"
+            color="var(--orrsiWhite)"
+            backgroundColor="var(--orrsiPrimary)"
+            radius="5px"
+            height="40px"
+            fontSize="0.85rem"
+            loading={isLoadingBtn}
+            onClick={() => addToCart(card, setIsLoadingBtn)}
+            className={!isLoadingBtn ? "add-to-cart-btn" : "loading-btn"}
+          >
+            Add to cart
+          </Button>
+        )}
       </ProductCardWrapper>
     );
   }
 }
-

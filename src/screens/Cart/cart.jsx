@@ -1,43 +1,36 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState } from "react";
 import { CartPageWrapper } from "./cart.styles";
 import { FlexibleDiv } from "@/components/lib/Box/styles";
 import { IoCartOutline as CartIcon } from "react-icons/io5";
 import Button from "@/components/lib/Button";
 import ProductCarousel from "@/components/lib/ProductCarousel/productCarousel";
-import { MainContext } from "@/context";
-import { PAGE_TITLE } from "@/context/types";
+import { useMainContext } from "@/context";
 import SingleCartProduct from "@/components/lib/SingleCartProduct/single-cart-product";
-import { cartItemsHelper } from "@/data-helpers/cart-helper";
-import RemoveFromCartModal from "@/components/lib/Modals/remove-from-cart";
+import RemoveFromCartModal from "@/components/lib/RemoveFromCartModal/remove-from-cart";
+import { nairaFormatter } from "@/data-helpers/hooks";
+import { useRouter } from "next/router";
 
 export default function CartPage() {
-  const [cartIsEmpty, setCartIsEmpty] = useState(false);
-  const { dispatch } = useContext(MainContext);
+  const { cart, dispatch, user } = useMainContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const { push, pathname } = useRouter();
+  const cartIsEmpty = cart.length === 0;
 
-  useEffect(() => {
-    if (!cartIsEmpty) {
-      async function SetPageTitle() {
-        await dispatch({
-          type: PAGE_TITLE,
-          payload: "My Cart (3 Items)",
-        });
-      }
-      SetPageTitle();
-    } else {
-      async function SetPageTitle() {
-        await dispatch({
-          type: PAGE_TITLE,
-          payload: "My Cart",
-        });
-      }
-      SetPageTitle();
-    }
-  }, [cartIsEmpty]);
+  const subTotal = cart.reduce(
+    (acc, item) => acc + (item.price || item.productPrice || 0) * item.quantity,
+    0
+  );
+  const shippingFee = 0;
+  const total = subTotal + shippingFee;
 
   return (
     <CartPageWrapper>
-      <RemoveFromCartModal isOpen={isModalOpen} setIsOpen={setIsModalOpen} />
+      <RemoveFromCartModal
+        isOpen={isModalOpen}
+        setIsOpen={setIsModalOpen}
+        item={selectedItem}
+      />
       {cartIsEmpty ? (
         <FlexibleDiv
           className="empty__cart__box"
@@ -67,8 +60,13 @@ export default function CartPage() {
       ) : (
         <>
           <FlexibleDiv className="cart__section">
-            {cartItemsHelper.map((item, idx) => (
-              <SingleCartProduct item={item} key={idx} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
+            {cart.map((item, idx) => (
+              <SingleCartProduct
+                item={item}
+                key={idx}
+                setIsModalOpen={setIsModalOpen}
+                setSelectedItem={setSelectedItem}
+              />
             ))}
             <FlexibleDiv
               className="summary__box"
@@ -86,10 +84,11 @@ export default function CartPage() {
               >
                 <h2>Cart Summary</h2>
                 <p className="shipping__fee__text">
-                  Shipping Fee: <span>N500</span>
+                  Shipping Fee:{" "}
+                  <span>{nairaFormatter.format(shippingFee || 0)}</span>
                 </p>
                 <p className="shipping__fee__text">
-                  Sub Total: <span>N500,000</span>
+                  Sub Total: <span>{nairaFormatter.format(subTotal || 0)}</span>
                 </p>
                 <Button
                   backgroundColor="var(--orrsiPrimary)"
@@ -97,8 +96,13 @@ export default function CartPage() {
                   height="40px"
                   color="var(--orrsiWhite)"
                   padding="0px 45px"
+                  onClick={() => {
+                    if (_.isEmpty(user)) {
+                      push(`/login?from=${pathname}&action=MERGE_CART`);
+                    }
+                  }}
                 >
-                  Checkout (N550,000)
+                  Checkout ({nairaFormatter.format(total)})
                 </Button>
               </FlexibleDiv>
             </FlexibleDiv>
@@ -106,9 +110,9 @@ export default function CartPage() {
         </>
       )}
 
-      <FlexibleDiv>
+      {/* <FlexibleDiv>
         <ProductCarousel carouselTitle={`You may also like`} />
-      </FlexibleDiv>
+      </FlexibleDiv> */}
     </CartPageWrapper>
   );
 }

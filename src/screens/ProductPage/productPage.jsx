@@ -1,16 +1,17 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import {
   ProductPageWrapper,
   ProductBreadcrumbsWrapper,
 } from "./productPage.styles";
 import { FlexibleDiv, FlexibleSection } from "@/components/lib/Box/styles";
-import { iPhone14ProMax } from "@/data-helpers/product-page-helper";
 import { AiFillStar as LikeIcon } from "react-icons/ai";
 import { useState } from "react";
+import { useMainContext } from "@/context";
+import _ from "lodash";
 import { FiPlus as PlusIcon } from "react-icons/fi";
 import { HiOutlineMinusSmall as MinusIcon } from "react-icons/hi2";
 import Button from "@/components/lib/Button";
-import { Tabs, theme } from "antd";
+import { Tabs, theme, Spin } from "antd";
 import StickyBox from "react-sticky-box";
 import ProductDescription from "./sections/product-desc/productDescription";
 import ProductReviewBox from "./sections/product-reviews/productReview";
@@ -19,6 +20,7 @@ import ProductsGridBox from "../HomeScreens/Homepage/ProductsGridBox/productsGri
 import { useRouter } from "next/router";
 import OorsiLoader from "@/components/lib/Loader/loader";
 import { nairaFormatter } from "@/data-helpers/hooks";
+import Image from "next/image";
 
 function NoOfProductReviews({ numOfReviews }) {
   return (
@@ -31,9 +33,26 @@ function NoOfProductReviews({ numOfReviews }) {
 
 export default function ProductPage({ product, loading, relatedProducts }) {
   const { push, query } = useRouter();
+  const { cart, addToCart, removeFromCart, updateQuantity } = useMainContext();
+  const [isLoadingBtn, setIsLoadingBtn] = useState(false);
   const [idxOfSelectedImage, setIdxOfSelectedImage] = useState(0);
   const [selectedImage, setSelectedImage] = useState("");
   const [numOfProduct, setNumOfProduct] = useState(1);
+  const [isLoadingIncrease, setIsLoadingIncrease] = useState(false);
+  const [isLoadingDecrease, setIsLoadingDecrease] = useState(false);
+
+  const productInCart = useMemo(
+    () => cart.find((item) => item?._id === product?._id),
+    [cart, product]
+  );
+
+  useEffect(() => {
+    if (productInCart) {
+      setNumOfProduct(productInCart.quantity);
+    } else {
+      setNumOfProduct(1);
+    }
+  }, [productInCart]);
 
   // functions
   function getBreadcrumbArray(categoryName, productName) {
@@ -117,8 +136,8 @@ export default function ProductPage({ product, loading, relatedProducts }) {
 
   // SSR: use product prop
   useEffect(() => {
-    if (product && product.images && product.images.length > 0) {
-      setSelectedImage(product.images[0]);
+    if (product && product.productImages && product.productImages.length > 0) {
+      setSelectedImage(product.productImages[0]);
       setIdxOfSelectedImage(0);
     }
   }, [product]);
@@ -169,19 +188,22 @@ export default function ProductPage({ product, loading, relatedProducts }) {
             gap="20px"
           >
             <FlexibleDiv className="image__section" flexDir="column" gap="10px">
-              {product?.images?.map((sgn, idx) => (
-                <img
-                  src={sgn}
-                  className={`${
-                    idxOfSelectedImage === idx ? "selected__image" : ""
-                  }`}
-                  onClick={() => {
-                    setIdxOfSelectedImage(idx);
-                    setSelectedImage(sgn);
-                  }}
-                  alt={`phone__${idx}`}
-                  key={idx}
-                />
+              {product?.productImages?.map((sgn, idx) => (
+                <div key={idx} className="images__wrapper">
+                  <Image
+                    src={sgn}
+                    onClick={() => {
+                      setIdxOfSelectedImage(idx);
+                      setSelectedImage(sgn);
+                    }}
+                    className={`${
+                      idxOfSelectedImage === idx ? "selected__image" : ""
+                    }`}
+                    alt={`phone__${idx}`}
+                    fill
+                    objectFit="cover"
+                  />
+                </div>
               ))}
             </FlexibleDiv>
             <FlexibleDiv className="main__image__wrapper">
@@ -195,7 +217,7 @@ export default function ProductPage({ product, loading, relatedProducts }) {
               ) : (
                 <img
                   className="main__image"
-                  src={product?.images?.[0] || ""}
+                  src={product?.productImages?.[0] || ""}
                   alt={`main__1`}
                 />
               )}
@@ -244,26 +266,55 @@ export default function ProductPage({ product, loading, relatedProducts }) {
             {/* The carting options */}
             <FlexibleDiv className="cart__options" gap="15px">
               <FlexibleDiv className="product__num__selector" gap="16px">
-                <MinusIcon
+                <FlexibleDiv
                   className="icon__class"
-                  size={18}
-                  onClick={() => {
-                    if (numOfProduct > 1) {
+                  flexDir="row"
+                  flexWrap="nowrap"
+                  width="fit-content"
+                  onClick={async () => {
+                    if (numOfProduct > 1 && !isLoadingDecrease) {
+                      await updateQuantity(
+                        product,
+                        numOfProduct - 1,
+                        setIsLoadingDecrease
+                      );
                       setNumOfProduct(numOfProduct - 1);
                     }
                   }}
-                />
+                >
+                  {isLoadingDecrease ? (
+                    <Spin size="small" />
+                  ) : (
+                    <MinusIcon size={18} />
+                  )}
+                </FlexibleDiv>
                 <p>{numOfProduct < 10 ? `0${numOfProduct}` : numOfProduct}</p>
-                <PlusIcon
+                <FlexibleDiv
                   className="icon__class"
-                  size={18}
-                  onClick={() => setNumOfProduct(numOfProduct + 1)}
-                />
+                  width="fit-content"
+                  onClick={async () => {
+                    if (!isLoadingIncrease) {
+                      await updateQuantity(
+                        product,
+                        numOfProduct + 1,
+                        setIsLoadingIncrease
+                      );
+                      setNumOfProduct(numOfProduct + 1);
+                    }
+                  }}
+                >
+                  {isLoadingIncrease ? (
+                    <Spin size="small" />
+                  ) : (
+                    <PlusIcon size={18} />
+                  )}
+                </FlexibleDiv>
               </FlexibleDiv>
               <Button
                 backgroundColor="var(--orrsiPrimary)"
                 color="#fff"
                 className="checkout__btn"
+                onClick={() => push("/cart")}
               >
                 Checkout
               </Button>
@@ -271,8 +322,19 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                 backgroundColor="#fff"
                 color="var(--orrsiPrimary)"
                 className="cart__btn"
+                onClick={() => {
+                  if (productInCart) {
+                    removeFromCart(product, setIsLoadingBtn);
+                  } else {
+                    addToCart(
+                      { product, quantity: numOfProduct, _id: product?.Id },
+                      setIsLoadingBtn
+                    );
+                  }
+                }}
+                isLoading={isLoadingBtn}
               >
-                Add to Cart
+                {productInCart ? "Remove from Cart" : "Add to Cart"}
               </Button>
             </FlexibleDiv>
           </FlexibleDiv>

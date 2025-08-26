@@ -53,32 +53,27 @@ export const NavMenuWrapper = styled(FlexibleDiv)`
   }
 
   .nav__content__wrapper {
-    display: block;
-    position: fixed;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100vh;
-    margin: 0;
-    padding: 60px 20px;
-    box-sizing: border-box;
-    list-style: none;
+    display: ${({ inputChecked }) => (inputChecked ? "flex" : "none")};
+    flex-direction: column;
+    position: absolute;
+    top: 40px; 
+    left: 0;
+    width: 200px; 
+    padding: 10px;
     background-color: #eceff1;
     box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.4);
-    transition-duration: 0.25s;
+    border-radius: 5px;
     z-index: 4;
-  }
-
-  .nav__content__wrapper {
-    left: ${({ inputChecked }) => (inputChecked ? 0 : "")};
   }
 
   .nav__content__wrapper a {
     text-align: center;
-    padding: 20px;
+    padding: 15px 0;
     color: #555555;
     display: block;
     text-decoration: none;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .nav__content__wrapper #active__link {

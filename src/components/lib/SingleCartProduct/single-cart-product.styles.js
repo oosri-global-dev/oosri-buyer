@@ -17,10 +17,18 @@ export const SCProductWrapper = styled(FlexibleDiv)`
       width: 180px;
       height: 100%;
       display: flex;
+      position: relative;
+      object-fit: cover;
+      overflow: hidden;
+      border-radius: 10px;
+      cursor: pointer;
 
-      img {
-        width: 100%;
-        object-fit: fill;
+      &:hover {
+        img {
+          object-fit: fill;
+          transition: transform 0.3s ease-in-out;
+          transform: scale(1.05);
+        }
       }
     }
 

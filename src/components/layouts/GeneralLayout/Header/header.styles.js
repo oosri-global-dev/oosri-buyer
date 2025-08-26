@@ -70,6 +70,26 @@ export const HeaderWrapper = styled(FlexibleDiv)`
       cursor: pointer;
     }
 
+    .cart-icon-container {
+      position: relative;
+    }
+
+    .cart-badge {
+      position: absolute;
+      top: -5px;
+      right: -10px;
+      background-color: red;
+      color: white;
+      border-radius: 50%;
+      height: 16px;
+      width: 16px;
+      font-size: 8px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     .selected__icon {
       background: var(--orrsiPrimary);
       width: 30px;
@@ -153,6 +173,17 @@ export const HeaderWrapper = styled(FlexibleDiv)`
         gap: 10px;
         padding: 8px 0;
         border-radius: 10px;
+
+        span {
+          display: flex;
+          align-items: center;
+          width: 100%;
+          gap: 10px;
+
+          p {
+            line-height: normal;
+          }
+        }
 
         &:hover {
           background: rgba(18, 18, 18, 0.16);

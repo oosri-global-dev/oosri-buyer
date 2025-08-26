@@ -23,6 +23,7 @@ export const BreadcrumbWrapper = styled(FlexibleDiv)`
   .banner__wrapper {
     width: 100%;
     height: 120px;
+    position: relative;
 
     img {
       width: 100%;
