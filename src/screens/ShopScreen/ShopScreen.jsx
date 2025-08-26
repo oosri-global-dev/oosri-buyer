@@ -2,11 +2,10 @@ import Breadcrumb from "../../components/lib/Breadcrumb/breadcrumb";
 import { ShopPageWrapper } from "./ShopScreen.styles";
 import { FlexibleDiv } from "@/components/lib/Box/styles";
 import { useMemo, useState } from "react";
-import { Checkbox, Select, Tag, Spin, Alert, Modal, Button } from "antd";
+import { Checkbox, Select, Tag, Spin, Alert, Modal, Button, Pagination } from "antd";
 import ProductCard from "@/components/lib/ProductCard/productCard";
 import { useProductsQuery, useProductCategoriesQuery } from "@/network/product";
 import { FaFilter } from "react-icons/fa";
-import ReactPaginate from "react-paginate";
 
 export default function ShopPage() {
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -89,17 +88,17 @@ export default function ShopPage() {
     });
   }, [products, sliderPrice]);
 
-  const pageCount = products?.body?.totalPages || 0;
+  const totalProducts = products?.body?.total || 0;
 
-  const handlePageClick = (event) => {
+  const handlePageChange = (page, pageSize) => {
     window.scrollTo({
       top: 0,
       left: 0,
       behavior: "smooth",
     });
-    const newOffset = event.selected * itemsPerPage;
+    const newOffset = (page - 1) * pageSize;
     setItemOffset(newOffset);
-    setCurrentPage(event.selected + 1); // Update currentPage for forcePage
+    setCurrentPage(page);
   };
 
   const showFilterModal = () => {
@@ -272,22 +271,17 @@ export default function ShopPage() {
                 </>
               )}
             </FlexibleDiv>
-            {pageCount > 1 && (
+            {totalProducts > 0 && (
               <FlexibleDiv className="pagination__wrapper">
-                <ReactPaginate
-                  breakLabel="..."
-                  nextLabel=">"
-                  onPageChange={handlePageClick}
-                  pageRangeDisplayed={5}
-                  pageCount={pageCount}
-                  previousLabel="<"
-                  renderOnZeroPageCount={null}
-                  containerClassName="react__custom__pagination"
-                  activeClassName="active"
-                  pageLinkClassName="page-num"
-                  previousLinkClassName="page-num"
-                  nextLinkClassName="page-num"
-                  forcePage={currentPage - 1}
+                <Pagination
+                  current={currentPage}
+                  pageSize={itemsPerPage}
+                  total={totalProducts}
+                  onChange={handlePageChange}
+                  showSizeChanger={false}
+                  responsive
+                  showQuickJumper
+                  showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} items`}
                 />
               </FlexibleDiv>
             )}
