@@ -11,7 +11,7 @@ import _ from "lodash";
 import { FiPlus as PlusIcon } from "react-icons/fi";
 import { HiOutlineMinusSmall as MinusIcon } from "react-icons/hi2";
 import Button from "@/components/lib/Button";
-import { Tabs, theme } from "antd";
+import { Tabs, theme, Spin } from "antd";
 import StickyBox from "react-sticky-box";
 import ProductDescription from "./sections/product-desc/productDescription";
 import ProductReviewBox from "./sections/product-reviews/productReview";
@@ -38,6 +38,8 @@ export default function ProductPage({ product, loading, relatedProducts }) {
   const [idxOfSelectedImage, setIdxOfSelectedImage] = useState(0);
   const [selectedImage, setSelectedImage] = useState("");
   const [numOfProduct, setNumOfProduct] = useState(1);
+  const [isLoadingIncrease, setIsLoadingIncrease] = useState(false);
+  const [isLoadingDecrease, setIsLoadingDecrease] = useState(false);
 
   const productInCart = useMemo(
     () => cart.find((item) => item?._id === product?._id),
@@ -264,31 +266,49 @@ export default function ProductPage({ product, loading, relatedProducts }) {
             {/* The carting options */}
             <FlexibleDiv className="cart__options" gap="15px">
               <FlexibleDiv className="product__num__selector" gap="16px">
-                <MinusIcon
+                <FlexibleDiv
                   className="icon__class"
-                  size={18}
-                  onClick={() => {
-                    if (numOfProduct > 1) {
-                      if (productInCart) {
-                        updateQuantity(product, numOfProduct - 1);
-                      } else {
-                        setNumOfProduct(numOfProduct - 1);
-                      }
+                  flexDir="row"
+                  flexWrap="nowrap"
+                  width="fit-content"
+                  onClick={async () => {
+                    if (numOfProduct > 1 && !isLoadingDecrease) {
+                      await updateQuantity(
+                        product,
+                        numOfProduct - 1,
+                        setIsLoadingDecrease
+                      );
+                      setNumOfProduct(numOfProduct - 1);
                     }
                   }}
-                />
+                >
+                  {isLoadingDecrease ? (
+                    <Spin size="small" />
+                  ) : (
+                    <MinusIcon size={18} />
+                  )}
+                </FlexibleDiv>
                 <p>{numOfProduct < 10 ? `0${numOfProduct}` : numOfProduct}</p>
-                <PlusIcon
+                <FlexibleDiv
                   className="icon__class"
-                  size={18}
-                  onClick={() => {
-                    if (productInCart) {
-                      updateQuantity(product, numOfProduct + 1);
-                    } else {
+                  width="fit-content"
+                  onClick={async () => {
+                    if (!isLoadingIncrease) {
+                      await updateQuantity(
+                        product,
+                        numOfProduct + 1,
+                        setIsLoadingIncrease
+                      );
                       setNumOfProduct(numOfProduct + 1);
                     }
                   }}
-                />
+                >
+                  {isLoadingIncrease ? (
+                    <Spin size="small" />
+                  ) : (
+                    <PlusIcon size={18} />
+                  )}
+                </FlexibleDiv>
               </FlexibleDiv>
               <Button
                 backgroundColor="var(--orrsiPrimary)"

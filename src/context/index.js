@@ -92,9 +92,9 @@ export const MainProvider = ({ children }) => {
     }
   };
 
-  const updateQuantity = async (item, quantity, setIsLoadingBtn = null) => {
+  const updateQuantity = async (item, quantity, setIsUpdatingQuantity = null) => {
     const cartKey = getDataInCookie("public__cart__key");
-    setIsLoadingBtn(true);
+    setIsUpdatingQuantity?.(true);
 
     //api to update prouct quantity before dispatching
     try {
@@ -116,7 +116,7 @@ export const MainProvider = ({ children }) => {
         },
       });
     } finally {
-      setIsLoadingBtn(false);
+      setIsUpdatingQuantity?.(false);
     }
   };
 
