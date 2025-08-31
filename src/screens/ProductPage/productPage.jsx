@@ -41,12 +41,13 @@ export default function ProductPage({ product, loading, relatedProducts }) {
   const [idxOfSelectedImage, setIdxOfSelectedImage] = useState(0);
   const [selectedImage, setSelectedImage] = useState("");
   const [numOfProduct, setNumOfProduct] = useState(1);
+  const [isLoadingIncrease, setIsLoadingIncrease] = useState(false);
+  const [isLoadingDecrease, setIsLoadingDecrease] = useState(false);
   const [moreReviewsActive,setMoreReviewsActive]=useState(false)
   const [reviewData,setReviewData]=useState([])
   const[starData,setStarData]=useState([])
   const [activeTab, setActiveTab] = useState("1");
-  const [isLoadingIncrease, setIsLoadingIncrease] = useState(false);
-  const [isLoadingDecrease, setIsLoadingDecrease] = useState(false);
+
 
   const productInCart = useMemo(
     () => cart.find((item) => item?._id === product?._id),
@@ -87,12 +88,10 @@ export default function ProductPage({ product, loading, relatedProducts }) {
       <DefaultTabBar {...props} style={{ background: colorBgContainer }} />
     </StickyBox>
   );
-
   const handleMoreReviews=()=>{
     setMoreReviewsActive(true)
   }
 
- 
   // const reviews = [
   //   {
   //     reviewerName: "Mike Tyson",
@@ -145,18 +144,18 @@ export default function ProductPage({ product, loading, relatedProducts }) {
     }
   }, [product]);
 
-  const fetchReviews = async (id) => {
-    const data = await getAllReviews(id);
-    setReviewData(data?.body?.reviews)
-    console.log(data?.body?.ratingSummary)
-    setStarData(data?.body?.ratingSummary)
-  };
+    const fetchReviews = async (id) => {
+      const data = await getAllReviews(id);
+      setReviewData(data?.body?.reviews)
+      console.log(data?.body?.ratingSummary)
+      setStarData(data?.body?.ratingSummary)
+    };
 
-  useEffect(() => {
-     if (product?._id) {
-    fetchReviews(product._id);
-  }
-  }, [product]);
+    useEffect(() => {
+      if (product?._id) {
+      fetchReviews(product._id);
+      }
+    }, [product]);
 
   const handleBack=()=>{
     setMoreReviewsActive(false)
@@ -194,6 +193,9 @@ export default function ProductPage({ product, loading, relatedProducts }) {
       </ProductBreadcrumbsWrapper>
       {/* Breacrumb ends here */}
       <ProductPageWrapper>
+        {
+          !moreReviewsActive?
+          <>
         <FlexibleSection
           className="top__section"
           flexWrap="nowrap"
@@ -273,85 +275,6 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                 )}
                 <p>{product?.productRating || 0}.0</p>
               </FlexibleDiv>
-        {
-          !moreReviewsActive?
-        <>
-          <FlexibleSection
-            className="top__section"
-            flexWrap="nowrap"
-            alignItems="flex-start"
-          >
-            <FlexibleDiv
-              flexDir="row"
-              flexWrap="nowrap"
-              width="100%"
-              justifyContent="space-between"
-              alignItems="flex-start"
-              className="top__left__section"
-              gap="20px"
-            >
-              <FlexibleDiv className="image__section" flexDir="column" gap="10px">
-                {product?.productImages?.map((sgn, idx) => (
-                  <img
-                    src={sgn}
-                    className={`${
-                      idxOfSelectedImage === idx ? "selected__image" : ""
-                    }`}
-                    onClick={() => {
-                      setIdxOfSelectedImage(idx);
-                      setSelectedImage(sgn);
-                    }}
-                    alt={`phone__${idx}`}
-                    key={idx}
-                  />
-                ))}
-              </FlexibleDiv>
-              <FlexibleDiv className="main__image__wrapper">
-                {/* This will handle loader for the product image */}
-                {selectedImage ? (
-                  <img
-                    className="main__image"
-                    src={selectedImage}
-                    alt={`main__1`}
-                  />
-                ) : (
-                  <img
-                    className="main__image"
-                    src={product?.productImages?.[0] || ""}
-                    alt={`main__1`}
-                  />
-                )}
-              </FlexibleDiv>
-            </FlexibleDiv>
-            <FlexibleDiv
-              className="top__right__section"
-              flexDir="column"
-              alignItems="flex-start"
-              justifyContent="flex-start"
-              gap="10px"
-            >
-              <p className="item__name">{product?.productName}</p>
-              <h1 className="item__price">
-                {nairaFormatter.format(product?.regularPrice)}
-              </h1>
-              <FlexibleDiv
-                flexDir="row"
-                justifyContent="flex-start"
-                alignItems="flex-start"
-                gap="8px"
-              >
-                <FlexibleDiv
-                  className="like__wrapper__box"
-                  justifyContent="flex-start"
-                  flexWrap="nowrap"
-                >
-                  {convertIntToArray(product?.productRating || 0).map(
-                    (sgn, idx) => (
-                      <LikeIcon color="#FCCB1B" key={idx} />
-                    )
-                  )}
-                  <p>{product?.productRating || 0}.0</p>
-                </FlexibleDiv>
 
               <p className="other__details__text reviews__text">
                 {product?.numOfReviews} reviews
@@ -469,11 +392,18 @@ export default function ProductPage({ product, loading, relatedProducts }) {
             defaultActiveKey="1"
             renderTabBar={renderTabBar}
             items={items}
-            onChange={(key) => handleSeeMoreReviews(key)}
+            onChange={(key) => setActiveTab(key)}
           />
-          <Link href={"/"}>
-            <p className="see__more__reviews">See more reviews</p>
-          </Link>
+          {activeTab === 2  &&(
+               reviewData?.length >0 ? 
+              <div className="see__more_btn" style={{ cursor: "pointer" }} onClick={handleMoreReviews}>
+                <p className="see__more__reviews">See more reviews</p>
+              </div>
+              :
+              <FlexibleDiv>
+                <p>No review Here</p>
+              </FlexibleDiv>
+            )}
         </FlexibleDiv>
         {/* Related Products Section */}
         <FlexibleDiv
@@ -487,89 +417,8 @@ export default function ProductPage({ product, loading, relatedProducts }) {
             showViewAll={false}
           />
         </FlexibleDiv>
-                <p className="other__details__text reviews__text">
-                  {product?.numOfReviews} reviews
-                </p>
-                <p className="other__details__text">
-                  {product?.numOfPurchase} purchases
-                </p>
-                <p className="other__details__text">
-                  Shipping Fee: {nairaFormatter.format(product?.shippingFee || 0)}
-                </p>
-              </FlexibleDiv>
-              {/* The carting options */}
-              <FlexibleDiv className="cart__options" gap="15px">
-                <FlexibleDiv className="product__num__selector" gap="16px">
-                  <MinusIcon
-                    className="icon__class"
-                    size={18}
-                    onClick={() => {
-                      if (numOfProduct > 1) {
-                        setNumOfProduct(numOfProduct - 1);
-                      }
-                    }}
-                  />
-                  <p>{numOfProduct < 10 ? `0${numOfProduct}` : numOfProduct}</p>
-                  <PlusIcon
-                    className="icon__class"
-                    size={18}
-                    onClick={() => setNumOfProduct(numOfProduct + 1)}
-                  />
-                </FlexibleDiv>
-                <Button
-                  backgroundColor="var(--orrsiPrimary)"
-                  color="#fff"
-                  className="checkout__btn"
-                >
-                  Checkout
-                </Button>
-                <Button
-                  backgroundColor="#fff"
-                  color="var(--orrsiPrimary)"
-                  className="cart__btn"
-                >
-                  Add to Cart
-                </Button>
-              </FlexibleDiv>
-            </FlexibleDiv>
-          </FlexibleSection>
-          {/* Product description starts here */}
-          <FlexibleDiv
-            className="product__description"
-            justifyContent="flex-start"
-          >
-            <Tabs
-              style={{ width: "100%", marginTop: "50px", marginBottom: "30px" }}
-              defaultActiveKey="1"
-              renderTabBar={renderTabBar}
-              items={items}
-             onChange={(key) => setActiveTab(key)}
-            />
-            {activeTab === 2  &&(
-               reviewData?.length >0 ? 
-              <div className="see__more_btn" style={{ cursor: "pointer" }} onClick={handleMoreReviews}>
-                <p className="see__more__reviews">See more reviews</p>
-              </div>
-              :
-              <FlexibleDiv>
-                <p>No review Here</p>
-              </FlexibleDiv>
-            )}
-          </FlexibleDiv>
-          {/* Related Products Section */}
-          <FlexibleDiv
-            justifyContent="flex-start"
-            alignItems="flex-start"
-            margin="20px 0"
-          >
-            <ProductsGridBox
-              content={relatedProducts || []}
-              sectionTitle="More Products"
-              showViewAll={false}
-            />
-          </FlexibleDiv>
         </>
-        :
+          :
           <FlexibleDiv>
               <MoreReviews id={product?._id} starData={starData}  reviewData={reviewData} setMoreReviewsActive={handleBack}/>
           </FlexibleDiv>
