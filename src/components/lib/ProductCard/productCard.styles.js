@@ -20,10 +20,20 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
     transition: all 0.3s ease-in-out;
   }
 
+  .loading-btn {
+    visibility: visible;
+    background-color: var(--orrsiPrimary);
+    border: none !important;
+  }
+
   .remove-from-cart-btn {
     visibility: visible;
     opacity: 1;
     transition: all 0.3s ease-in-out;
+
+    &:hover {
+      border: none !important;
+    }
   }
 
   &:hover {
@@ -172,10 +182,7 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
 
     .product__info {
       .product__name {
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        width: 150px;
-        overflow: hidden;
+        /* Removed specific width and white-space: nowrap to allow two lines */
       }
 
       .likes__wrapper {
@@ -198,10 +205,7 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
 
     .product__info {
       .product__name {
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        width: 130px;
-        overflow: hidden;
+        /* Removed specific width and white-space: nowrap to allow two lines */
       }
 
       .likes__wrapper {
@@ -236,10 +240,7 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
     .product__info {
       height: fit-content;
       .product__name {
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        width: 130px;
-        overflow: hidden;
+        /* Removed specific width and white-space: nowrap to allow two lines */
       }
 
       .likes__wrapper {
@@ -257,6 +258,7 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
     }
 
     .seller__info {
+      margin-bottom: 18px;
       .seller__text {
         margin: 0;
       }
@@ -282,6 +284,11 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
           width: 14px;
         }
       }
+    }
+
+    .add-to-cart-btn {
+      visibility: visible;
+      opacity: 1;
     }
   }
 `;

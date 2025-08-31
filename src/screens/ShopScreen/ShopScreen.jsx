@@ -2,7 +2,7 @@ import Breadcrumb from "../../components/lib/Breadcrumb/breadcrumb";
 import { ShopPageWrapper } from "./ShopScreen.styles";
 import { FlexibleDiv } from "@/components/lib/Box/styles";
 import { useMemo, useState } from "react";
-import { Checkbox, Select, Tag, Spin, Alert, Modal, Button } from "antd";
+import { Checkbox, Select, Tag, Spin, Alert, Modal, Button, Pagination } from "antd";
 import ProductCard from "@/components/lib/ProductCard/productCard";
 import { useProductsQuery, useProductCategoriesQuery } from "@/network/product";
 import { FaFilter } from "react-icons/fa";
@@ -10,11 +10,12 @@ import { FaFilter } from "react-icons/fa";
 export default function ShopPage() {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedSubCategories, setSelectedSubCategories] = useState({});
-  const [sliderPrice, setSliderPrice] = useState(500000);
+  const [sliderPrice, setSliderPrice] = useState(9999999);
   const [currentPage, setCurrentPage] = useState(1);
   const [openSelects, setOpenSelects] = useState({});
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
-  const [] = useState([])
+  const [itemOffset, setItemOffset] = useState(0); // Keep itemOffset for skip calculation
+  const itemsPerPage = 12; // This should match the limit passed to useProductsQuery
   const {
     data: productCategories,
     isLoading: isLoadingCategories,
@@ -26,7 +27,7 @@ export default function ShopPage() {
     data: products,
     isLoading: isLoadingProducts,
     isError: isErrorProducts,
-  } = useProductsQuery("", 12, "products");
+  } = useProductsQuery("", itemsPerPage, "products", itemOffset); // Pass itemOffset as skip
 
   const formatCategory = (cat = []) => {
     return cat.map((ct) => ({ label: ct.name, value: ct.name }));
@@ -87,6 +88,19 @@ export default function ShopPage() {
     });
   }, [products, sliderPrice]);
 
+  const totalProducts = products?.body?.total || 0;
+
+  const handlePageChange = (page, pageSize) => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "smooth",
+    });
+    const newOffset = (page - 1) * pageSize;
+    setItemOffset(newOffset);
+    setCurrentPage(page);
+  };
+
   const showFilterModal = () => {
     setIsFilterModalVisible(true);
   };
@@ -122,7 +136,7 @@ export default function ShopPage() {
 
             <div className="price__filter">
               <label htmlFor="price-range">
-                Price: ₦1,000 - ₦{Number(sliderPrice).toLocaleString()}
+                Price: ₦100 - ₦{Number(sliderPrice).toLocaleString()}
               </label>
               <input
                 type="range"
@@ -198,8 +212,6 @@ export default function ShopPage() {
     </FlexibleDiv>
   );
 
-  console.log("cart");
-
   return (
     <>
       <Breadcrumb numOfProducts={products?.body?.products?.length} />
@@ -223,41 +235,56 @@ export default function ShopPage() {
           </FlexibleDiv>
 
           {/* The page content */}
-          <FlexibleDiv
-            width="100%"
-            justifyContent={
-              isLoadingProducts || isErrorProducts ? "center" : "flex-start"
-            }
-            alignItems={
-              isLoadingProducts || isErrorProducts ? "center" : "flex-start"
-            }
-            className={
-              !isLoadingProducts && !isErrorProducts ? "products__grid" : ""
-            }
-            style={{
-              flex: 1,
-              display: isLoadingProducts || isErrorProducts ? "block" : "",
-            }}
-          >
-            {isLoadingProducts ? (
-              <div className="loader_wrapper">
-                <Spin style={{ color: "red" }} size="large" color="red" />
-              </div>
-            ) : isErrorProducts ? (
-              <Alert
-                message="Error"
-                description="Failed to fetch products. Please try again later."
-                type="error"
-                showIcon
-              />
-            ) : (
-              <>
-                {filteredProducts.map((sgn, idx) => (
-                  <ProductCard card={sgn} key={idx} />
-                ))}
-              </>
+          <FlexibleDiv width="100%" flexDir="column">
+            <FlexibleDiv
+              width="100%"
+              justifyContent={
+                isLoadingProducts || isErrorProducts ? "center" : "flex-start"
+              }
+              alignItems={
+                isLoadingProducts || isErrorProducts ? "center" : "flex-start"
+              }
+              className={
+                !isLoadingProducts && !isErrorProducts ? "products__grid" : ""
+              }
+              style={{
+                flex: 1,
+                display: isLoadingProducts || isErrorProducts ? "block" : "",
+              }}
+            >
+              {isLoadingProducts ? (
+                <div className="loader_wrapper">
+                  <Spin style={{ color: "red" }} size="large" color="red" />
+                </div>
+              ) : isErrorProducts ? (
+                <Alert
+                  message="Error"
+                  description="Failed to fetch products. Please try again later."
+                  type="error"
+                  showIcon
+                />
+              ) : (
+                <>
+                  {filteredProducts.map((sgn, idx) => (
+                    <ProductCard card={sgn} key={idx} />
+                  ))}
+                </>
+              )}
+            </FlexibleDiv>
+            {totalProducts > 0 && (
+              <FlexibleDiv className="pagination__wrapper">
+                <Pagination
+                  current={currentPage}
+                  pageSize={itemsPerPage}
+                  total={totalProducts}
+                  onChange={handlePageChange}
+                  showSizeChanger={false}
+                  responsive
+                  showQuickJumper
+                  showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} items`}
+                />
+              </FlexibleDiv>
             )}
-            <FlexibleDiv className="pagination__wrapper"></FlexibleDiv>
           </FlexibleDiv>
         </FlexibleDiv>
 

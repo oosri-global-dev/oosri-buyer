@@ -1,11 +1,14 @@
 import { Modal } from "antd";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { RFCWrapper } from "./remove-from-cart.styles";
 import { FlexibleDiv } from "../Box/styles";
 import Button from "../Button";
 import { GoHeart as HeartIcon, GoTrash as DeleteIcon } from "react-icons/go";
+import { useMainContext } from "@/context";
 
-export default function RemoveFromCartModal({ isOpen, setIsOpen }) {
+export default function RemoveFromCartModal({ isOpen, setIsOpen, item }) {
+  const { removeFromCart } = useMainContext();
+  const [isLoadingBtn, setIsLoadingBtn] = useState(false);
   const handleOk = () => {
     setIsOpen(false);
   };
@@ -56,7 +59,7 @@ export default function RemoveFromCartModal({ isOpen, setIsOpen }) {
             <p>Save for Later</p>
           </Button>
           <Button
-            className="cta__button"
+            className={`cta__button ${isOpen ? "loading__btn" : ""}`}
             height="35px"
             radius="10px"
             backgroundColor="var(--orrsiPrimary)"
@@ -64,6 +67,12 @@ export default function RemoveFromCartModal({ isOpen, setIsOpen }) {
             borderColor="var(--orrsiPrimary) !important"
             color="var(--orrsiWhite)"
             hoverColor="var(--orrsiWhite)"
+            loading={isLoadingBtn}
+            disabled={isLoadingBtn}
+            onClick={() => {
+              removeFromCart(item, setIsLoadingBtn, setIsOpen);
+              // setIsOpen(false);
+            }}
           >
             <DeleteIcon size={"18px"} />
             <p>Remove Item</p>

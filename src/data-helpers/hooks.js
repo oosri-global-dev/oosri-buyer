@@ -37,7 +37,8 @@ export const nairaFormatter = Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "NGN",
   useGrouping: true,
-  maximumSignificantDigits: 3,
+  maximumFractionDigits: 2, // Up to 2 decimal places
+  minimumFractionDigits: 0,
 });
 
 export function truncateString(str, num) {

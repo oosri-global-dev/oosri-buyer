@@ -1,16 +1,17 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import {
   ProductPageWrapper,
   ProductBreadcrumbsWrapper,
 } from "./productPage.styles";
 import { FlexibleDiv, FlexibleSection } from "@/components/lib/Box/styles";
-import { iPhone14ProMax } from "@/data-helpers/product-page-helper";
 import { AiFillStar as LikeIcon } from "react-icons/ai";
 import { useState } from "react";
+import { useMainContext } from "@/context";
+import _ from "lodash";
 import { FiPlus as PlusIcon } from "react-icons/fi";
 import { HiOutlineMinusSmall as MinusIcon } from "react-icons/hi2";
 import Button from "@/components/lib/Button";
-import { Tabs, theme } from "antd";
+import { Tabs, theme, Spin } from "antd";
 import StickyBox from "react-sticky-box";
 import ProductDescription from "./sections/product-desc/productDescription";
 import ProductReviewBox from "./sections/product-reviews/productReview";
@@ -19,6 +20,7 @@ import ProductsGridBox from "../HomeScreens/Homepage/ProductsGridBox/productsGri
 import { useRouter } from "next/router";
 import OorsiLoader from "@/components/lib/Loader/loader";
 import { nairaFormatter } from "@/data-helpers/hooks";
+import Image from "next/image";
 import { MoreReviews } from "./sections/more-reviews/moreReviews";
 import { getAllReviews } from "@/network/reviews";
 
@@ -33,6 +35,9 @@ function NoOfProductReviews({ numOfReviews }) {
 
 export default function ProductPage({ product, loading, relatedProducts }) {
   const { push, query } = useRouter();
+  const { cart, addToCart, removeFromCart, updateQuantity, dispatch } =
+    useMainContext();
+  const [isLoadingBtn, setIsLoadingBtn] = useState(false);
   const [idxOfSelectedImage, setIdxOfSelectedImage] = useState(0);
   const [selectedImage, setSelectedImage] = useState("");
   const [numOfProduct, setNumOfProduct] = useState(1);
@@ -40,7 +45,23 @@ export default function ProductPage({ product, loading, relatedProducts }) {
   const [reviewData,setReviewData]=useState([])
   const[starData,setStarData]=useState([])
   const [activeTab, setActiveTab] = useState("1");
+  const [isLoadingIncrease, setIsLoadingIncrease] = useState(false);
+  const [isLoadingDecrease, setIsLoadingDecrease] = useState(false);
 
+  const productInCart = useMemo(
+    () => cart.find((item) => item?._id === product?._id),
+    [cart, product]
+  );
+
+  useEffect(() => {
+    if (productInCart) {
+      setNumOfProduct(productInCart.quantity);
+    } else {
+      setNumOfProduct(1);
+    }
+  }, [productInCart]);
+
+  // functions
   function getBreadcrumbArray(categoryName, productName) {
     return [
       { label: "Home", link: "/" },
@@ -118,8 +139,8 @@ export default function ProductPage({ product, loading, relatedProducts }) {
 
   // SSR: use product prop
   useEffect(() => {
-    if (product && product.images && product.images.length > 0) {
-      setSelectedImage(product.images[0]);
+    if (product && product.productImages && product.productImages.length > 0) {
+      setSelectedImage(product.productImages[0]);
       setIdxOfSelectedImage(0);
     }
   }, [product]);
@@ -173,6 +194,85 @@ export default function ProductPage({ product, loading, relatedProducts }) {
       </ProductBreadcrumbsWrapper>
       {/* Breacrumb ends here */}
       <ProductPageWrapper>
+        <FlexibleSection
+          className="top__section"
+          flexWrap="nowrap"
+          alignItems="flex-start"
+        >
+          <FlexibleDiv
+            flexDir="row"
+            flexWrap="nowrap"
+            width="100%"
+            justifyContent="space-between"
+            alignItems="flex-start"
+            className="top__left__section"
+            gap="20px"
+          >
+            <FlexibleDiv className="image__section" flexDir="column" gap="10px">
+              {product?.productImages?.map((sgn, idx) => (
+                <div key={idx} className="images__wrapper">
+                  <Image
+                    src={sgn}
+                    onClick={() => {
+                      setIdxOfSelectedImage(idx);
+                      setSelectedImage(sgn);
+                    }}
+                    className={`${
+                      idxOfSelectedImage === idx ? "selected__image" : ""
+                    }`}
+                    alt={`phone__${idx}`}
+                    fill
+                    objectFit="cover"
+                  />
+                </div>
+              ))}
+            </FlexibleDiv>
+            <FlexibleDiv className="main__image__wrapper">
+              {/* This will handle loader for the product image */}
+              {selectedImage ? (
+                <img
+                  className="main__image"
+                  src={selectedImage}
+                  alt={`main__1`}
+                />
+              ) : (
+                <img
+                  className="main__image"
+                  src={product?.productImages?.[0] || ""}
+                  alt={`main__1`}
+                />
+              )}
+            </FlexibleDiv>
+          </FlexibleDiv>
+          <FlexibleDiv
+            className="top__right__section"
+            flexDir="column"
+            alignItems="flex-start"
+            justifyContent="flex-start"
+            gap="10px"
+          >
+            <p className="item__name">{product?.productName}</p>
+            <h1 className="item__price">
+              {nairaFormatter.format(product?.regularPrice)}
+            </h1>
+            <FlexibleDiv
+              flexDir="row"
+              justifyContent="flex-start"
+              alignItems="flex-start"
+              gap="8px"
+            >
+              <FlexibleDiv
+                className="like__wrapper__box"
+                justifyContent="flex-start"
+                flexWrap="nowrap"
+              >
+                {convertIntToArray(product?.productRating || 0).map(
+                  (sgn, idx) => (
+                    <LikeIcon color="#FCCB1B" key={idx} />
+                  )
+                )}
+                <p>{product?.productRating || 0}.0</p>
+              </FlexibleDiv>
         {
           !moreReviewsActive?
         <>
@@ -253,6 +353,140 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                   <p>{product?.productRating || 0}.0</p>
                 </FlexibleDiv>
 
+              <p className="other__details__text reviews__text">
+                {product?.numOfReviews} reviews
+              </p>
+              <p className="other__details__text">
+                {product?.numOfPurchase} purchases
+              </p>
+              <p className="other__details__text">
+                Shipping Fee: {nairaFormatter.format(product?.shippingFee || 0)}
+              </p>
+            </FlexibleDiv>
+            {/* The carting options */}
+            <FlexibleDiv className="cart__options" gap="15px">
+              <FlexibleDiv className="product__num__selector" gap="16px">
+                <FlexibleDiv
+                  className="icon__class"
+                  flexDir="row"
+                  flexWrap="nowrap"
+                  width="fit-content"
+                  onClick={async () => {
+                    if (numOfProduct > 1 && !isLoadingDecrease) {
+                      if (productInCart) {
+                        await updateQuantity(
+                          product,
+                          numOfProduct - 1,
+                          setIsLoadingDecrease
+                        );
+                        setNumOfProduct(numOfProduct - 1);
+                      } else {
+                        dispatch({
+                          type: "TOAST_BOX",
+                          payload: {
+                            type: "error",
+                            message: "Sorry, item is not in cart.",
+                          },
+                        });
+                      }
+                    }
+                  }}
+                >
+                  {isLoadingDecrease ? (
+                    <Spin size="small" />
+                  ) : (
+                    <MinusIcon size={18} />
+                  )}
+                </FlexibleDiv>
+                <p>{numOfProduct < 10 ? `0${numOfProduct}` : numOfProduct}</p>
+                <FlexibleDiv
+                  className="icon__class"
+                  width="fit-content"
+                  onClick={async () => {
+                    if (!isLoadingIncrease) {
+                      if (productInCart) {
+                        await updateQuantity(
+                          product,
+                          numOfProduct + 1,
+                          setIsLoadingIncrease
+                        );
+                        setNumOfProduct(numOfProduct + 1);
+                      } else {
+                        dispatch({
+                          type: "TOAST_BOX",
+                          payload: {
+                            type: "error",
+                            message: "Sorry, item is not in cart.",
+                          },
+                        });
+                      }
+                    }
+                  }}
+                >
+                  {isLoadingIncrease ? (
+                    <Spin size="small" />
+                  ) : (
+                    <PlusIcon size={18} />
+                  )}
+                </FlexibleDiv>
+              </FlexibleDiv>
+              <Button
+                backgroundColor="var(--orrsiPrimary)"
+                color="#fff"
+                className="checkout__btn"
+                onClick={() => push("/cart")}
+              >
+                Checkout
+              </Button>
+              <Button
+                backgroundColor="#fff"
+                color="var(--orrsiPrimary)"
+                className="cart__btn"
+                onClick={() => {
+                  if (productInCart) {
+                    removeFromCart(product, setIsLoadingBtn);
+                  } else {
+                    addToCart(
+                      { ...product, quantity: numOfProduct },
+                      setIsLoadingBtn
+                    );
+                  }
+                }}
+                loading={isLoadingBtn}
+              >
+                {productInCart ? "Remove from Cart" : "Add to Cart"}
+              </Button>
+            </FlexibleDiv>
+          </FlexibleDiv>
+        </FlexibleSection>
+        {/* Product description starts here */}
+        <FlexibleDiv
+          className="product__description"
+          justifyContent="flex-start"
+        >
+          <Tabs
+            style={{ width: "100%", marginTop: "50px", marginBottom: "30px" }}
+            defaultActiveKey="1"
+            renderTabBar={renderTabBar}
+            items={items}
+            onChange={(key) => handleSeeMoreReviews(key)}
+          />
+          <Link href={"/"}>
+            <p className="see__more__reviews">See more reviews</p>
+          </Link>
+        </FlexibleDiv>
+        {/* Related Products Section */}
+        <FlexibleDiv
+          justifyContent="flex-start"
+          alignItems="flex-start"
+          margin="20px 0"
+        >
+          <ProductsGridBox
+            content={relatedProducts || []}
+            sectionTitle="More Products"
+            showViewAll={false}
+          />
+        </FlexibleDiv>
                 <p className="other__details__text reviews__text">
                   {product?.numOfReviews} reviews
                 </p>

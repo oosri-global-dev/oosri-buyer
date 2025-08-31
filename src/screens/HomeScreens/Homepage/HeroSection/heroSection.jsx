@@ -2,7 +2,7 @@ import { FlexibleDiv } from "@/components/lib/Box/styles";
 import HeroCarousel from "./HeroCarousel/heroCarousel";
 import { HeroSectionWrapper } from "./heroSection.styles";
 import { heroBannerFiles } from "@/data-helpers/homepage-helper";
-import WelcomeImage from '@/assets/images/homepage/welcome.gif'
+import WelcomeImage from "@/assets/images/homepage/welcome.gif";
 import SingleCategoryBox from "@/components/lib/SingleCategoryBox/single-category-box";
 import { LoadingCategoryBox } from "@/components/lib/SingleCategoryBox/loading-category-box";
 
@@ -19,14 +19,14 @@ export default function HeroSection({ productCategories, loadingCategories }) {
       <HeroCarousel content={heroBannerFiles} />
       {/* categories */}
       {loadingCategories ? (
-        <FlexibleDiv className="category__wrapper">
-          {[...Array(5)].map((_, idx) => (
+        <FlexibleDiv className="category__wrapper loader__wrapper">
+          {[...Array(4)].map((_, idx) => (
             <LoadingCategoryBox key={idx} />
           ))}
         </FlexibleDiv>
       ) : (
         !!productCategories && (
-          <FlexibleDiv className="category__wrapper">
+          <FlexibleDiv className="category__wrapper" flexWrap="nowrap">
             {productCategories.map((catg, idx) => (
               <SingleCategoryBox data={catg} key={idx} />
             ))}

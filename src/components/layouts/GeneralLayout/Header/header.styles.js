@@ -174,6 +174,17 @@ export const HeaderWrapper = styled(FlexibleDiv)`
         padding: 8px 0;
         border-radius: 10px;
 
+        span {
+          display: flex;
+          align-items: center;
+          width: 100%;
+          gap: 10px;
+
+          p {
+            line-height: normal;
+          }
+        }
+
         &:hover {
           background: rgba(18, 18, 18, 0.16);
         }

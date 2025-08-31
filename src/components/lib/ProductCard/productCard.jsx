@@ -10,6 +10,7 @@ import { useRouter } from "next/router";
 import Image from "next/image";
 import Button from "../Button";
 import { useMainContext } from "@/context";
+import { useState } from "react";
 
 export function LoadingCard({ key }) {
   return (
@@ -34,6 +35,7 @@ export default function ProductCard({ card, key, isLoading = false }) {
   const maxLikes = ["", "", "", "", ""];
   const { push } = useRouter();
   const { cart, addToCart, removeFromCart } = useMainContext();
+  const [isLoadingBtn, setIsLoadingBtn] = useState(false);
 
   const isProductInCart = (productId) => {
     return cart.some((item) => item._id === productId);
@@ -113,15 +115,16 @@ export default function ProductCard({ card, key, isLoading = false }) {
             width="100%"
             color="#000"
             backgroundColor="var(--orrsiSecondary)"
-            hoverBg="var(--orrsiSecondary)"
-            borderColor="#000"
-            hoverColor="#000"
+            hoverBg="var(--orrsiPrimary)"
+            borderColor="#fff"
+            hoverColor="#fff"
             radius="5px"
             height="40px"
             fontSize="0.85rem"
             border="1px solid #000"
-            onClick={() => removeFromCart(card)}
-            className="remove-from-cart-btn"
+            loading={isLoadingBtn}
+            onClick={() => removeFromCart(card, setIsLoadingBtn)}
+            className={!isLoadingBtn ? "remove-from-cart-btn" : "loading-btn"}
           >
             Remove from cart
           </Button>
@@ -133,8 +136,9 @@ export default function ProductCard({ card, key, isLoading = false }) {
             radius="5px"
             height="40px"
             fontSize="0.85rem"
-            onClick={() => addToCart(card)}
-            className="add-to-cart-btn"
+            loading={isLoadingBtn}
+            onClick={() => addToCart(card, setIsLoadingBtn)}
+            className={!isLoadingBtn ? "add-to-cart-btn" : "loading-btn"}
           >
             Add to cart
           </Button>

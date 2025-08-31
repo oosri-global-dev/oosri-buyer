@@ -27,8 +27,10 @@ export const HeroSectionWrapper = styled(FlexibleSection)`
     justify-content: flex-start;
     align-items: flex-start;
     gap: 1.8%;
-    flex-wrap: wrap;
     margin: 35px 0;
+    overflow-x: auto;
+    background: #fff;
+    box-shadow: none;
   }
 
   @media (max-width: 650px) {
@@ -42,6 +44,10 @@ export const HeroSectionWrapper = styled(FlexibleSection)`
 
     .category__wrapper {
       margin: 15px 0;
+    }
+
+    .loader__wrapper {
+      flex-wrap: nowrap;
     }
   }
 

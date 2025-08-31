@@ -1,11 +1,16 @@
-import { useEffect, useContext } from "react";
+import { useEffect, useContext, useRef } from "react";
 import Footer from "./Footer/footer";
 import { GeneralLayoutWrapper } from "./generalLayout.styles";
 import Header from "./Header/header";
 import { MainContext } from "@/context";
 import { fetchUser } from "@/network/auth";
-import { CURRENT_USER } from "@/context/types";
-import { getDataInCookie } from "@/data-helpers/auth-session";
+import { CURRENT_USER, TOAST_BOX } from "@/context/types";
+import {
+  getDataInCookie,
+  storeDataInCookie,
+} from "@/data-helpers/auth-session";
+import { handleGenerateUniqueCartKey } from "@/network/cart";
+import _ from "lodash";
 
 export default function GeneralLayout({
   children,
@@ -15,28 +20,10 @@ export default function GeneralLayout({
   contextTitle = false,
   isAuth = false,
 }) {
-  const { dispatch, pageTitle } = useContext(MainContext);
+  const { dispatch, pageTitle, user } = useContext(MainContext);
+  const effectRan = useRef(false);
 
-  useEffect(() => {
-    const userToken = getDataInCookie("access_token");
-    if (userToken) {
-      const FetchCurrentUser = async () => {
-        try {
-          const currentUser = await fetchUser();
-          //dispatch the user function
-          dispatch({
-            type: CURRENT_USER,
-            payload: {
-              ...currentUser?.body?.user,
-              lastLogin: currentUser?.body?.lastLogin,
-            },
-          });
-        } catch (err) {}
-      };
 
-      FetchCurrentUser();
-    }
-  }, [dispatch]);
 
   return (
     <>

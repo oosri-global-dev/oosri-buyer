@@ -1,10 +1,11 @@
 import {
   CURRENT_USER,
-  PAGE_TITLE,
   TOAST_BOX,
   ADD_TO_CART,
   REMOVE_FROM_CART,
   UPDATE_QUANTITY,
+  CART,
+  LOADING_MODAL,
 } from "./types";
 
 export const Reducer = (state, { type, payload }) => {
@@ -13,11 +14,6 @@ export const Reducer = (state, { type, payload }) => {
       return {
         ...state,
         user: payload || undefined,
-      };
-    case PAGE_TITLE:
-      return {
-        ...state,
-        pageTitle: payload || "",
       };
     case TOAST_BOX:
       return {
@@ -29,10 +25,20 @@ export const Reducer = (state, { type, payload }) => {
         ...state,
         cart: [...state.cart, payload],
       };
+    case CART:
+      return {
+        ...state,
+        cart: payload || [],
+      };
     case REMOVE_FROM_CART:
       return {
         ...state,
         cart: state.cart.filter((item) => item._id !== payload._id),
+      };
+    case LOADING_MODAL:
+      return {
+        ...state,
+        loadingModal: payload || false,
       };
     case UPDATE_QUANTITY:
       return {

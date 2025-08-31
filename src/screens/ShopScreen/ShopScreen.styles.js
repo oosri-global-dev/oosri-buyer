@@ -134,7 +134,13 @@ export const ShopPageWrapper = styled(FlexibleDiv)`
       max-width: initial;
       align-items: flex-start;
       grid-auto-rows: 350px;
-      overflow: hidden;
+      /* overflow: hidden; */
+
+      @media (max-width: 1300px) {
+        .card__image {
+          height: 180px;
+        }
+      }
     }
   }
 
@@ -158,7 +164,35 @@ export const ShopPageWrapper = styled(FlexibleDiv)`
   .pagination__wrapper {
     width: 100%;
     height: 100px;
-    background: red;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+
+    .ant-pagination-item-active {
+      background-color: var(--orrsiPrimary);
+      border-color: var(--orrsiPrimary);
+    }
+
+    .ant-pagination-item-active a {
+      color: #fff;
+    }
+
+    .ant-pagination-item:hover {
+      border-color: var(--orrsiPrimary);
+    }
+
+    .ant-pagination-item:hover a {
+      color: var(--orrsiWhite);
+    }
+
+    .ant-pagination-prev .ant-pagination-item-link,
+    .ant-pagination-next .ant-pagination-item-link {
+      &:hover {
+        color: var(--orrsiPrimary);
+        border-color: var(--orrsiPrimary);
+      }
+    }
   }
 
   @media (max-width: 600px) {
