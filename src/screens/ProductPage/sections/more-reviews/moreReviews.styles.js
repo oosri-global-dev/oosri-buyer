@@ -82,6 +82,10 @@ export const MoreReviewsWrapper=styled.div`
             // display:none;
         }
 
+    .mobile__review__container{
+        width:100%;
+    }
+
     @media screen and (max-width: 768px) {
     .left__section{
         max-width:100%;
@@ -117,8 +121,7 @@ export const MoreReviewsWrapper=styled.div`
         }
 
         .mobile__review__container{
-            width:100%;
-            padding:0px 16px 0px 12px;
+            padding:0px 12px 0px 0px;
         }
     }
 

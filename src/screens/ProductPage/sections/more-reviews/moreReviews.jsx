@@ -139,7 +139,7 @@ export const MoreReviews = ({id,reviewData,starData,setMoreReviewsActive}) => {
                 <p>{newReviewData?.length> 1?`${newReviewData?.length} reviews`:`${newReviewData?.length} review`}</p>
               </FlexibleDiv>
               {/* Input */}
-              <FlexibleDiv>
+              <FlexibleDiv margin={"0px 0px 0px 32px"}>
                 {
                   starDetails.map((item,idx)=>{
                     return <CustomSlider key={idx} number={item.id} rating={item.percent} /> 
