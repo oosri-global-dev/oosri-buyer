@@ -21,6 +21,8 @@ import { useRouter } from "next/router";
 import OorsiLoader from "@/components/lib/Loader/loader";
 import { nairaFormatter } from "@/data-helpers/hooks";
 import Image from "next/image";
+import { MoreReviews } from "./sections/more-reviews/moreReviews";
+import { getAllReviews } from "@/network/reviews";
 
 function NoOfProductReviews({ numOfReviews }) {
   return (
@@ -41,6 +43,11 @@ export default function ProductPage({ product, loading, relatedProducts }) {
   const [numOfProduct, setNumOfProduct] = useState(1);
   const [isLoadingIncrease, setIsLoadingIncrease] = useState(false);
   const [isLoadingDecrease, setIsLoadingDecrease] = useState(false);
+  const [moreReviewsActive,setMoreReviewsActive]=useState(false)
+  const [reviewData,setReviewData]=useState([])
+  const[starData,setStarData]=useState([])
+  const [activeTab, setActiveTab] = useState("1");
+
 
   const productInCart = useMemo(
     () => cart.find((item) => item?._id === product?._id),
@@ -81,42 +88,36 @@ export default function ProductPage({ product, loading, relatedProducts }) {
       <DefaultTabBar {...props} style={{ background: colorBgContainer }} />
     </StickyBox>
   );
+  const handleMoreReviews=()=>{
+    setMoreReviewsActive(true)
+  }
 
-  const reviews = [
-    {
-      reviewerName: "Mike Tyson",
-      likes: 4,
-      review:
-        "The iPhone 14 is a very good phone for the money, offering improved cameras, a faster A15 Bionic chip and fun.",
-    },
-    {
-      reviewerName: "Mike Tyson",
-      likes: 3,
-      review:
-        "The iPhone 14 is a very good phone for the money, offering improved cameras, a faster A15 Bionic chip and fun.",
-    },
-    {
-      reviewerName: "Mike Tyson",
-      likes: 5,
-      review:
-        "The iPhone 14 is a very good phone for the money, offering improved cameras, a faster A15 Bionic chip and fun.",
-    },
-    {
-      reviewerName: "Mike Tyson",
-      likes: 1,
-      review:
-        "The iPhone 14 is a very good phone for the money, offering improved cameras, a faster A15 Bionic chip and fun.",
-    },
-  ];
-
-  const handleSeeMoreReviews = (key) => {
-    const seeMoreBtn = document.getElementsByClassName("see__more__reviews")[0];
-    if (key === 1) {
-      seeMoreBtn.style.display = "none";
-    } else {
-      seeMoreBtn.style.display = "block";
-    }
-  };
+  // const reviews = [
+  //   {
+  //     reviewerName: "Mike Tyson",
+  //     likes: 4,
+  //     review:
+  //       "The iPhone 14 is a very good phone for the money, offering improved cameras, a faster A15 Bionic chip and fun.",
+  //   },
+  //   {
+  //     reviewerName: "Mike Tyson",
+  //     likes: 3,
+  //     review:
+  //       "The iPhone 14 is a very good phone for the money, offering improved cameras, a faster A15 Bionic chip and fun.",
+  //   },
+  //   {
+  //     reviewerName: "Mike Tyson",
+  //     likes: 5,
+  //     review:
+  //       "The iPhone 14 is a very good phone for the money, offering improved cameras, a faster A15 Bionic chip and fun.",
+  //   },
+  //   {
+  //     reviewerName: "Mike Tyson",
+  //     likes: 1,
+  //     review:
+  //       "The iPhone 14 is a very good phone for the money, offering improved cameras, a faster A15 Bionic chip and fun.",
+  //   },
+  // ];
 
   const items = [
     {
@@ -128,9 +129,9 @@ export default function ProductPage({ product, loading, relatedProducts }) {
       style: {},
     },
     {
-      label: <NoOfProductReviews numOfReviews={reviews.length} />,
+      label: <NoOfProductReviews numOfReviews={reviewData?.length} />,
       key: 2,
-      children: <ProductReviewBox reviews={reviews} />,
+      children: <ProductReviewBox reviews={reviewData} />,
       style: {},
     },
   ];
@@ -142,6 +143,24 @@ export default function ProductPage({ product, loading, relatedProducts }) {
       setIdxOfSelectedImage(0);
     }
   }, [product]);
+
+    const fetchReviews = async (id) => {
+      const data = await getAllReviews(id);
+      setReviewData(data?.body?.reviews)
+      console.log(data?.body?.ratingSummary)
+      setStarData(data?.body?.ratingSummary)
+    };
+
+    useEffect(() => {
+      if (product?._id) {
+      fetchReviews(product._id);
+      }
+    }, [product]);
+
+  const handleBack=()=>{
+    setMoreReviewsActive(false)
+    setActiveTab(1)
+  }
 
   if (loading) {
     return <OorsiLoader />;
@@ -174,6 +193,9 @@ export default function ProductPage({ product, loading, relatedProducts }) {
       </ProductBreadcrumbsWrapper>
       {/* Breacrumb ends here */}
       <ProductPageWrapper>
+        {
+          !moreReviewsActive?
+          <>
         <FlexibleSection
           className="top__section"
           flexWrap="nowrap"
@@ -370,11 +392,18 @@ export default function ProductPage({ product, loading, relatedProducts }) {
             defaultActiveKey="1"
             renderTabBar={renderTabBar}
             items={items}
-            onChange={(key) => handleSeeMoreReviews(key)}
+            onChange={(key) => setActiveTab(key)}
           />
-          <Link href={"/"}>
-            <p className="see__more__reviews">See more reviews</p>
-          </Link>
+          {activeTab === 2  &&(
+               reviewData?.length >0 ? 
+              <div className="see__more_btn" style={{ cursor: "pointer" }} onClick={handleMoreReviews}>
+                <p className="see__more__reviews">See more reviews</p>
+              </div>
+              :
+              <FlexibleDiv>
+                <p>No review Here</p>
+              </FlexibleDiv>
+            )}
         </FlexibleDiv>
         {/* Related Products Section */}
         <FlexibleDiv
@@ -388,6 +417,12 @@ export default function ProductPage({ product, loading, relatedProducts }) {
             showViewAll={false}
           />
         </FlexibleDiv>
+        </>
+          :
+          <FlexibleDiv>
+              <MoreReviews id={product?._id} starData={starData}  reviewData={reviewData} setMoreReviewsActive={handleBack}/>
+          </FlexibleDiv>
+        }
       </ProductPageWrapper>
     </>
   );

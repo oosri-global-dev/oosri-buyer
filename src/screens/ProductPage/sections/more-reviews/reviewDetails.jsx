@@ -1,30 +1,27 @@
 import { FlexibleDiv } from "@/components/lib/Box/styles";
-import { ProductReviewWrapper } from "./productReview.styles";
 import Image from "next/image";
 import ReviewerImage from "@/assets/images/product-related/reviewer-image.png";
-// import ReviewerImage from "@/assets/images/phone9.png";
 import { AiFillStar as LikeIcon } from "react-icons/ai";
+import { ProductReviewWrapper } from "../product-reviews/productReview.styles";
+import { ReviewDetailWrapper } from "./moreReviews.styles";
 
-export default function ProductReviewBox({ reviews }) {
+export default function ReviewDetails({ reviews }) {
   return (
-    <>
+    <ReviewDetailWrapper>
       {reviews?.map((review, index, elements) => (
         <ProductReviewWrapper
           key={index}
           isLastElem={index === elements?.length - 1 ? true : false}
         >
           <FlexibleDiv className="reviewer__image__wrapper">
-            <Image alt="reviewer__dp"  
-              width={35}
-              height={35}
-            src={review?.reviewerImage} />
+            <Image alt="reviewer__dp" src={review?.reviewerImage} width={35} height={35} />
           </FlexibleDiv>
           <FlexibleDiv
             className="reviewer__content__wrapper"
             justifyContent="flex-start"
             alignItems="flex-start"
             flexDir="column"
-            gap="4px"
+            gap="10px"
           >
             <FlexibleDiv
               flexWrap="nowrap"
@@ -33,10 +30,7 @@ export default function ProductReviewBox({ reviews }) {
               alignItems="flex-start"
             >
               <FlexibleDiv className="reviewer__image__wrapper__mobile">
-                <Image alt="reviewer__dp" 
-                  width={35}
-                  height={35}
-                src={review?.reviewerImage} />
+                <Image alt="reviewer__dp" src={review?.reviewerImage} width={35} height={35} />
               </FlexibleDiv>
               <FlexibleDiv
                 flexDir="column"
@@ -53,9 +47,10 @@ export default function ProductReviewBox({ reviews }) {
             </FlexibleDiv>
 
             <p className="reviewer__content">{review?.review}</p>
+            <p className="date_number">{review?.reviewDate}</p>
           </FlexibleDiv>
         </ProductReviewWrapper>
       ))}
-    </>
+    </ReviewDetailWrapper>
   );
 }

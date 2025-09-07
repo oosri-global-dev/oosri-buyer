@@ -1,4 +1,4 @@
-import GeneralLayout from "@/components/layouts/GeneralLayout/generalLayout";
+   import GeneralLayout from "@/components/layouts/GeneralLayout/generalLayout";
 import { SearchWrapper } from "./search.styles";
 import TextField from "@/components/lib/TextField";
 import { SearchOutlined } from "@ant-design/icons";
