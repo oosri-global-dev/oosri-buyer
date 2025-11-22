@@ -5,7 +5,7 @@ const nextConfig = {
     styledComponents: true,
   },
   images: {
-    domains: ["oosri.com"],
+    domains: ["https://backend-oosri.onrender.com"],
   },
 };
 
