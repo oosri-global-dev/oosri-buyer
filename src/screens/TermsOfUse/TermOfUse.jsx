@@ -31,14 +31,14 @@ export const TermsOfUsePage = () => {
       </DownloadButton>
 
       <Paragraph>
-        These Oosri Buyer Terms of Use ("Buyer Terms") govern your use of the
-        Oosri online marketplace as a Buyer. They supplement the general Oosri
-        Platform Terms & Conditions and our Privacy Policy (together, the "Oosri
-        Terms"). If there is any conflict, the terms that most protect Oosri
-        will prevail, to the extent permitted by law. By creating an account,
-        browsing, or purchasing products on Oosri, you agree to be bound by
-        these Buyer Terms and the Oosri Terms. If you do not agree, do not use
-        Oosri.
+        These Oosri Buyer Terms of Use (&quot;Buyer Terms&quot;) govern your use
+        of the Oosri online marketplace as a Buyer. They supplement the general
+        Oosri Platform Terms & Conditions and our Privacy Policy (together, the
+        &quot;Oosri Terms&quot;). If there is any conflict, the terms that most
+        protect Oosri will prevail, to the extent permitted by law. By creating
+        an account, browsing, or purchasing products on Oosri, you agree to be
+        bound by these Buyer Terms and the Oosri Terms. If you do not agree, do
+        not use Oosri.
       </Paragraph>
 
       <Section>1. ABOUT OOSRI</Section>
@@ -46,9 +46,9 @@ export const TermsOfUsePage = () => {
       <SubSection>1.1 Marketplace Only</SubSection>
       <Paragraph>
         Oosri is an online marketplace that connects independent sellers
-        <b>("Sellers")</b> with buyers <b>("Buyers")</b>. Except where explicitly
-        stated, Oosri is not the manufacturer, owner, or seller of products
-        listed by third-party Sellers.
+        <b>(&quot;Sellers&quot;)</b> with buyers <b>(&quot;Buyers&quot;)</b>.
+        Except where explicitly stated, Oosri is not the manufacturer, owner, or
+        seller of products listed by third-party Sellers.
       </Paragraph>
 
       <SubSection>1.2 Your Contract Is With the Seller</SubSection>
@@ -89,8 +89,9 @@ export const TermsOfUsePage = () => {
       <SubSection>2.2 Account Information</SubSection>
       <Paragraph>
         To use key features (including purchasing), you must create an Oosri
-        account ("Account") and provide accurate, current, and complete
-        information. You must promptly update your details if they change.
+        account (&quot;Account&quot;) and provide accurate, current, and
+        complete information. You must promptly update your details if they
+        change.
       </Paragraph>
 
       <SubSection>2.3 Account Security</SubSection>
@@ -182,7 +183,7 @@ export const TermsOfUsePage = () => {
       <Section>5. ORDERS & PAYMENTS</Section>
 
       <SubSection>5.1 Placing Orders</SubSection>
-      <Paragraph>When you place an order ("Order"):</Paragraph>
+      <Paragraph>When you place an order (&quot;Order&quot;):</Paragraph>
       <List>
         <ListItem>
           You make a binding offer to purchase specified products from the
@@ -550,7 +551,8 @@ export const TermsOfUsePage = () => {
       <List>
         <ListItem>
           The Platform and all content, products and services accessible through
-          it are provided on an "as is" and "as available" basis;
+          it are provided on an &quot;as is&quot; and &quot;as available&quot;
+          basis;
         </ListItem>
         <ListItem>
           Oosri makes no express or implied warranties, including but not
@@ -700,8 +702,8 @@ export const TermsOfUsePage = () => {
       </Paragraph>
       <List>
         <ListItem>
-          We will post the updated Buyer Terms on the Platform with a new "Last
-          Updated" date; and
+          We will post the updated Buyer Terms on the Platform with a new
+          &quot;Last Updated&quot; date; and
         </ListItem>
         <ListItem>
           Where appropriate or required, we may notify you by email or in-app
