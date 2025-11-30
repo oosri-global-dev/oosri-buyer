@@ -60,11 +60,12 @@ export const TermsOfUsePage = () => {
 
       <SubSection>1.3 No Guarantee of Seller Identity or Conduct</SubSection>
       <Paragraph>
-        Oosri performs reasonable checks but does not guarantee any Seller's
-        identity, legal compliance, capability, or product quality.
+        Oosri performs reasonable checks but does not guarantee any
+        Seller&apos;s identity, legal compliance, capability, or product
+        quality.
       </Paragraph>
 
-      <SubSection>1.4 Oosri's Facilitation Role</SubSection>
+      <SubSection>1.4 Oosri&apos;s Facilitation Role</SubSection>
       <Paragraph>Oosri provides:</Paragraph>
       <List>
         <ListItem>Product discovery and listing tools</ListItem>
@@ -142,17 +143,17 @@ export const TermsOfUsePage = () => {
         </ListItem>
         <ListItem>
           Copy, reproduce, sell, resell, or exploit any part of the Platform for
-          commercial purposes without Oosri's written consent;
+          commercial purposes without Oosri&apos;s written consent;
         </ListItem>
         <ListItem>
-          Reverse-engineer, decompile, or tamper with the Platform's software or
-          security features;
+          Reverse-engineer, decompile, or tamper with the Platform&apos;s
+          software or security features;
         </ListItem>
         <ListItem>
-          Frame or mirror any part of the Platform without Oosri's consent;
+          Frame or mirror any part of the Platform without Oosri&apos;s consent;
         </ListItem>
         <ListItem>
-          Attempt to bypass or avoid Oosri's fees or payment flows.
+          Attempt to bypass or avoid Oosri&apos;s fees or payment flows.
         </ListItem>
       </List>
 
@@ -307,8 +308,8 @@ export const TermsOfUsePage = () => {
           The nature of the product (e.g. custom-made or personalised items may
           be non-returnable);
         </ListItem>
-        <ListItem>The Seller's return policy (where applicable);</ListItem>
-        <ListItem>Oosri's Buyer Protection / Return Policy;</ListItem>
+        <ListItem>The Seller&apos;s return policy (where applicable);</ListItem>
+        <ListItem>Oosri&apos;s Buyer Protection / Return Policy;</ListItem>
         <ListItem>Applicable consumer protection laws.</ListItem>
       </List>
       <Paragraph>
@@ -361,7 +362,7 @@ export const TermsOfUsePage = () => {
         assessing refund eligibility.
       </Paragraph>
 
-      <SubSection>7.5 Oosri's Role in Disputes About Orders</SubSection>
+      <SubSection>7.5 Oosri&apos;s Role in Disputes About Orders</SubSection>
       <Paragraph>
         Where a dispute between you and a Seller is escalated to Oosri:
       </Paragraph>
@@ -378,7 +379,7 @@ export const TermsOfUsePage = () => {
       </List>
       <Paragraph>
         For purposes of how funds are allocated within the Oosri ecosystem,
-        Oosri's decision is final and binding, without prejudice to any
+        Oosri&apos;s decision is final and binding, without prejudice to any
         non-waivable statutory rights you may have under applicable consumer
         protection law.
       </Paragraph>
@@ -494,7 +495,7 @@ export const TermsOfUsePage = () => {
         </ListItem>
         <ListItem>
           You are not located in a jurisdiction subject to comprehensive
-          sanctions relevant to Oosri's operations;
+          sanctions relevant to Oosri&apos;s operations;
         </ListItem>
         <ListItem>
           You will not use Oosri to transact with sanctioned persons or for
@@ -586,8 +587,8 @@ export const TermsOfUsePage = () => {
 
       <SubSection>14.2 Liability Cap</SubSection>
       <Paragraph>
-        In any event, Oosri's total aggregate liability to you arising from or
-        relating to your use of the Platform or any purchase shall not exceed
+        In any event, Oosri&apos;s total aggregate liability to you arising from
+        or relating to your use of the Platform or any purchase shall not exceed
         the greater of:
       </Paragraph>
       <List>
@@ -674,7 +675,7 @@ export const TermsOfUsePage = () => {
         </ListItem>
       </List>
 
-      <SubSection>17.2 Oosri's Right to Suspend or Terminate</SubSection>
+      <SubSection>17.2 Oosri&apos;s Right to Suspend or Terminate</SubSection>
       <Paragraph>
         Oosri may suspend, restrict, or terminate your Account or access to the
         Platform at any time, with or without notice, if:
