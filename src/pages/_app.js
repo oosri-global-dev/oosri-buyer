@@ -17,7 +17,7 @@ const queryClient = new QueryClient();
 function AppContent({ Component, pageProps, getLayout }) {
   const [mounted, setMounted] = useState(false);
   const { loadingModal } = useMainContext();
-  const router = useRouter(); 
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
@@ -65,8 +65,9 @@ export default function App({ Component, pageProps }) {
     <>
       <Head>
         <title>
-          Oosri Global | Direct UK, US and Canadian used and new Phones, Gadgets
-          & More
+          Oosri is an African marketplace serving international buyers in the
+          USA, UK, Canada, EU, Australia, UAE, and more with authentic African
+          made products
         </title>
         <meta
           name="description"
@@ -78,7 +79,11 @@ export default function App({ Component, pageProps }) {
       </Head>
       <MainProvider>
         <QueryClientProvider client={queryClient}>
-          <AppContent Component={Component} pageProps={pageProps} getLayout={getLayout} />
+          <AppContent
+            Component={Component}
+            pageProps={pageProps}
+            getLayout={getLayout}
+          />
         </QueryClientProvider>
       </MainProvider>
     </>

@@ -5,7 +5,7 @@ const nextConfig = {
     styledComponents: true,
   },
   images: {
-    domains: ["oosri.com"],
+    domains: ["oosri.com", "res.cloudinary.com"],
   },
 };
 
