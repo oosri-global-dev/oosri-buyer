@@ -7,7 +7,9 @@ const LandingPage = () => {
     <>
       <Head>
         <title>
-          Oosri | Direct UK, US and Canadian used and new Phones, Gadgets & More
+          Oosri is an African marketplace serving international buyers in the
+          USA, UK, Canada, EU, Australia, UAE, and more with authentic African
+          made products
         </title>
       </Head>
       <Homepage />

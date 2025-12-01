@@ -1,67 +1,173 @@
-import GeneralLayout from "@/components/layouts/GeneralLayout/generalLayout";
-import { FaqWrapper } from "./faq.styles";
+import {
+  FaqWrapper,
+  FaqItem,
+  FaqTitle,
+  FaqContent,
+  ExpandIcon,
+} from "./faq.styles";
 import { useState } from "react";
-import { FlexibleDiv, FlexibleSection } from "@/components/lib/Box/styles";
-
+import { FlexibleSection } from "@/components/lib/Box/styles";
 
 export default function FAQPage() {
-
   const faqCollection = [
+    // 1. GETTING STARTED
     {
-        question: `What is Oosri?`,
-        answer: (
-          <div>
-            <p>Oosri is your one-stop destination for all things mobile phones. We are a specialized e-commerce platform dedicated to offering a wide selection of high-quality mobile devices, accessories, and related products. At Oosri, we pride ourselves on providing an extensive range of smartphones, from the latest flagship models to budget-friendly options, ensuring that every customer finds the perfect phone to meet their needs.</p>
-  
-            <p>Our mission is to make the mobile phone shopping experience convenient and enjoyable. We offer competitive pricing, secure payment options, and a seamless ordering process. With a focus on customer satisfaction, we also provide reliable shipping, a flexible return policy, and dedicated customer support to assist you at every step.</p> 
-  
-            <p>Whether you`re looking for the latest iPhone, Samsung Galaxy, Google Pixel, or any other popular brand, Oosri is your trusted partner for all your mobile phone needs. Explore our diverse product catalog, enjoy peace of mind with warranties, and experience a user-friendly interface as you shop for your ideal mobile device on Oosri.</p>
-          </div>
-        ),
-    }, {
-        question: `How can I place an order on Oosri?`,
-        answer:   `To place an order on Oosri, simply browse our selection of mobile phones, choose the product you want, and click "Add to Cart." Follow the checkout process, provide your shipping and payment information, and confirm your order.`
-    }, {
-        question:  `What payment methods are accepted on Oosri?`,
-        answer: `We accept a variety of payment methods, including credit cards, debit cards, PayPal, and other secure online payment options. You can choose the method that suits you best during the checkout process.`
-    }, {
-        question: `Do the products on Oosri come with warranties?`,
-        answer: `Yes, most of our phones come with manufacturer warranties. The duration and terms of the warranty can vary by product, so please check the product details for warranty information. We also offer extended warranty options for added peace of mind.`
-    }, {
-        question:  `How can I contact Oosri's customer support?`,
-        answer: `We offer multiple ways to get in touch with our customer support team. You can reach us via phone at [Customer Support Phone Number], send us an email at [Customer Support Email], or use the live chat feature on our website. Our support team is available [24/7] to assist you with any questions or concerns.`
-    }
+      question: `1.1 What is Oosri?`,
+      answer: `Oosri is an African marketplace serving international buyers in the USA, UK, Canada, EU, Australia, UAE, and more with authentic African made products.`,
+    },
+    {
+      question: `1.2 Do I need an account?`,
+      answer: `Yes. Register with your email and password.`,
+    },
+    {
+      question: `1.3 Supported Countries`,
+      answer: `Oosri ships internationally only—no deliveries within Nigeria.`,
+    },
+    // 2. SHOPPING & ORDERS
+    {
+      question: `2.1 How to Order`,
+      answer: `Browse → Choose product → Add to cart → Pay → Track.`,
+    },
+    {
+      question: `2.2 No Direct Messaging`,
+      answer: `Buyers cannot message Sellers. Oosri Support handles communication.`,
+    },
+    {
+      question: `2.3 Product Quality`,
+      answer: `All Sellers are verified, and all items are reviewed for authenticity and quality.`,
+    },
+    // 3. PAYMENTS
+    {
+      question: `3.1 Payment Methods`,
+      answer: (
+        <div>
+          <p>Payment methods accepted:</p>
+          <ul>
+            <li>International debit/credit cards</li>
+            <li>Supported payment gateways</li>
+          </ul>
+        </div>
+      ),
+    },
+    {
+      question: `3.2 Extra Charges`,
+      answer: (
+        <div>
+          <p>Additional charges may apply:</p>
+          <ul>
+            <li>International shipping</li>
+            <li>Customs fees (varies by country)</li>
+            <li>FX charges from your bank</li>
+          </ul>
+        </div>
+      ),
+    },
+    // 4. DELIVERY & TRACKING
+    {
+      question: `4.1 Delivery Time`,
+      answer: (
+        <div>
+          <p>All shipments are from Africa to international destinations.</p>
+          <ul>
+            <li>Express: 3–7 days</li>
+            <li>Standard: 5–14 days</li>
+          </ul>
+        </div>
+      ),
+    },
+    {
+      question: `4.2 Tracking`,
+      answer: `Available under Account → Orders → Track Package`,
+    },
+    {
+      question: `4.3 If Marked Delivered but Missing`,
+      answer: `Check neighbours, mailbox areas, reception, then contact Oosri Support.`,
+    },
+    // 5. RETURNS & REFUNDS
+    {
+      question: `5.1 Return Eligibility`,
+      answer: (
+        <div>
+          <p>Allowed if:</p>
+          <ul>
+            <li>Damaged</li>
+            <li>Wrong item</li>
+            <li>Not as described</li>
+            <li>Never arrived</li>
+          </ul>
+        </div>
+      ),
+    },
+    {
+      question: `5.2 Return Process`,
+      answer: `Go to Account → Orders → Report an Issue.`,
+    },
+    {
+      question: `5.3 Refund Time`,
+      answer: (
+        <div>
+          <ul>
+            <li>Wallet: 0–3 days</li>
+            <li>Card: 5–15 days</li>
+          </ul>
+        </div>
+      ),
+    },
+    // 6. DISPUTES
+    {
+      question: `6. DISPUTES`,
+      answer: `Oosri mediates all issues and issues decisions based on evidence.`,
+    },
+    // 7. TRUST & SAFETY
+    {
+      question: `7. TRUST & SAFETY`,
+      answer: (
+        <div>
+          <p>Buyer accounts may be restricted for:</p>
+          <ul>
+            <li>Chargeback abuse</li>
+            <li>Fraudulent claims</li>
+            <li>Policy violations</li>
+          </ul>
+        </div>
+      ),
+    },
+    // 8. OTHER QUESTIONS
+    {
+      question: `8.1 Order Cancellation`,
+      answer: `Allowed ONLY before Seller delivers item to Oosri warehouse.`,
+    },
+    {
+      question: `8.2 Multi-Seller Orders`,
+      answer: `Yes, items arrive separately based on Seller packaging times.`,
+    },
   ];
-  const [selected, setSelected] = useState(null)
 
-  const toggle = (i) => {
-    if (selected == i) {
-      return setSelected(null)
-    }
+  const [openIndex, setOpenIndex] = useState(null);
 
-    setSelected(i)
-  }
+  const toggleItem = (index) => {
+    setOpenIndex(openIndex === index ? null : index);
+  };
+
   return (
     <FaqWrapper>
       <FlexibleSection className="container">
-        <h1 className="faq_title">FREQUENTLY ASKED QUESTIONS (FAQs)</h1>
-        <FlexibleDiv className="accordion">
-          {faqCollection.map((item, i) => (
-            <FlexibleDiv className="item" key={i}>
-              <FlexibleDiv className="title" onClick={() => toggle(i)}>
+        <h1 className="faq_title">OOSRI BUYER FAQ</h1>
+        <div className="accordion">
+          {faqCollection.map((item, index) => (
+            <FaqItem key={index} isOpen={openIndex === index}>
+              <FaqTitle onClick={() => toggleItem(index)}>
                 <h2 className="question">{item.question}</h2>
-                <span className="expand_sign">
-                  {selected === i ? "-" : "+"}
-                </span>
-              </FlexibleDiv>
-              <FlexibleDiv
-                className={selected === i ? "content show" : "content"}
-              >
-                {item.answer}
-              </FlexibleDiv>
-            </FlexibleDiv>
+                <ExpandIcon isOpen={openIndex === index}>
+                  {openIndex === index ? "−" : "+"}
+                </ExpandIcon>
+              </FaqTitle>
+              <FaqContent isOpen={openIndex === index}>
+                <div className="answer-content">{item.answer}</div>
+              </FaqContent>
+            </FaqItem>
           ))}
-        </FlexibleDiv>
+        </div>
       </FlexibleSection>
     </FaqWrapper>
   );

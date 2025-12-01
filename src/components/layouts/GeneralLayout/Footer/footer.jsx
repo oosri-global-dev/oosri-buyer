@@ -24,10 +24,6 @@ export default function Footer() {
       linkUrl: "/shop",
     },
     {
-      linkName: "New Arrivals",
-      linkUrl: "/new-arrivals",
-    },
-    {
       linkName: "Order",
       linkUrl: "/order",
     },
@@ -45,10 +41,6 @@ export default function Footer() {
     {
       linkName: "Terms of Use",
       linkUrl: "/terms-of-use",
-    },
-    {
-      linkName: "Policy",
-      linkUrl: "/policy",
     },
   ];
   return (
