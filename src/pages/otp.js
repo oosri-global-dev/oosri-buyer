@@ -1,4 +1,4 @@
-import GeneralLayout from "@/components/layouts/GeneralLayout/generalLayout";
+import AuthLayoutWrapper from "@/components/layouts/GeneralLayout/AuthLayoutWrapper";
 import OTP from "@/screens/AuthScreens/OTPScreen/otp";
 import Head from "next/head";
 
@@ -13,6 +13,6 @@ const OTPScreen = () => {
   );
 };
 
-OTPScreen.getLayout = (page) => <GeneralLayout>{page}</GeneralLayout>;
+OTPScreen.getLayout = (page) => <AuthLayoutWrapper>{page}</AuthLayoutWrapper>;
 
 export default OTPScreen;

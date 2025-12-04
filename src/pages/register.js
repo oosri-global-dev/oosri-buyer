@@ -1,4 +1,4 @@
-import GeneralLayout from "@/components/layouts/GeneralLayout/generalLayout";
+import AuthLayoutWrapper from "@/components/layouts/GeneralLayout/AuthLayoutWrapper";
 import Register from "@/screens/AuthScreens/RegistrationScreen/register";
 import Head from "next/head";
 
@@ -13,6 +13,8 @@ const RegisterPage = () => {
   );
 };
 
-RegisterPage.getLayout = (page) => <GeneralLayout>{page}</GeneralLayout>;
+RegisterPage.getLayout = (page) => (
+  <AuthLayoutWrapper>{page}</AuthLayoutWrapper>
+);
 
 export default RegisterPage;
