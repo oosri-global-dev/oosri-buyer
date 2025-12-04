@@ -26,6 +26,19 @@ export default function AuthWrapper({ children }) {
     }
   }, [user]);
 
+  const handleGoBack = () => {
+    if (typeof window !== "undefined") {
+      // Since router.replace() removes the protected page from history,
+      // history.back() will naturally go to the page before the protected route
+      if (window.history.length > 1) {
+        history.back();
+      } else {
+        // If no history, go to home
+        push("/");
+      }
+    }
+  };
+
   return (
     <AuthWrapperBox>
       <FlexibleDiv
@@ -34,7 +47,7 @@ export default function AuthWrapper({ children }) {
         alignItems="flex-start"
         flexDir="row"
         className="top__navigation"
-        onClick={() => history.back()}
+        onClick={handleGoBack}
       >
         <ArrowBack size={15} /> <p>Go Back</p>
       </FlexibleDiv>

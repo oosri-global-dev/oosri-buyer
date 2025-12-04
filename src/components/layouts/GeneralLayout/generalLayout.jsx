@@ -25,9 +25,11 @@ export default function GeneralLayout({
       const userToken = getDataInCookie("access_token");
 
       // If no token exists, redirect immediately
+      // Use replace instead of push to remove protected page from history
+      // This way, history.back() will go to the page before the protected route
       if (!userToken) {
         setIsRedirecting(true);
-        router.push("/login");
+        router.replace("/login");
       }
     }
   }, [isAuth, router]);

@@ -169,6 +169,9 @@ export const MainProvider = ({ children }) => {
     } catch (err) {
       // If fetch fails, user doesn't exist or token is invalid
       // Redirect to login if not already on login page
+      // Note: Using window.location.href causes a full page reload,
+      // but since GeneralLayout uses router.replace() for initial redirects,
+      // the history should be correct for most cases
       if (
         typeof window !== "undefined" &&
         window.location.pathname !== "/login"
