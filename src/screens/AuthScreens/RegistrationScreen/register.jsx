@@ -68,7 +68,7 @@ export default function Register() {
   };
 
   return (
-    <AuthWrapper isAuth={false}>
+    <AuthWrapper>
       <LoginWrapper>
         <FlexibleDiv maxWidth="350px" gap="40px" flexDir="column">
           <Toaster containerClassName="toaster__style" />

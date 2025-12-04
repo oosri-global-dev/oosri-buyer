@@ -1,13 +1,12 @@
 import { FlexibleDiv } from "@/components/lib/Box/styles";
 import { AuthWrapperBox } from "./auth-wrapper.styles";
 import { MdOutlineArrowBack as ArrowBack } from "react-icons/md";
-import GeneralLayout from "../GeneralLayout/generalLayout";
 import { useWindowSize } from "@/data-helpers/hooks";
 import { useState, useEffect } from "react";
 import { useMainContext } from "@/context";
 import { useRouter } from "next/router";
 
-export default function AuthWrapper({ children, noFooter, isAuth }) {
+export default function AuthWrapper({ children }) {
   const [width, height] = useWindowSize();
   const [removeHeader, setRemoveHeader] = useState(false);
   const { user } = useMainContext();
@@ -28,20 +27,18 @@ export default function AuthWrapper({ children, noFooter, isAuth }) {
   }, [user]);
 
   return (
-    <GeneralLayout noFooter={noFooter} noHeader={removeHeader}>
-      <AuthWrapperBox>
-        <FlexibleDiv
-          flexWrap="nowrap"
-          justifyContent="flex-start"
-          alignItems="flex-start"
-          flexDir="row"
-          className="top__navigation"
-          onClick={() => history.back()}
-        >
-          <ArrowBack size={15} /> <p>Go Back</p>
-        </FlexibleDiv>
-        <FlexibleDiv className="auth__content__wrapper">{children}</FlexibleDiv>
-      </AuthWrapperBox>
-    </GeneralLayout>
+    <AuthWrapperBox>
+      <FlexibleDiv
+        flexWrap="nowrap"
+        justifyContent="flex-start"
+        alignItems="flex-start"
+        flexDir="row"
+        className="top__navigation"
+        onClick={() => history.back()}
+      >
+        <ArrowBack size={15} /> <p>Go Back</p>
+      </FlexibleDiv>
+      <FlexibleDiv className="auth__content__wrapper">{children}</FlexibleDiv>
+    </AuthWrapperBox>
   );
 }

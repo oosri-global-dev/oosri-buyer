@@ -134,7 +134,7 @@ export default function OTP() {
   };
 
   return (
-    <AuthWrapper isAuth={false}>
+    <AuthWrapper>
       <CheckEmailWrapper>
         <FlexibleDiv className="lock__icon__wrapper">
           <LockIcon size={40} color="var(--orrsiPrimary)" />

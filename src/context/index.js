@@ -9,6 +9,7 @@ import {
 import {
   CURRENT_USER,
   LOADING_MODAL,
+  LOADING_USER,
   TOAST_BOX,
   UPDATE_QUANTITY,
 } from "./types";
@@ -24,6 +25,7 @@ export const MainContext = createContext({
   toastbox: { type: "", message: "", duration: 5000 },
   cart: [],
   loadingModal: false,
+  isLoadingUser: false,
 });
 
 export const MainProvider = ({ children }) => {
@@ -149,6 +151,11 @@ export const MainProvider = ({ children }) => {
 
   const handleUpdateCurrentUser = async () => {
     //update the user object
+    dispatch({
+      type: LOADING_USER,
+      payload: true,
+    });
+
     try {
       const currentUser = await fetchUser();
       //dispatch the user function
@@ -159,7 +166,21 @@ export const MainProvider = ({ children }) => {
           lastLogin: currentUser?.body?.lastLogin,
         },
       });
-    } catch (err) {}
+    } catch (err) {
+      // If fetch fails, user doesn't exist or token is invalid
+      // Redirect to login if not already on login page
+      if (
+        typeof window !== "undefined" &&
+        window.location.pathname !== "/login"
+      ) {
+        window.location.href = "/login";
+      }
+    } finally {
+      dispatch({
+        type: LOADING_USER,
+        payload: false,
+      });
+    }
 
     //update the user cart
   };
@@ -214,6 +235,7 @@ export const MainProvider = ({ children }) => {
     updateQuantity,
     dispatch,
     loadingModal: state.loadingModal,
+    isLoadingUser: state.isLoadingUser,
   };
 
   return <MainContext.Provider value={value}>{children}</MainContext.Provider>;

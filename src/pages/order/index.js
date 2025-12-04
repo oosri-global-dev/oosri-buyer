@@ -13,6 +13,6 @@ const Order = () => {
   );
 };
 
-Order.getLayout = (page) => <GeneralLayout>{page}</GeneralLayout>;
+Order.getLayout = (page) => <GeneralLayout isAuth={true}>{page}</GeneralLayout>;
 
 export default Order;

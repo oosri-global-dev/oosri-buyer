@@ -39,6 +39,10 @@ export const HeaderWrapper = styled(FlexibleDiv)`
       color: var(--orrsiBlack);
       background: none;
       border: none;
+      padding: 10px 25px;
+      border: 1px solid transparent;
+      border-radius: 20px;
+      transition: all 0.2s ease;
     }
 
     :hover {
@@ -48,7 +52,6 @@ export const HeaderWrapper = styled(FlexibleDiv)`
     #active__link {
       border: 1px solid;
       color: var(--orrsiWhite);
-      padding: 10px 25px;
       border-radius: 20px;
       text-shadow: none;
       background: var(--orrsiPrimary);
@@ -68,6 +71,9 @@ export const HeaderWrapper = styled(FlexibleDiv)`
 
     .single__menu {
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .cart-icon-container {
@@ -101,6 +107,11 @@ export const HeaderWrapper = styled(FlexibleDiv)`
 
       svg {
         color: white;
+        display: flex;
+        align-self: center;
+        margin: 0;
+        padding: 0;
+        vertical-align: middle;
       }
     }
 

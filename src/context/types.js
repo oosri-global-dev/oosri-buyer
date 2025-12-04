@@ -5,3 +5,4 @@ export const TOAST_BOX = "TOAST_BOX";
 export const UPDATE_QUANTITY = "UPDATE_QUANTITY";
 export const CART = "CART";
 export const LOADING_MODAL = "LOADING_MODAL";
+export const LOADING_USER = "LOADING_USER";
