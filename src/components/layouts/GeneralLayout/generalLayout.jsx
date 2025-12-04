@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Footer from "./Footer/footer";
 import { GeneralLayoutWrapper, AuthOverlay } from "./generalLayout.styles";
@@ -18,6 +18,7 @@ export default function GeneralLayout({
 }) {
   const { dispatch, pageTitle, user, isLoadingUser } = useMainContext();
   const router = useRouter();
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   useEffect(() => {
     if (isAuth) {
@@ -25,19 +26,21 @@ export default function GeneralLayout({
 
       // If no token exists, redirect immediately
       if (!userToken) {
+        setIsRedirecting(true);
         router.push("/login");
       }
     }
   }, [isAuth, router]);
 
   // Show overlay while checking authentication
-  // Hide overlay when:
-  // 1. Not an auth page (isAuth is false)
-  // 2. User is loaded and exists
-  // 3. User loading is complete and user doesn't exist (will redirect)
+  // Hide overlay only when user exists (authentication confirmed)
+  // The overlay will show:
+  // - While loading user (isLoadingUser is true)
+  // - When user is empty (either no token, or token exists but user fetch hasn't completed/failed)
+  // - During redirect (isRedirecting is true)
+  // The overlay will hide only when user exists (authentication confirmed)
   const showOverlay =
-    isAuth &&
-    (isLoadingUser || (_.isEmpty(user) && getDataInCookie("access_token")));
+    isAuth && (isRedirecting || isLoadingUser || _.isEmpty(user));
 
   return (
     <>
