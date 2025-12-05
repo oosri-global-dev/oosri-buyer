@@ -1,4 +1,4 @@
-import OrderDetailsScreen from '@/screens/OrderPage/OrderDetails'
+import OrderDetailsScreen from "@/screens/OrderPage/OrderDetails";
 import GeneralLayout from "@/components/layouts/GeneralLayout/generalLayout";
 import Head from "next/head";
 
@@ -13,6 +13,8 @@ const OrderDetails = () => {
   );
 };
 
-OrderDetails.getLayout = (page) => <GeneralLayout>{page}</GeneralLayout>;
+OrderDetails.getLayout = (page) => (
+  <GeneralLayout isAuth={true}>{page}</GeneralLayout>
+);
 
 export default OrderDetails;

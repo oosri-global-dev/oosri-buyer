@@ -1,4 +1,4 @@
-import AuthWrapper from "@/components/layouts/AuthWrapper/auth-wrapper";
+import AuthLayoutWrapper from "@/components/layouts/GeneralLayout/AuthLayoutWrapper";
 import Login from "@/screens/AuthScreens/LoginScreen/login";
 import Head from "next/head";
 
@@ -13,6 +13,6 @@ const LoginPage = () => {
   );
 };
 
-LoginPage.getLayout = (page) => <AuthWrapper>{page}</AuthWrapper>;
+LoginPage.getLayout = (page) => <AuthLayoutWrapper>{page}</AuthLayoutWrapper>;
 
 export default LoginPage;

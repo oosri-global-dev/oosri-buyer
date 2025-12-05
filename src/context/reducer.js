@@ -6,6 +6,7 @@ import {
   UPDATE_QUANTITY,
   CART,
   LOADING_MODAL,
+  LOADING_USER,
 } from "./types";
 
 export const Reducer = (state, { type, payload }) => {
@@ -39,6 +40,11 @@ export const Reducer = (state, { type, payload }) => {
       return {
         ...state,
         loadingModal: payload || false,
+      };
+    case LOADING_USER:
+      return {
+        ...state,
+        isLoadingUser: payload || false,
       };
     case UPDATE_QUANTITY:
       return {

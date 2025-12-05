@@ -35,3 +35,17 @@ export const GeneralLayoutWrapper = styled(FlexibleDiv)`
     min-height: fit-content;
   }
 `;
+
+export const AuthOverlay = styled(FlexibleDiv)`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.95);
+  z-index: 9999;
+  width: 100vw;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+`;

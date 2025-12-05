@@ -6,8 +6,8 @@ export default function CustomTabs({active}) {
 
   const tabs = [
     { label: "Inprogress", count: 0, key: "inprogress" },
-    { label: "Completed Orders", count: 3, key: "completed" },
-    { label: "Cancelled", count: 3, key: "cancelled" },
+    { label: "Completed Orders", count: 0, key: "completed" },
+    { label: "Cancelled", count: 0, key: "cancelled" },
   ];
   
   const handleChange=(tab)=>{

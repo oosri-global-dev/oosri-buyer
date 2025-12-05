@@ -1,15 +1,11 @@
-import { useEffect, useContext, useRef } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import Footer from "./Footer/footer";
-import { GeneralLayoutWrapper } from "./generalLayout.styles";
+import { GeneralLayoutWrapper, AuthOverlay } from "./generalLayout.styles";
 import Header from "./Header/header";
-import { MainContext } from "@/context";
-import { fetchUser } from "@/network/auth";
-import { CURRENT_USER, TOAST_BOX } from "@/context/types";
-import {
-  getDataInCookie,
-  storeDataInCookie,
-} from "@/data-helpers/auth-session";
-import { handleGenerateUniqueCartKey } from "@/network/cart";
+import { useMainContext } from "@/context";
+import { getDataInCookie } from "@/data-helpers/auth-session";
+import OorsiLoader from "@/components/lib/Loader/loader";
 import _ from "lodash";
 
 export default function GeneralLayout({
@@ -20,10 +16,33 @@ export default function GeneralLayout({
   contextTitle = false,
   isAuth = false,
 }) {
-  const { dispatch, pageTitle, user } = useContext(MainContext);
-  const effectRan = useRef(false);
+  const { dispatch, pageTitle, user, isLoadingUser } = useMainContext();
+  const router = useRouter();
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
+  useEffect(() => {
+    if (isAuth) {
+      const userToken = getDataInCookie("access_token");
 
+      // If no token exists, redirect immediately
+      // Use replace instead of push to remove protected page from history
+      // This way, history.back() will go to the page before the protected route
+      if (!userToken) {
+        setIsRedirecting(true);
+        router.replace("/login");
+      }
+    }
+  }, [isAuth, router]);
+
+  // Show overlay while checking authentication
+  // Hide overlay only when user exists (authentication confirmed)
+  // The overlay will show:
+  // - While loading user (isLoadingUser is true)
+  // - When user is empty (either no token, or token exists but user fetch hasn't completed/failed)
+  // - During redirect (isRedirecting is true)
+  // The overlay will hide only when user exists (authentication confirmed)
+  const showOverlay =
+    isAuth && (isRedirecting || isLoadingUser || _.isEmpty(user));
 
   return (
     <>
@@ -32,7 +51,13 @@ export default function GeneralLayout({
         {contextTitle && <h1 className="page__title">{pageTitle}</h1>}
         <> {title && <h1 className="page__title">{title}</h1>}</>
 
-        {children}
+        {showOverlay ? (
+          <AuthOverlay>
+            <OorsiLoader />
+          </AuthOverlay>
+        ) : (
+          children
+        )}
       </GeneralLayoutWrapper>
       {!noFooter && <Footer />}
     </>

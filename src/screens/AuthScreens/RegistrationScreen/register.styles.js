@@ -123,5 +123,6 @@ export const LoginWrapper = styled(FlexibleDiv)`
 
   @media (max-width: 550px) {
     padding: 0 25px;
+    margin: 0px;
   }
 `;
