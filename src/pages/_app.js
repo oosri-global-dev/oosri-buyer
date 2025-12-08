@@ -71,8 +71,9 @@ export default function App({ Component, pageProps }) {
         </title>
         <meta
           name="description"
-          content="Direct UK, US and Canadian used and new Phones, Gadgets
-          & More"
+          content="Oosri is an African marketplace serving international buyers in the
+          USA, UK, Canada, EU, Australia, UAE, and more with authentic African
+          made products"
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
