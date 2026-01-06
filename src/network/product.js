@@ -37,6 +37,24 @@ export const handleGetSingleProduct = async (productId) => {
   return data;
 };
 
+export const handleAddProductToSavedItems = async (productId) => {
+  const { data } = await instance.post(`/buyer/saved-items`, {
+    productId: productId,
+  });
+  return data;
+};
+
+export const handleGetSavedItems = async (productId = null) => {
+  const params = {};
+  if (productId) {
+    params.productId = productId;
+  }
+  const { data } = await instance.get(`/buyer/saved-items`, {
+    params,
+  });
+  return data;
+};
+
 export function useProductsQuery(category, limit, key = "products", skip) {
   return useQuery({
     queryKey: [key, skip],
@@ -67,6 +85,18 @@ export function useProductQuery(productId) {
     queryFn: () => handleGetSingleProduct(productId),
     enabled: !!productId,
     refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+}
+
+export function useSavedItemsQuery() {
+  return useQuery({
+    queryKey: ["saved-items"],
+    queryFn: () => handleGetSavedItems(),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    cacheTime: 1000 * 60 * 10, // 10 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
     refetchOnReconnect: false,
   });
 }

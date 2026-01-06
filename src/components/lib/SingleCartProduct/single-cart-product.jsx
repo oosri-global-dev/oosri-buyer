@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FlexibleDiv } from "../Box/styles";
 import { SCProductWrapper } from "./single-cart-product.styles";
 import { BsTrash as TrashIcon } from "react-icons/bs";
-import { nairaFormatter } from "@/data-helpers/hooks";
+import { formatCurrency } from "@/data-helpers/hooks";
 import Image from "next/image";
 import { useMainContext } from "@/context";
 import { useRouter } from "next/router";
@@ -64,7 +64,7 @@ export default function SingleCartProduct({
         justifyContent="space-evenly"
       >
         <p className="product__price">
-          {nairaFormatter.format(item?.productPrice || item?.price || 0)}
+          {formatCurrency(item?.productPrice || item?.price || 0)}
         </p>
         <FlexibleDiv className="right__box__controls">
           <p
@@ -80,11 +80,7 @@ export default function SingleCartProduct({
             }}
             className="count__trigger"
           >
-            {isLoadingDecrease ? (
-              <Spin size="small" />
-            ) : (
-              "-"
-            )}
+            {isLoadingDecrease ? <Spin size="small" /> : "-"}
           </p>
           <p className="number__of__product">{numOfProduct}</p>
           <p

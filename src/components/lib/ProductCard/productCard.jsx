@@ -5,12 +5,14 @@ import { AiFillHeart as HeartIcon } from "react-icons/ai";
 import ReactCountryFlag from "react-country-flag";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-import { nairaFormatter } from "@/data-helpers/hooks";
+import { formatCurrency } from "@/data-helpers/hooks";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import Button from "../Button";
 import { useMainContext } from "@/context";
 import { useState } from "react";
+import { handleAddProductToSavedItems } from "@/network/product";
+import { TOAST_BOX } from "@/context/types";
 
 export function LoadingCard({ key }) {
   return (
@@ -34,11 +36,59 @@ export function LoadingCard({ key }) {
 export default function ProductCard({ card, key, isLoading = false }) {
   const maxLikes = ["", "", "", "", ""];
   const { push } = useRouter();
-  const { cart, addToCart, removeFromCart } = useMainContext();
+  const { cart, addToCart, removeFromCart, dispatch, user } = useMainContext();
   const [isLoadingBtn, setIsLoadingBtn] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(card?.isFavorite || false);
+  const [isSavingFavorite, setIsSavingFavorite] = useState(false);
 
   const isProductInCart = (productId) => {
     return cart.some((item) => item._id === productId);
+  };
+
+  const handleFavoriteClick = async (e) => {
+    e.stopPropagation(); // Prevent card click event
+    if (isSavingFavorite || !card?._id) return;
+
+    // Check if user is logged in
+    if (!user || !user.id) {
+      dispatch({
+        type: TOAST_BOX,
+        payload: {
+          type: "error",
+          message: "Please login to save products to your wishlist",
+        },
+      });
+      // Redirect to login page after showing the message
+      setTimeout(() => {
+        push("/login");
+      }, 2000);
+      return;
+    }
+
+    setIsSavingFavorite(true);
+    try {
+      const res = await handleAddProductToSavedItems(card._id);
+      setIsFavorite(true);
+      dispatch({
+        type: TOAST_BOX,
+        payload: {
+          type: "success",
+          message: res?.message || "Product added to favorites successfully",
+        },
+      });
+    } catch (error) {
+      dispatch({
+        type: TOAST_BOX,
+        payload: {
+          type: "error",
+          message:
+            error?.response?.data?.message ||
+            "Failed to add product to favorites",
+        },
+      });
+    } finally {
+      setIsSavingFavorite(false);
+    }
   };
 
   if (isLoading) {
@@ -87,11 +137,11 @@ export default function ProductCard({ card, key, isLoading = false }) {
             justifyContent="start"
           >
             <p className="product__price">
-              {nairaFormatter.format(card?.productPrice || 0)}
+              {formatCurrency(card?.productPrice || 0)}
             </p>
             {card?.previousPrice && (
               <p className="discounted__price">
-                {nairaFormatter.format(card?.previousPrice || 0)}
+                {formatCurrency(card?.previousPrice || 0)}
               </p>
             )}
           </FlexibleDiv>
@@ -99,8 +149,12 @@ export default function ProductCard({ card, key, isLoading = false }) {
           <FlexibleDiv className="favorite__wrapper">
             <HeartIcon
               size={18}
-              fill={card.isFavorite ? "var(--orrsiPrimary)" : "transparent"}
-              onClick={() => {}}
+              fill={isFavorite ? "var(--orrsiPrimary)" : "transparent"}
+              onClick={handleFavoriteClick}
+              style={{
+                cursor: isSavingFavorite ? "not-allowed" : "pointer",
+                opacity: isSavingFavorite ? 0.6 : 1,
+              }}
             />
           </FlexibleDiv>
           <FlexibleDiv className="seller__info" justifyContent="flex-start">

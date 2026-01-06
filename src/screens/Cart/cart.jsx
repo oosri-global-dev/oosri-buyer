@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CartPageWrapper } from "./cart.styles";
 import { FlexibleDiv } from "@/components/lib/Box/styles";
 import { IoCartOutline as CartIcon } from "react-icons/io5";
@@ -7,13 +7,16 @@ import ProductCarousel from "@/components/lib/ProductCarousel/productCarousel";
 import { useMainContext } from "@/context";
 import SingleCartProduct from "@/components/lib/SingleCartProduct/single-cart-product";
 import RemoveFromCartModal from "@/components/lib/RemoveFromCartModal/remove-from-cart";
-import { nairaFormatter } from "@/data-helpers/hooks";
+import PaymentModal from "@/components/lib/PaymentModal";
+import { formatCurrency } from "@/data-helpers/hooks";
 import { useRouter } from "next/router";
+import _ from "lodash";
 
 export default function CartPage() {
   const { cart, dispatch, user } = useMainContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const { push, pathname } = useRouter();
   const cartIsEmpty = cart.length === 0;
 
@@ -24,12 +27,19 @@ export default function CartPage() {
   const shippingFee = 0;
   const total = subTotal + shippingFee;
 
+  console.log(cart);
+
   return (
     <CartPageWrapper>
       <RemoveFromCartModal
         isOpen={isModalOpen}
         setIsOpen={setIsModalOpen}
         item={selectedItem}
+      />
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        setIsOpen={setIsPaymentModalOpen}
+        subtotal={subTotal}
       />
       {cartIsEmpty ? (
         <FlexibleDiv
@@ -53,6 +63,7 @@ export default function CartPage() {
           <Button
             backgroundColor="var(--orrsiPrimary)"
             color="var(--orrsiWhite)"
+            onClick={() => push("/shop")}
           >
             Start Shopping
           </Button>
@@ -84,11 +95,10 @@ export default function CartPage() {
               >
                 <h2>Cart Summary</h2>
                 <p className="shipping__fee__text">
-                  Shipping Fee:{" "}
-                  <span>{nairaFormatter.format(shippingFee || 0)}</span>
+                  Shipping Fee: <span>{formatCurrency(shippingFee || 0)}</span>
                 </p>
                 <p className="shipping__fee__text">
-                  Sub Total: <span>{nairaFormatter.format(subTotal || 0)}</span>
+                  Sub Total: <span>{formatCurrency(subTotal || 0)}</span>
                 </p>
                 <Button
                   backgroundColor="var(--orrsiPrimary)"
@@ -97,12 +107,14 @@ export default function CartPage() {
                   color="var(--orrsiWhite)"
                   padding="0px 45px"
                   onClick={() => {
-                    if (_.isEmpty(user)) {
+                    if (_.isEmpty(user) || !user?.id) {
                       push(`/login?from=${pathname}&action=MERGE_CART`);
+                    } else {
+                      setIsPaymentModalOpen(true);
                     }
                   }}
                 >
-                  Checkout ({nairaFormatter.format(total)})
+                  Checkout ({formatCurrency(total)})
                 </Button>
               </FlexibleDiv>
             </FlexibleDiv>
