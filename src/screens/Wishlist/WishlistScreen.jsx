@@ -33,6 +33,8 @@ export default function WishlistPage() {
 
   const isEmpty = !isLoading && filteredItems.length === 0;
 
+  console.log(savedItemsData?.body);
+
   return (
     <WishListWrapper flexDir={"column"} alignItems={"start"}>
       <FlexibleDiv className="top_bar" justifyContent={"space-between"}>

@@ -42,6 +42,15 @@ export const handleDeleteBuyerAddress = async (addressId) => {
   return data;
 };
 
+// Get shipping fee
+export const handleGetShippingFee = async (payload) => {
+  const { data } = await instance.post(
+    `/buyer/dhl-shipping/get-shipping-fee`,
+    payload
+  );
+  return data;
+};
+
 // React Query hook for fetching addresses
 export function useBuyerAddresses() {
   return useQuery({
@@ -89,3 +98,8 @@ export function useDeleteBuyerAddress() {
   });
 }
 
+export function useGetShippingFee() {
+  return useMutation({
+    mutationFn: handleGetShippingFee,
+  });
+}

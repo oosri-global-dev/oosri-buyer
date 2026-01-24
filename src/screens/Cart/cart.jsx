@@ -40,6 +40,7 @@ export default function CartPage() {
         isOpen={isPaymentModalOpen}
         setIsOpen={setIsPaymentModalOpen}
         subtotal={subTotal}
+        cartItems={cart}
       />
       {cartIsEmpty ? (
         <FlexibleDiv

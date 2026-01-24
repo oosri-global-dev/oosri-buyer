@@ -11,6 +11,7 @@ import {
   useCreateBuyerAddress,
   useUpdateBuyerAddress,
   useDeleteBuyerAddress,
+  useGetShippingFee,
 } from "@/network/checkout";
 import { formatCurrency } from "@/data-helpers/hooks";
 import { TOAST_BOX } from "@/context/types";
@@ -49,31 +50,76 @@ const countryOptions = COUNTRIES.map((country) => ({
 }));
 
 
-export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0 }) {
+export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItems = [] }) {
   const { dispatch } = useMainContext();
   const [form] = Form.useForm();
   const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editingAddressId, setEditingAddressId] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [shippingFee, setShippingFee] = useState(0);
+  const [isLoadingShippingFee, setIsLoadingShippingFee] = useState(false);
 
   const { data: addressesData, isLoading: isLoadingAddresses } =
     useBuyerAddresses();
   const createAddress = useCreateBuyerAddress();
   const updateAddress = useUpdateBuyerAddress();
   const deleteAddress = useDeleteBuyerAddress();
+  const getShippingFee = useGetShippingFee();
 
   const addresses = addressesData?.body || [];
-  const shippingFee = 0;
   const total = subtotal + shippingFee;
   const maxAddresses = 3;
+
+  // Function to fetch shipping fee when address is selected
+  const fetchShippingFee = async (addressId) => {
+    if (!addressId || cartItems.length === 0) {
+      setShippingFee(0);
+      return;
+    }
+
+    setIsLoadingShippingFee(true);
+    try {
+      const payload = {
+        addressId,
+        items: cartItems.map((item) => ({
+          productId: item._id,
+          quantity: item.quantity,
+        })),
+      };
+
+      const response = await getShippingFee.mutateAsync(payload);
+      const fee = response?.body?.shippingFee || response?.shippingFee || 0;
+      setShippingFee(fee);
+    } catch (error) {
+      console.error("Error fetching shipping fee:", error);
+      dispatch({
+        type: TOAST_BOX,
+        payload: {
+          type: "error",
+          message: error?.response?.data?.message || "Failed to get shipping fee",
+        },
+      });
+      setShippingFee(0);
+    } finally {
+      setIsLoadingShippingFee(false);
+    }
+  };
+
+  // Handle address selection
+  const handleAddressSelect = (addressId) => {
+    setSelectedAddressId(addressId);
+    fetchShippingFee(addressId);
+  };
 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
       // Select first address by default if available
       if (addresses.length > 0 && !selectedAddressId) {
-        setSelectedAddressId(addresses[0]._id || addresses[0].id);
+        const firstAddressId = addresses[0]._id || addresses[0].id;
+        setSelectedAddressId(firstAddressId);
+        fetchShippingFee(firstAddressId);
       }
     } else {
       document.body.style.overflow = "unset";
@@ -82,6 +128,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0 }) {
       setEditingAddressId(null);
       setSelectedAddressId(null);
       setShowAddForm(false);
+      setShippingFee(0);
     }
   }, [isOpen, addresses.length, form]);
 
@@ -157,11 +204,11 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0 }) {
           (addr) => (addr._id || addr.id) !== addressId
         );
         if (remainingAddresses.length > 0) {
-          setSelectedAddressId(
-            remainingAddresses[0]._id || remainingAddresses[0].id
-          );
+          const nextAddressId = remainingAddresses[0]._id || remainingAddresses[0].id;
+          handleAddressSelect(nextAddressId);
         } else {
           setSelectedAddressId(null);
+          setShippingFee(0);
         }
       }
     } catch (error) {
@@ -296,10 +343,9 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0 }) {
                   return (
                     <div
                       key={addressId}
-                      className={`address__card ${
-                        isSelected ? "selected" : ""
-                      }`}
-                      onClick={() => setSelectedAddressId(addressId)}
+                      className={`address__card ${isSelected ? "selected" : ""
+                        }`}
+                      onClick={() => handleAddressSelect(addressId)}
                     >
                       <FlexibleDiv
                         justifyContent="space-between"
@@ -349,7 +395,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0 }) {
                             }
                           >
                             {deleteAddress.isPending ||
-                            deleteAddress.isLoading ? (
+                              deleteAddress.isLoading ? (
                               <Spin size="small" />
                             ) : (
                               <DeleteIcon size={16} />
@@ -571,7 +617,13 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0 }) {
               </FlexibleDiv>
               <FlexibleDiv justifyContent="space-between" alignItems="center">
                 <p className="summary__label">Shipping Fee:</p>
-                <p className="summary__value">{formatCurrency(shippingFee)}</p>
+                <p className="summary__value">
+                  {isLoadingShippingFee ? (
+                    <Spin size="small" />
+                  ) : (
+                    formatCurrency(shippingFee)
+                  )}
+                </p>
               </FlexibleDiv>
               <FlexibleDiv
                 justifyContent="space-between"
@@ -596,12 +648,12 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0 }) {
             width="100%"
             fontSize="0.95rem"
             fontWeight="600"
-            disabled={!selectedAddressId}
+            disabled={!selectedAddressId || !shippingFee || isLoadingShippingFee}
             style={{
-              background: !selectedAddressId
+              background: !selectedAddressId || !shippingFee || isLoadingShippingFee
                 ? "#ccc"
                 : "linear-gradient(135deg, var(--orrsiPrimary) 0%, #ff6b6b 100%)",
-              boxShadow: !selectedAddressId
+              boxShadow: !selectedAddressId || !shippingFee || isLoadingShippingFee
                 ? "none"
                 : "0 4px 20px rgba(252, 83, 83, 0.3)",
               transition: "all 0.3s ease",
