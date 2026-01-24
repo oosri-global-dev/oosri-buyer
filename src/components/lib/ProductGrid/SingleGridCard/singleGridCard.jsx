@@ -1,4 +1,4 @@
-import { nairaFormatter } from "@/data-helpers/hooks";
+import { formatCurrency } from "@/data-helpers/hooks";
 import { FlexibleDiv } from "../../Box/styles";
 import { SingleCardWrapper } from "./singleCard.styles";
 import { AiFillStar as LikeIcon } from "react-icons/ai";
@@ -68,11 +68,11 @@ export default function SingleGridCard({ key, product, isLoading = false }) {
               className="price__wrapper"
             >
               <p className="product__price__grid">
-                {nairaFormatter.format(product?.productPrice || 0)}
+                {formatCurrency(product?.productPrice || 0)}
               </p>
               {product?.previousPrice && (
                 <p className="discounted__price__grid">
-                  {nairaFormatter.format(product?.previousPrice || 0)}
+                  {formatCurrency(product?.previousPrice || 0)}
                 </p>
               )}
             </FlexibleDiv>

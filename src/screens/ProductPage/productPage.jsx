@@ -19,7 +19,7 @@ import Link from "next/link";
 import ProductsGridBox from "../HomeScreens/Homepage/ProductsGridBox/productsGridBox";
 import { useRouter } from "next/router";
 import OorsiLoader from "@/components/lib/Loader/loader";
-import { nairaFormatter } from "@/data-helpers/hooks";
+import { formatCurrency } from "@/data-helpers/hooks";
 import Image from "next/image";
 import { MoreReviews } from "./sections/more-reviews/moreReviews";
 import { getAllReviews } from "@/network/reviews";
@@ -193,236 +193,254 @@ export default function ProductPage({ product, loading, relatedProducts }) {
       </ProductBreadcrumbsWrapper>
       {/* Breacrumb ends here */}
       <ProductPageWrapper>
-        {
-          !moreReviewsActive?
+        {!moreReviewsActive ? (
           <>
-        <FlexibleSection
-          className="top__section"
-          flexWrap="nowrap"
-          alignItems="flex-start"
-        >
-          <FlexibleDiv
-            flexDir="row"
-            flexWrap="nowrap"
-            width="100%"
-            justifyContent="space-between"
-            alignItems="flex-start"
-            className="top__left__section"
-            gap="20px"
-          >
-            <FlexibleDiv className="image__section" flexDir="column" gap="10px">
-              {product?.productImages?.map((sgn, idx) => (
-                <div key={idx} className="images__wrapper">
-                  <Image
-                    src={sgn}
-                    onClick={() => {
-                      setIdxOfSelectedImage(idx);
-                      setSelectedImage(sgn);
-                    }}
-                    className={`${
-                      idxOfSelectedImage === idx ? "selected__image" : ""
-                    }`}
-                    alt={`phone__${idx}`}
-                    fill
-                    objectFit="cover"
-                  />
-                </div>
-              ))}
-            </FlexibleDiv>
-            <FlexibleDiv className="main__image__wrapper">
-              {/* This will handle loader for the product image */}
-              {selectedImage ? (
-                <img
-                  className="main__image"
-                  src={selectedImage}
-                  alt={`main__1`}
-                />
-              ) : (
-                <img
-                  className="main__image"
-                  src={product?.productImages?.[0] || ""}
-                  alt={`main__1`}
-                />
-              )}
-            </FlexibleDiv>
-          </FlexibleDiv>
-          <FlexibleDiv
-            className="top__right__section"
-            flexDir="column"
-            alignItems="flex-start"
-            justifyContent="flex-start"
-            gap="10px"
-          >
-            <p className="item__name">{product?.productName}</p>
-            <h1 className="item__price">
-              {nairaFormatter.format(product?.regularPrice)}
-            </h1>
-            <FlexibleDiv
-              flexDir="row"
-              justifyContent="flex-start"
+            <FlexibleSection
+              className="top__section"
+              flexWrap="nowrap"
               alignItems="flex-start"
-              gap="8px"
             >
               <FlexibleDiv
-                className="like__wrapper__box"
-                justifyContent="flex-start"
+                flexDir="row"
                 flexWrap="nowrap"
+                width="100%"
+                justifyContent="space-between"
+                alignItems="flex-start"
+                className="top__left__section"
+                gap="20px"
               >
-                {convertIntToArray(product?.productRating || 0).map(
-                  (sgn, idx) => (
-                    <LikeIcon color="#FCCB1B" key={idx} />
-                  )
-                )}
-                <p>{product?.productRating || 0}.0</p>
-              </FlexibleDiv>
-
-              <p className="other__details__text reviews__text">
-                {product?.numOfReviews} reviews
-              </p>
-              <p className="other__details__text">
-                {product?.numOfPurchase} purchases
-              </p>
-              <p className="other__details__text">
-                Shipping Fee: {nairaFormatter.format(product?.shippingFee || 0)}
-              </p>
-            </FlexibleDiv>
-            {/* The carting options */}
-            <FlexibleDiv className="cart__options" gap="15px">
-              <FlexibleDiv className="product__num__selector" gap="16px">
                 <FlexibleDiv
-                  className="icon__class"
+                  className="image__section"
+                  flexDir="column"
+                  gap="10px"
+                >
+                  {product?.productImages?.map((sgn, idx) => (
+                    <div key={idx} className="images__wrapper">
+                      <Image
+                        src={sgn}
+                        onClick={() => {
+                          setIdxOfSelectedImage(idx);
+                          setSelectedImage(sgn);
+                        }}
+                        className={`${
+                          idxOfSelectedImage === idx ? "selected__image" : ""
+                        }`}
+                        alt={`phone__${idx}`}
+                        fill
+                        objectFit="cover"
+                      />
+                    </div>
+                  ))}
+                </FlexibleDiv>
+                <FlexibleDiv className="main__image__wrapper">
+                  {/* This will handle loader for the product image */}
+                  {selectedImage ? (
+                    <img
+                      className="main__image"
+                      src={selectedImage}
+                      alt={`main__1`}
+                    />
+                  ) : (
+                    <img
+                      className="main__image"
+                      src={product?.productImages?.[0] || ""}
+                      alt={`main__1`}
+                    />
+                  )}
+                </FlexibleDiv>
+              </FlexibleDiv>
+              <FlexibleDiv
+                className="top__right__section"
+                flexDir="column"
+                alignItems="flex-start"
+                justifyContent="flex-start"
+                gap="10px"
+              >
+                <p className="item__name">{product?.productName}</p>
+                <h1 className="item__price">
+                  {formatCurrency(product?.regularPrice)}
+                </h1>
+                <FlexibleDiv
                   flexDir="row"
-                  flexWrap="nowrap"
-                  width="fit-content"
-                  onClick={async () => {
-                    if (numOfProduct > 1 && !isLoadingDecrease) {
-                      if (productInCart) {
-                        await updateQuantity(
-                          product,
-                          numOfProduct - 1,
-                          setIsLoadingDecrease
-                        );
-                        setNumOfProduct(numOfProduct - 1);
-                      } else {
-                        dispatch({
-                          type: "TOAST_BOX",
-                          payload: {
-                            type: "error",
-                            message: "Sorry, item is not in cart.",
-                          },
-                        });
-                      }
-                    }
-                  }}
+                  justifyContent="flex-start"
+                  alignItems="flex-start"
+                  gap="8px"
                 >
-                  {isLoadingDecrease ? (
-                    <Spin size="small" />
-                  ) : (
-                    <MinusIcon size={18} />
-                  )}
+                  <FlexibleDiv
+                    className="like__wrapper__box"
+                    justifyContent="flex-start"
+                    flexWrap="nowrap"
+                  >
+                    {convertIntToArray(product?.productRating || 0).map(
+                      (sgn, idx) => (
+                        <LikeIcon color="#FCCB1B" key={idx} />
+                      )
+                    )}
+                    <p>{product?.productRating || 0}.0</p>
+                  </FlexibleDiv>
+
+                  <p className="other__details__text reviews__text">
+                    {product?.numOfReviews} reviews
+                  </p>
+                  <p className="other__details__text">
+                    {product?.numOfPurchase} purchases
+                  </p>
+                  <p className="other__details__text">
+                    Shipping Fee: {formatCurrency(product?.shippingFee || 0)}
+                  </p>
                 </FlexibleDiv>
-                <p>{numOfProduct < 10 ? `0${numOfProduct}` : numOfProduct}</p>
-                <FlexibleDiv
-                  className="icon__class"
-                  width="fit-content"
-                  onClick={async () => {
-                    if (!isLoadingIncrease) {
+                {/* The carting options */}
+                <FlexibleDiv className="cart__options" gap="15px">
+                  <FlexibleDiv className="product__num__selector" gap="16px">
+                    <FlexibleDiv
+                      className="icon__class"
+                      flexDir="row"
+                      flexWrap="nowrap"
+                      width="fit-content"
+                      onClick={async () => {
+                        if (numOfProduct > 1 && !isLoadingDecrease) {
+                          if (productInCart) {
+                            await updateQuantity(
+                              product,
+                              numOfProduct - 1,
+                              setIsLoadingDecrease
+                            );
+                            setNumOfProduct(numOfProduct - 1);
+                          } else {
+                            dispatch({
+                              type: "TOAST_BOX",
+                              payload: {
+                                type: "error",
+                                message: "Sorry, item is not in cart.",
+                              },
+                            });
+                          }
+                        }
+                      }}
+                    >
+                      {isLoadingDecrease ? (
+                        <Spin size="small" />
+                      ) : (
+                        <MinusIcon size={18} />
+                      )}
+                    </FlexibleDiv>
+                    <p>
+                      {numOfProduct < 10 ? `0${numOfProduct}` : numOfProduct}
+                    </p>
+                    <FlexibleDiv
+                      className="icon__class"
+                      width="fit-content"
+                      onClick={async () => {
+                        if (!isLoadingIncrease) {
+                          if (productInCart) {
+                            await updateQuantity(
+                              product,
+                              numOfProduct + 1,
+                              setIsLoadingIncrease
+                            );
+                            setNumOfProduct(numOfProduct + 1);
+                          } else {
+                            dispatch({
+                              type: "TOAST_BOX",
+                              payload: {
+                                type: "error",
+                                message: "Sorry, item is not in cart.",
+                              },
+                            });
+                          }
+                        }
+                      }}
+                    >
+                      {isLoadingIncrease ? (
+                        <Spin size="small" />
+                      ) : (
+                        <PlusIcon size={18} />
+                      )}
+                    </FlexibleDiv>
+                  </FlexibleDiv>
+                  <Button
+                    backgroundColor="var(--orrsiPrimary)"
+                    color="#fff"
+                    className="checkout__btn"
+                    onClick={() => push("/cart")}
+                  >
+                    Checkout
+                  </Button>
+                  <Button
+                    backgroundColor="#fff"
+                    color="var(--orrsiPrimary)"
+                    className="cart__btn"
+                    onClick={() => {
                       if (productInCart) {
-                        await updateQuantity(
-                          product,
-                          numOfProduct + 1,
-                          setIsLoadingIncrease
-                        );
-                        setNumOfProduct(numOfProduct + 1);
+                        removeFromCart(product, setIsLoadingBtn);
                       } else {
-                        dispatch({
-                          type: "TOAST_BOX",
-                          payload: {
-                            type: "error",
-                            message: "Sorry, item is not in cart.",
-                          },
-                        });
+                        addToCart(
+                          { ...product, quantity: numOfProduct },
+                          setIsLoadingBtn
+                        );
                       }
-                    }
-                  }}
-                >
-                  {isLoadingIncrease ? (
-                    <Spin size="small" />
-                  ) : (
-                    <PlusIcon size={18} />
-                  )}
+                    }}
+                    loading={isLoadingBtn}
+                  >
+                    {productInCart ? "Remove from Cart" : "Add to Cart"}
+                  </Button>
                 </FlexibleDiv>
               </FlexibleDiv>
-              <Button
-                backgroundColor="var(--orrsiPrimary)"
-                color="#fff"
-                className="checkout__btn"
-                onClick={() => push("/cart")}
-              >
-                Checkout
-              </Button>
-              <Button
-                backgroundColor="#fff"
-                color="var(--orrsiPrimary)"
-                className="cart__btn"
-                onClick={() => {
-                  if (productInCart) {
-                    removeFromCart(product, setIsLoadingBtn);
-                  } else {
-                    addToCart(
-                      { ...product, quantity: numOfProduct },
-                      setIsLoadingBtn
-                    );
-                  }
+            </FlexibleSection>
+            {/* Product description starts here */}
+            <FlexibleDiv
+              className="product__description"
+              justifyContent="flex-start"
+            >
+              <Tabs
+                style={{
+                  width: "100%",
+                  marginTop: "50px",
+                  marginBottom: "30px",
                 }}
-                loading={isLoadingBtn}
-              >
-                {productInCart ? "Remove from Cart" : "Add to Cart"}
-              </Button>
+                defaultActiveKey="1"
+                renderTabBar={renderTabBar}
+                items={items}
+                onChange={(key) => setActiveTab(key)}
+              />
+              {activeTab === 2 &&
+                (reviewData?.length > 0 ? (
+                  <div
+                    className="see__more_btn"
+                    style={{ cursor: "pointer" }}
+                    onClick={handleMoreReviews}
+                  >
+                    <p className="see__more__reviews">See more reviews</p>
+                  </div>
+                ) : (
+                  <FlexibleDiv>
+                    <p>No review Here</p>
+                  </FlexibleDiv>
+                ))}
             </FlexibleDiv>
-          </FlexibleDiv>
-        </FlexibleSection>
-        {/* Product description starts here */}
-        <FlexibleDiv
-          className="product__description"
-          justifyContent="flex-start"
-        >
-          <Tabs
-            style={{ width: "100%", marginTop: "50px", marginBottom: "30px" }}
-            defaultActiveKey="1"
-            renderTabBar={renderTabBar}
-            items={items}
-            onChange={(key) => setActiveTab(key)}
-          />
-          {activeTab === 2  &&(
-               reviewData?.length >0 ? 
-              <div className="see__more_btn" style={{ cursor: "pointer" }} onClick={handleMoreReviews}>
-                <p className="see__more__reviews">See more reviews</p>
-              </div>
-              :
-              <FlexibleDiv>
-                <p>No review Here</p>
-              </FlexibleDiv>
-            )}
-        </FlexibleDiv>
-        {/* Related Products Section */}
-        <FlexibleDiv
-          justifyContent="flex-start"
-          alignItems="flex-start"
-          margin="20px 0"
-        >
-          <ProductsGridBox
-            content={relatedProducts || []}
-            sectionTitle="More Products"
-            showViewAll={false}
-          />
-        </FlexibleDiv>
-        </>
-          :
+            {/* Related Products Section */}
+            <FlexibleDiv
+              justifyContent="flex-start"
+              alignItems="flex-start"
+              margin="20px 0"
+            >
+              <ProductsGridBox
+                content={relatedProducts || []}
+                sectionTitle="More Products"
+                showViewAll={false}
+              />
+            </FlexibleDiv>
+          </>
+        ) : (
           <FlexibleDiv>
-              <MoreReviews id={product?._id} starData={starData}  reviewData={reviewData} setMoreReviewsActive={handleBack}/>
+            <MoreReviews
+              id={product?._id}
+              starData={starData}
+              reviewData={reviewData}
+              setMoreReviewsActive={handleBack}
+            />
           </FlexibleDiv>
-        }
+        )}
       </ProductPageWrapper>
     </>
   );

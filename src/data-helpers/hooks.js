@@ -41,6 +41,18 @@ export const nairaFormatter = Intl.NumberFormat("en-US", {
   minimumFractionDigits: 0,
 });
 
+export const formatCurrency = (amount, currency = "USD") => {
+  const formatter = Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: currency || "USD",
+    currencyDisplay: "symbol", // Explicitly use currency symbol (₦, $, €, etc.) instead of code
+    useGrouping: true,
+    maximumFractionDigits: 2, // Up to 2 decimal places
+    minimumFractionDigits: 0,
+  });
+  return formatter.format(amount || 0);
+};
+
 export function truncateString(str, num) {
   // If the length of str is less than or equal to num
   // just return str--don't truncate it.
