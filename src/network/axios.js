@@ -13,6 +13,10 @@ if (typeof window !== "undefined") {
   refreshToken = sessionStorage.getItem("refresh_token");
 }
 
+if (!process.env.NEXT_PUBLIC_BASE_URL) {
+  console.warn("NEXT_PUBLIC_BASE_URL is not defined. API requests may fail.");
+}
+
 export const publicInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BASE_URL,
   headers: {

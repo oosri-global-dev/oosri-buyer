@@ -76,6 +76,7 @@ export function useProductCategoriesQuery() {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
+
   });
 }
 
