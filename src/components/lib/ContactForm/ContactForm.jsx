@@ -75,10 +75,10 @@ export default function ContactForm() {
                 <a href="tel:+2347011067109">+2347011067109</a>
               </p>
             </FlexibleDiv>
-            <FlexibleDiv className="admin__location admin__details">
+            {/* <FlexibleDiv className="admin__location admin__details">
               <House className="contact__icon" />
               <p>LoremIpsum Lorem Ipsumlorem</p>
-            </FlexibleDiv>
+            </FlexibleDiv> */}
           </div>
         </FlexibleSection>
       </ContactWrapper>
