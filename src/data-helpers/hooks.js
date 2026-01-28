@@ -62,3 +62,68 @@ export function truncateString(str, num) {
   // Return str truncated with '...' concatenated to the end of str.
   return str.slice(0, num) + "...";
 }
+
+/**
+ * Custom hook/helper to determine the correct price to display for a product.
+ * @param {Object} product - The product object containing price details.
+ * @returns {Object} - An object containing:
+ *   - price: The current selling price.
+ *   - originalPrice: The price to be crossed out (if any).
+ *   - hasDiscount: Boolean indicating if there is a discount.
+ *   - discount: The calculated discount amount (optional/extensible).
+ */
+/**
+ * Helper function to calculate product price logic.
+ * Can be used in loops or outside components.
+ */
+export const calculateProductPrice = (product) => {
+  if (!product) return { price: 0, originalPrice: null, hasDiscount: false };
+
+  const {
+    productPrice,
+    salesPrice,
+    regularPriceUSD,
+    salesPriceUSD,
+    previousPriceUSD,
+  } = product;
+
+  // Use USD values if available, falling back to older fields if not
+  const regular = regularPriceUSD || productPrice || 0;
+  const sales = salesPriceUSD || salesPrice;
+  const previous = previousPriceUSD;
+
+  // Logic based on user's simple explanation:
+
+  // 1. When the item is on Sale (Sales Price exists, and no specific previous price overriding it logic-wise)
+  if (sales && !previous) {
+    return {
+      price: sales,
+      originalPrice: regular,
+      hasDiscount: true,
+    };
+  }
+
+  // If we have a previous price, that's the crossed out one.
+  // The current selling price is the sales price if it exists, otherwise the regular price.
+  if (previous) {
+    return {
+      price: sales || regular,
+      originalPrice: previous,
+      hasDiscount: true
+    }
+  }
+
+  // Default / Standard Case
+  return {
+    price: regular,
+    originalPrice: null,
+    hasDiscount: false,
+  };
+};
+
+/**
+ * Custom hook wrapper for product price logic.
+ */
+export const useProductPrice = (product) => {
+  return calculateProductPrice(product);
+};

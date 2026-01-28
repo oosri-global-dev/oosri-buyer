@@ -4,7 +4,7 @@ export default function ProductDescription({ content = "" }) {
 
   return (
     <ProductDescWrapper>
-      <p>{content}</p>
+      <div dangerouslySetInnerHTML={{ __html: content }} />
     </ProductDescWrapper>
   );
 }

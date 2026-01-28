@@ -393,6 +393,31 @@ export const PaymentModalContent = styled.div`
     }
   }
 
+  .shipping__details__compact {
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+    border-radius: 10px;
+    border: 1px solid #ffe0e0;
+    width: 100%;
+    box-sizing: border-box;
+
+    .shipping__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      background: #fff;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #333;
+      border: 1px solid #ffe0e0;
+      white-space: nowrap;
+      box-shadow: 0 1px 3px rgba(252, 83, 83, 0.1);
+    }
+  }
+
   .payment__summary {
     padding: 16px;
     margin-bottom: 16px;
@@ -491,6 +516,15 @@ export const PaymentModalContent = styled.div`
 
     .payment__summary {
       padding: 16px;
+    }
+
+    .shipping__details__compact {
+      padding: 10px 12px;
+      
+      .shipping__badge {
+        font-size: 0.8rem;
+        padding: 5px 10px;
+      }
     }
 
     .section__title {

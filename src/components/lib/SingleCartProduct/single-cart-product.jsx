@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FlexibleDiv } from "../Box/styles";
 import { SCProductWrapper } from "./single-cart-product.styles";
 import { BsTrash as TrashIcon } from "react-icons/bs";
-import { formatCurrency } from "@/data-helpers/hooks";
+import { formatCurrency, useProductPrice } from "@/data-helpers/hooks";
 import Image from "next/image";
 import { useMainContext } from "@/context";
 import { useRouter } from "next/router";
@@ -19,6 +19,7 @@ export default function SingleCartProduct({
   const [isLoadingIncrease, setIsLoadingIncrease] = useState(false);
   const [isLoadingDecrease, setIsLoadingDecrease] = useState(false);
   const { push } = useRouter();
+  const priceData = useProductPrice(item);
 
   return (
     <SCProductWrapper>
@@ -44,7 +45,11 @@ export default function SingleCartProduct({
           alignItems="flex-start"
         >
           <p className="product__name">{item.productName}</p>
-          <p className="product__discounted__price">{item.previousPrice}</p>
+          {priceData?.hasDiscount && priceData?.originalPrice && (
+            <p className="product__discounted__price">
+              {formatCurrency(priceData?.originalPrice || 0)}
+            </p>
+          )}
           <div
             className="remove__box"
             onClick={() => {
@@ -64,7 +69,7 @@ export default function SingleCartProduct({
         justifyContent="space-evenly"
       >
         <p className="product__price">
-          {formatCurrency(item?.productPrice || item?.price || 0)}
+          {formatCurrency(priceData?.price || 0)}
         </p>
         <FlexibleDiv className="right__box__controls">
           <p

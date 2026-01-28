@@ -57,7 +57,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
   const [isEditing, setIsEditing] = useState(false);
   const [editingAddressId, setEditingAddressId] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [shippingFee, setShippingFee] = useState(0);
+  const [shippingInfo, setShippingInfo] = useState(null);
   const [isLoadingShippingFee, setIsLoadingShippingFee] = useState(false);
 
   const { data: addressesData, isLoading: isLoadingAddresses } =
@@ -68,13 +68,14 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
   const getShippingFee = useGetShippingFee();
 
   const addresses = addressesData?.body || [];
+  const shippingFee = shippingInfo?.totalPriceUSD || 0;
   const total = subtotal + shippingFee;
   const maxAddresses = 3;
 
   // Function to fetch shipping fee when address is selected
   const fetchShippingFee = async (addressId) => {
     if (!addressId || cartItems.length === 0) {
-      setShippingFee(0);
+      setShippingInfo(null);
       return;
     }
 
@@ -89,8 +90,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
       };
 
       const response = await getShippingFee.mutateAsync(payload);
-      const fee = response?.body?.shippingFee || response?.shippingFee || 0;
-      setShippingFee(fee);
+      setShippingInfo(response?.body || null);
     } catch (error) {
       console.error("Error fetching shipping fee:", error);
       dispatch({
@@ -100,7 +100,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
           message: error?.response?.data?.message || "Failed to get shipping fee",
         },
       });
-      setShippingFee(0);
+      setShippingInfo(null);
     } finally {
       setIsLoadingShippingFee(false);
     }
@@ -109,6 +109,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
   // Handle address selection
   const handleAddressSelect = (addressId) => {
     setSelectedAddressId(addressId);
+    setShippingInfo(null); // Clear shipping info immediately when address changes
     fetchShippingFee(addressId);
   };
 
@@ -128,7 +129,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
       setEditingAddressId(null);
       setSelectedAddressId(null);
       setShowAddForm(false);
-      setShippingFee(0);
+      setShippingInfo(null);
     }
   }, [isOpen, addresses.length, form]);
 
@@ -208,7 +209,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
           handleAddressSelect(nextAddressId);
         } else {
           setSelectedAddressId(null);
-          setShippingFee(0);
+          setShippingInfo(null);
         }
       }
     } catch (error) {
@@ -601,6 +602,35 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
             )}
           </div>
 
+          {/* Shipping Details - Compact */}
+          {shippingInfo && (
+            <div className="shipping__details__compact">
+              <FlexibleDiv
+                gap="8px"
+                flexWrap="wrap"
+                justifyContent="flex-start"
+                alignItems="center"
+              >
+                <span className="shipping__badge">
+                  📦 {shippingInfo.product}
+                </span>
+                {shippingInfo.estimatedDeliveryDate && (
+                  <span className="shipping__badge">
+                    🚚 Arrives on or before {new Date(shippingInfo.estimatedDeliveryDate).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric'
+                    })}
+                  </span>
+                )}
+                {shippingInfo.totalTransitDays && (
+                  <span className="shipping__badge">
+                    ⏱️ {shippingInfo.totalTransitDays} {shippingInfo.totalTransitDays === 1 ? 'day' : 'days'}
+                  </span>
+                )}
+              </FlexibleDiv>
+            </div>
+          )}
+
           {/* Payment Summary */}
           <div className="payment__summary">
             <h3 className="section__title">Payment Summary</h3>
@@ -619,7 +649,9 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                 <p className="summary__label">Shipping Fee:</p>
                 <p className="summary__value">
                   {isLoadingShippingFee ? (
-                    <Spin size="small" />
+                    <span className="calculating__loader">
+                      Calculating<span className="dots"></span>
+                    </span>
                   ) : (
                     formatCurrency(shippingFee)
                   )}

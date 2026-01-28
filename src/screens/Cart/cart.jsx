@@ -8,7 +8,7 @@ import { useMainContext } from "@/context";
 import SingleCartProduct from "@/components/lib/SingleCartProduct/single-cart-product";
 import RemoveFromCartModal from "@/components/lib/RemoveFromCartModal/remove-from-cart";
 import PaymentModal from "@/components/lib/PaymentModal";
-import { formatCurrency } from "@/data-helpers/hooks";
+import { formatCurrency, calculateProductPrice } from "@/data-helpers/hooks";
 import { useRouter } from "next/router";
 import _ from "lodash";
 
@@ -20,14 +20,13 @@ export default function CartPage() {
   const { push, pathname } = useRouter();
   const cartIsEmpty = cart.length === 0;
 
-  const subTotal = cart.reduce(
-    (acc, item) => acc + (item.price || item.productPrice || 0) * item.quantity,
-    0
-  );
+  const subTotal = cart.reduce((acc, item) => {
+    const priceData = calculateProductPrice(item);
+    return acc + (priceData?.price || 0) * item.quantity;
+  }, 0);
   const shippingFee = 0;
   const total = subTotal + shippingFee;
 
-  console.log(cart);
 
   return (
     <CartPageWrapper>

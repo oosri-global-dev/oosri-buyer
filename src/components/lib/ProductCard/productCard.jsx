@@ -5,7 +5,7 @@ import { AiFillHeart as HeartIcon } from "react-icons/ai";
 import ReactCountryFlag from "react-country-flag";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-import { formatCurrency } from "@/data-helpers/hooks";
+import { formatCurrency, useProductPrice } from "@/data-helpers/hooks";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import Button from "../Button";
@@ -40,6 +40,7 @@ export default function ProductCard({ card, key, isLoading = false }) {
   const [isLoadingBtn, setIsLoadingBtn] = useState(false);
   const [isFavorite, setIsFavorite] = useState(card?.isFavorite || false);
   const [isSavingFavorite, setIsSavingFavorite] = useState(false);
+  const priceData = useProductPrice(card);
 
   const isProductInCart = (productId) => {
     return cart.some((item) => item._id === productId);
@@ -136,12 +137,21 @@ export default function ProductCard({ card, key, isLoading = false }) {
             className="product__price__section"
             justifyContent="start"
           >
-            <p className="product__price">
-              {formatCurrency(card?.productPrice || 0)}
-            </p>
-            {card?.previousPrice && (
+            {((priceData?.hasDiscount && priceData?.originalPrice)) ? (
+              <p className="product__price">
+                {formatCurrency(priceData?.price || 0)}
+              </p>
+            ) : (
+              <p className="product__price">
+                {formatCurrency(priceData?.price || 0)} 
+              </p>
+            )}
+             {/* If there's a discount, show original price crossed out (or as 'discounted' style if that's what this class does - wait, 'discounted__price' usually implies the crossed out one in many themes, but let's check. 
+                 In the previous code: `previousPriceUSD` was shown in `discounted__price` p tag.
+                 So `originalPrice` should go there. */}
+            {priceData?.hasDiscount && priceData?.originalPrice && (
               <p className="discounted__price">
-                {formatCurrency(card?.previousPrice || 0)}
+                {formatCurrency(priceData?.originalPrice || 0)}
               </p>
             )}
           </FlexibleDiv>

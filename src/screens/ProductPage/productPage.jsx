@@ -19,7 +19,7 @@ import Link from "next/link";
 import ProductsGridBox from "../HomeScreens/Homepage/ProductsGridBox/productsGridBox";
 import { useRouter } from "next/router";
 import OorsiLoader from "@/components/lib/Loader/loader";
-import { formatCurrency } from "@/data-helpers/hooks";
+import { formatCurrency, useProductPrice } from "@/data-helpers/hooks";
 import Image from "next/image";
 import { MoreReviews } from "./sections/more-reviews/moreReviews";
 import { getAllReviews } from "@/network/reviews";
@@ -43,10 +43,11 @@ export default function ProductPage({ product, loading, relatedProducts }) {
   const [numOfProduct, setNumOfProduct] = useState(1);
   const [isLoadingIncrease, setIsLoadingIncrease] = useState(false);
   const [isLoadingDecrease, setIsLoadingDecrease] = useState(false);
-  const [moreReviewsActive,setMoreReviewsActive]=useState(false)
-  const [reviewData,setReviewData]=useState([])
-  const[starData,setStarData]=useState([])
+  const [moreReviewsActive, setMoreReviewsActive] = useState(false)
+  const [reviewData, setReviewData] = useState([])
+  const [starData, setStarData] = useState([])
   const [activeTab, setActiveTab] = useState("1");
+  const priceData = useProductPrice(product);
 
 
   const productInCart = useMemo(
@@ -88,36 +89,9 @@ export default function ProductPage({ product, loading, relatedProducts }) {
       <DefaultTabBar {...props} style={{ background: colorBgContainer }} />
     </StickyBox>
   );
-  const handleMoreReviews=()=>{
+  const handleMoreReviews = () => {
     setMoreReviewsActive(true)
   }
-
-  // const reviews = [
-  //   {
-  //     reviewerName: "Mike Tyson",
-  //     likes: 4,
-  //     review:
-  //       "The iPhone 14 is a very good phone for the money, offering improved cameras, a faster A15 Bionic chip and fun.",
-  //   },
-  //   {
-  //     reviewerName: "Mike Tyson",
-  //     likes: 3,
-  //     review:
-  //       "The iPhone 14 is a very good phone for the money, offering improved cameras, a faster A15 Bionic chip and fun.",
-  //   },
-  //   {
-  //     reviewerName: "Mike Tyson",
-  //     likes: 5,
-  //     review:
-  //       "The iPhone 14 is a very good phone for the money, offering improved cameras, a faster A15 Bionic chip and fun.",
-  //   },
-  //   {
-  //     reviewerName: "Mike Tyson",
-  //     likes: 1,
-  //     review:
-  //       "The iPhone 14 is a very good phone for the money, offering improved cameras, a faster A15 Bionic chip and fun.",
-  //   },
-  // ];
 
   const items = [
     {
@@ -144,20 +118,19 @@ export default function ProductPage({ product, loading, relatedProducts }) {
     }
   }, [product]);
 
-    const fetchReviews = async (id) => {
-      const data = await getAllReviews(id);
-      setReviewData(data?.body?.reviews)
-      console.log(data?.body?.ratingSummary)
-      setStarData(data?.body?.ratingSummary)
-    };
+  const fetchReviews = async (id) => {
+    const data = await getAllReviews(id);
+    setReviewData(data?.body?.reviews)
+    setStarData(data?.body?.ratingSummary)
+  };
 
-    useEffect(() => {
-      if (product?._id) {
+  useEffect(() => {
+    if (product?._id) {
       fetchReviews(product._id);
-      }
-    }, [product]);
+    }
+  }, [product]);
 
-  const handleBack=()=>{
+  const handleBack = () => {
     setMoreReviewsActive(false)
     setActiveTab(1)
   }
@@ -222,9 +195,8 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                           setIdxOfSelectedImage(idx);
                           setSelectedImage(sgn);
                         }}
-                        className={`${
-                          idxOfSelectedImage === idx ? "selected__image" : ""
-                        }`}
+                        className={`${idxOfSelectedImage === idx ? "selected__image" : ""
+                          }`}
                         alt={`phone__${idx}`}
                         fill
                         objectFit="cover"
@@ -258,7 +230,19 @@ export default function ProductPage({ product, loading, relatedProducts }) {
               >
                 <p className="item__name">{product?.productName}</p>
                 <h1 className="item__price">
-                  {formatCurrency(product?.regularPrice)}
+                  {formatCurrency(priceData?.price || 0)}
+                  {priceData?.hasDiscount && priceData?.originalPrice && (
+                    <span
+                      style={{
+                        textDecoration: "line-through",
+                        fontSize: "0.6em",
+                        color: "#999",
+                        marginLeft: "10px",
+                      }}
+                    >
+                      {formatCurrency(priceData?.originalPrice || 0)}
+                    </span>
+                  )}
                 </h1>
                 <FlexibleDiv
                   flexDir="row"
