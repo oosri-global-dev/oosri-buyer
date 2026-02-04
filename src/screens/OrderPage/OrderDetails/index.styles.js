@@ -74,7 +74,161 @@ margin:0 auto;
     color:#BBBBBB;
   }
 
+  .product_card {
+    border: 4px solid #FEDDDD;
+    border-radius: 12px;
+    padding: 16px 24px;
+    margin: 24px 0;
+    background: white;
+  }
+
+  .product_card_content {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .product_image_container {
+    background-color: #F5F5F5;
+    width: 150px;
+    height: 150px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 16px;
+  }
+
+  .product_image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .product_info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 150px;
+  }
+
+  .order_id {
+    color: #BBBBBB;
+    font-size: 12px;
+    margin: 0 0 8px 0;
+  }
+
+  .product_title {
+    font-size: 16px;
+    font-weight: 500;
+    color: #212121;
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  .product_footer {
+    margin-top: auto;
+  }
+
+  .product_price {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333333;
+    margin: 0 0 4px 0;
+  }
+
+  .product_time {
+    color: #BBBBBB;
+    font-size: 12px;
+    margin: 0;
+  }
+
+  .delivery_section {
+    border-top: 1px solid #EEEEEE;
+    border-bottom: 1px solid #EEEEEE;
+    padding: 24px 0;
+    margin: 24px 0;
+  }
+
+  .delivery_header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .delivery_title {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333333;
+    margin: 0;
+  }
+
+  .delivery_details {
+    padding-left: 28px;
+  }
+
+  .address_text {
+    color: #616161;
+    font-size: 14px;
+    margin: 0 0 8px 0;
+    font-weight: 500;
+  }
+
+  .landmark_label {
+    color: #999999;
+    font-size: 14px;
+    margin: 0 0 12px 0;
+    font-weight: 500;
+  }
+
+  .landmark_value {
+    color: #616161;
+  }
+
+  .delivery_fee_row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .fee_label {
+    color: #999999;
+    font-size: 14px;
+    margin: 0;
+    font-weight: 500;
+  }
+
+  .fee_value {
+    color: #89B46D;
+    font-size: 14px;
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .grand_total {
+    margin-top: 16px;
+    padding-top: 16px;
+  }
+
+  .grand_total_value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #333333;
+  }
+
+  .loading_text,
+  .error_text {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999999;
+    font-size: 16px;
+  }
+
   @media screen and (max-width:560px){
+
       .order_title{
         flex-direction: column;
         align-items: start;
