@@ -12,6 +12,7 @@ import {
   useUpdateBuyerAddress,
   useDeleteBuyerAddress,
   useGetShippingFee,
+  useCreatePaymentIntent,
 } from "@/network/checkout";
 import { formatCurrency } from "@/data-helpers/hooks";
 import { TOAST_BOX } from "@/context/types";
@@ -50,8 +51,14 @@ const countryOptions = COUNTRIES.map((country) => ({
 }));
 
 
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
+import StripePaymentForm from "./StripePaymentForm";
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+
 export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItems = [] }) {
-  const { dispatch } = useMainContext();
+  const { dispatch, user } = useMainContext();
   const [form] = Form.useForm();
   const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -59,6 +66,10 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
   const [showAddForm, setShowAddForm] = useState(false);
   const [shippingInfo, setShippingInfo] = useState(null);
   const [isLoadingShippingFee, setIsLoadingShippingFee] = useState(false);
+
+  // Stripe state
+  const [clientSecret, setClientSecret] = useState(null);
+  const [paymentSummary, setPaymentSummary] = useState(null);
 
   const { data: addressesData, isLoading: isLoadingAddresses } =
     useBuyerAddresses();
@@ -130,6 +141,8 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
       setSelectedAddressId(null);
       setShowAddForm(false);
       setShippingInfo(null);
+      setClientSecret(null);
+      setPaymentSummary(null);
     }
   }, [isOpen, addresses.length, form]);
 
@@ -139,6 +152,8 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     setIsEditing(false);
     setEditingAddressId(null);
     setShowAddForm(false);
+    setClientSecret(null);
+    setPaymentSummary(null);
   };
 
   const handleShowAddForm = () => {
@@ -283,7 +298,9 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     }
   };
 
-  const handleCompletePayment = () => {
+  const createPaymentIntent = useCreatePaymentIntent();
+
+  const handleCompletePayment = async () => {
     if (!selectedAddressId) {
       dispatch({
         type: TOAST_BOX,
@@ -294,20 +311,81 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
       });
       return;
     }
-    // Handle payment completion logic here
+
+    if (!user?._id && !user?.id) {
+      dispatch({
+        type: TOAST_BOX,
+        payload: {
+          type: "error",
+          message: "User not found. Please log in.",
+        },
+      });
+      return;
+    }
+
+    try {
+      const payload = {
+        buyerId: user._id || user.id,
+        addressId: selectedAddressId,
+        items: cartItems.map((item) => ({
+          productId: item._id,
+          quantity: item.quantity,
+        })),
+      };
+
+      const response = await createPaymentIntent.mutateAsync(payload);
+
+      if (response && response.clientSecret) {
+        setClientSecret(response.clientSecret);
+        setPaymentSummary(response.summary);
+      } else {
+        dispatch({
+          type: TOAST_BOX,
+          payload: {
+            type: "success",
+            message: response?.message || "Payment intent created successfully",
+          },
+        });
+        handleCancel();
+      }
+
+    } catch (error) {
+      console.error("Error creating payment intent:", error);
+
+      let errorMessage = error?.response?.data?.message || error?.response?.data?.error || "Failed to create payment intent";
+
+      if (error?.response?.data?.stockIssues?.length > 0) {
+        const issues = error.response.data.stockIssues.map(issue =>
+          `${issue.productName} (Requested: ${issue.requestedQuantity}, Available: ${issue.availableStock})`
+        ).join('; ');
+        errorMessage = `Insufficient stock for: ${issues}`;
+      }
+
+      dispatch({
+        type: TOAST_BOX,
+        payload: {
+          type: "error",
+          message: errorMessage,
+        },
+      });
+    }
+  };
+
+  const handlePaymentSuccess = (paymentIntent) => {
     dispatch({
       type: TOAST_BOX,
       payload: {
         type: "success",
-        message: "Payment completed successfully",
+        message: "Payment successful!",
       },
     });
     handleCancel();
+    // Here you might want to redirect to an order confirmation page or refresh orders
   };
 
   return (
     <StyledModal
-      title="Complete Payment"
+      title={clientSecret ? "Secure Payment" : "Complete Payment"}
       open={isOpen}
       onCancel={handleCancel}
       centered
@@ -316,6 +394,18 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
       width={600}
     >
       <PaymentModalContent>
+        {clientSecret && stripePromise ? (
+          <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe' } }}>
+            <StripePaymentForm
+              totalAmount={paymentSummary?.totalAmount?.dollars || total}
+              onSuccess={handlePaymentSuccess}
+              onBack={() => {
+                setClientSecret(null);
+                setPaymentSummary(null);
+              }}
+            />
+          </Elements>
+        ) : (
         <FlexibleDiv
           flexDir="column"
           gap="25px"
@@ -673,19 +763,21 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
           {/* Complete Payment Button */}
           <Button
             onClick={handleCompletePayment}
-            backgroundColor="var(--orrsiPrimary)"
+                backgroundColor={
+                  !selectedAddressId || !shippingFee || isLoadingShippingFee
+                    ? "#ccc"
+                    : "linear-gradient(135deg, var(--orrsiPrimary) 0%, #ff6b6b 100%)"
+                }
             color="var(--orrsiWhite)"
             radius="10px"
             height="48px"
             width="100%"
             fontSize="0.95rem"
             fontWeight="600"
-            disabled={!selectedAddressId || !shippingFee || isLoadingShippingFee}
+                loading={createPaymentIntent.isPending || createPaymentIntent.isLoading}
+                disabled={!selectedAddressId || !shippingFee || isLoadingShippingFee || createPaymentIntent.isPending || createPaymentIntent.isLoading}
             style={{
-              background: !selectedAddressId || !shippingFee || isLoadingShippingFee
-                ? "#ccc"
-                : "linear-gradient(135deg, var(--orrsiPrimary) 0%, #ff6b6b 100%)",
-              boxShadow: !selectedAddressId || !shippingFee || isLoadingShippingFee
+              boxShadow: !selectedAddressId || !shippingFee || isLoadingShippingFee || createPaymentIntent.isPending || createPaymentIntent.isLoading
                 ? "none"
                 : "0 4px 20px rgba(252, 83, 83, 0.3)",
               transition: "all 0.3s ease",
@@ -695,6 +787,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
             Complete Payment ({formatCurrency(total)})
           </Button>
         </FlexibleDiv>
+        )}
       </PaymentModalContent>
     </StyledModal>
   );

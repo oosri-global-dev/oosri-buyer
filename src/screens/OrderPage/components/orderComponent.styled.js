@@ -206,3 +206,148 @@ export const NameTagWrapper=styled.div`
    object-fit:cover;
   }
 `
+
+export const OrderCardWrapper = styled.div`
+  border: 1px solid #EEEEEE;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+  
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: #FC5353;
+  }
+
+  .card_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .order_number {
+    font-family: Inter;
+    font-size: 18px;
+    font-weight: 600;
+    color: #212121;
+    margin: 0;
+  }
+
+  .status_badge {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: Inter;
+    
+    &.picked {
+      background-color: #FFF4E6;
+      color: #FF9800;
+    }
+    
+    &.delivered {
+      background-color: #E8F5E9;
+      color: #4CAF50;
+    }
+    
+    &.cancelled {
+      background-color: #FFEBEE;
+      color: #F44336;
+    }
+    
+    &.pending {
+      background-color: #F5F5F5;
+      color: #999999;
+    }
+  }
+
+  .timestamp {
+    font-family: Inter;
+    font-size: 13px;
+    color: #BBBBBB;
+    margin: 0 0 16px 0;
+  }
+
+  .card_content {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 16px;
+    padding: 12px;
+    background-color: #FAFAFA;
+    border-radius: 8px;
+  }
+
+  .product_image {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #F5F5F5;
+    flex-shrink: 0;
+    
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .product_details {
+    flex: 1;
+  }
+
+  .product_title {
+    font-family: Inter;
+    font-size: 15px;
+    font-weight: 500;
+    color: #333333;
+    margin: 0 0 4px 0;
+    line-height: 1.4;
+  }
+
+  .item_count {
+    font-family: Inter;
+    font-size: 12px;
+    color: #999999;
+    margin: 0;
+  }
+
+  .card_footer {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 12px;
+    border-top: 1px solid #EEEEEE;
+  }
+
+  .price {
+    font-family: Inter;
+    font-size: 18px;
+    font-weight: 600;
+    color: #FC5353;
+  }
+
+  @media screen and (max-width: 560px) {
+    padding: 16px;
+    
+    .order_number {
+      font-size: 16px;
+    }
+    
+    .product_image {
+      width: 60px;
+      height: 60px;
+    }
+    
+    .product_title {
+      font-size: 14px;
+    }
+    
+    .price {
+      font-size: 16px;
+    }
+  }
+`
