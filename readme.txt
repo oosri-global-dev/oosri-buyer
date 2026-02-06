@@ -1,2 +1,0 @@
----> ADD TO CART should be easy
----> 
