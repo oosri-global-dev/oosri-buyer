@@ -1,89 +1,137 @@
-import { FlexibleDiv } from "../Box/styles";
-import ProductCard from "../ProductCard/productCard";
-import { PCWrapper } from "./productCarousel.styles";
-import { IoIosArrowBack as BackArrow } from "react-icons/io";
-import { IoIosArrowForward as ForwardArrow } from "react-icons/io";
-import { useEffect, useRef, useState } from "react";
+import React, { useMemo, useRef } from "react";
+import ProductCard, { LoadingCard } from "@/components/lib/ProductCard/productCard";
 
+/**
+ * Props expected:
+ * - content: array
+ * - carouselTitle: string
+ * - loading: boolean
+ * - hideIfEmpty: boolean
+ * - onViewMore: function (optional)
+ */
 export default function ProductCarousel({
-  carouselTitle,
-  content,
-  loading,
-  hideIfEmpty = true,
+  content = [],
+  carouselTitle = "",
+  loading = false,
+  hideIfEmpty = false,
+  onViewMore,
 }) {
-  const carouselRef = useRef(null);
-  const [scrollPositionX, setscrollPositionX] = useState(0);
-  const handleCardScroll = (direction) => {
-    if (direction === "left") {
-      carouselRef.current.scrollLeft -= 280;
-    } else {
-      carouselRef.current.scrollLeft += 280;
-    }
+  const scrollerRef = useRef(null);
+
+  const normalizedContent = useMemo(() => {
+    const list = Array.isArray(content) ? content : [];
+    return list.map((item) => {
+      if (item?.type === "VIEW_MORE") return item;
+
+      if (item?.__type === "VIEW_MORE") {
+        return {
+          type: "VIEW_MORE",
+          title: "View all",
+          onClick: () => {
+            if (typeof onViewMore === "function") onViewMore();
+          },
+        };
+      }
+
+      return item;
+    });
+  }, [content, onViewMore]);
+
+  const isActuallyEmpty =
+    !loading &&
+    (!normalizedContent || normalizedContent.length === 0);
+
+  if (hideIfEmpty && isActuallyEmpty) return null;
+
+  const scrollByCards = (direction) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+
+    const amount = Math.max(280, el.clientWidth * 0.8);
+    el.scrollBy({ left: direction === "next" ? amount : -amount, behavior: "smooth" });
   };
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const el = carouselRef.current;
-      setscrollPositionX(el.scrollLeft);
-    };
+  const handleNext = () => {
+    const el = scrollerRef.current;
+    if (!el) return;
 
-    const element = carouselRef.current;
-    element?.addEventListener("scroll", handleScroll);
+    // if already at end, redirect (your requirement)
+    const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 10;
+    if (atEnd) {
+      if (typeof onViewMore === "function") onViewMore();
+      return;
+    }
 
-    return () => {
-      element?.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
+    scrollByCards("next");
+  };
+
+  const handlePrev = () => scrollByCards("prev");
 
   return (
-    <PCWrapper>
-      {hideIfEmpty && content && content?.length === 0 ? null : (
-        <>
-          {carouselTitle && (
-            <h2 className="carousel__title">{carouselTitle}</h2>
-          )}
-          <FlexibleDiv className="product__card__carousel" ref={carouselRef}>
-            {loading ? (
-              <>
-                {Array.from({ length: 8 }).map((_, idx) => (
-                  <ProductCard key={idx} isLoading={true} />
-                ))}
-              </>
-            ) : (
-              <>
-                {content &&
-                  content.map((product, idx) => (
-                    <ProductCard key={idx} card={product} />
-                  ))}
-              </>
-            )}
+    <section style={{ width: "100%", marginTop: 20 }}>
+      {carouselTitle ? (
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <h3 style={{ margin: 0 }}>{carouselTitle}</h3>
 
-            <FlexibleDiv
-              className={`button__wrapper ${
-                scrollPositionX < 1 ? "flex__end__div" : ""
-              } 
-          `}
-              justifyContent="space-between"
+          <div style={{ display: "flex", gap: 8 }}>
+            <button
+              type="button"
+              onClick={handlePrev}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 999,
+                border: "1px solid rgba(0,0,0,0.15)",
+                background: "#fff",
+                cursor: "pointer",
+              }}
+              aria-label="Previous"
             >
-              <button
-                className={`button__left__position ${
-                  scrollPositionX < 1 ? "hide__button" : ""
-                }`}
-                onClick={() => handleCardScroll("left")}
-              >
-                <BackArrow color="#fff" size={30} />
-              </button>
+              ←
+            </button>
 
-              <button
-                className="button__right__position"
-                onClick={() => handleCardScroll("right")}
-              >
-                <ForwardArrow color="#fff" size={30} />
-              </button>
-            </FlexibleDiv>
-          </FlexibleDiv>
-        </>
-      )}
-    </PCWrapper>
+            <button
+              type="button"
+              onClick={handleNext}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 999,
+                border: "1px solid rgba(0,0,0,0.15)",
+                background: "#fff",
+                cursor: "pointer",
+              }}
+              aria-label="Next"
+            >
+              →
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      <div
+        ref={scrollerRef}
+        style={{
+          display: "flex",
+          gap: 14,
+          overflowX: "auto",
+          paddingBottom: 8,
+          marginTop: 12,
+          scrollBehavior: "smooth",
+        }}
+      >
+        {loading
+          ? Array.from({ length: 8 }).map((_, idx) => (
+              <div key={idx} style={{ minWidth: 220, flex: "0 0 auto" }}>
+                <LoadingCard />
+              </div>
+            ))
+          : normalizedContent.map((card, idx) => (
+              <div key={card?._id || `carousel-card-${idx}`} style={{ minWidth: 220, flex: "0 0 auto" }}>
+                <ProductCard card={card} />
+              </div>
+            ))}
+      </div>
+    </section>
   );
 }
