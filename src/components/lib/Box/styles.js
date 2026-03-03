@@ -2,13 +2,40 @@
  * Component: Flexible/Gridable Boxes
  * Author: Olayinka Aremu
  * Date: 17th October 2023
- *Custom FlexibleDiv and Gridable component
+ * Custom FlexibleDiv and Gridable component
  */
 
 import styled from "styled-components";
 
+// Custom props that should NOT be forwarded to the DOM.
+// Styled-components v6 forwards all props by default — we must explicitly block our custom ones.
+const LAYOUT_PROPS = new Set([
+  "flex",
+  "justifyContent",
+  "alignItems",
+  "flexWrap",
+  "flexDir",
+  "width",
+  "maxWidth",
+  "minWidth",
+  "height",
+  "minHeight",
+  "margin",
+  "padding",
+  "bgColor",
+  "position",
+  "top",
+  "bottom",
+  "border",
+  "gap",
+  "gridCol",
+  "gridRow",
+]);
+
+const shouldForwardProp = (prop) => !LAYOUT_PROPS.has(prop);
+
 // Flexible box  div element
-export const FlexibleDiv = styled("div")`
+export const FlexibleDiv = styled("div").withConfig({ shouldForwardProp })`
   display: flex;
   flex: ${({ flex }) => flex || ""};
   justify-content: ${({ justifyContent }) => justifyContent || "center"};
@@ -31,7 +58,7 @@ export const FlexibleDiv = styled("div")`
 `;
 
 // Flexible box section element
-export const FlexibleSection = styled("section")`
+export const FlexibleSection = styled("section").withConfig({ shouldForwardProp })`
   display: flex;
   justify-content: ${({ justifyContent }) => justifyContent || "center"};
   align-items: ${({ alignItems }) => alignItems || "center"};
@@ -43,8 +70,8 @@ export const FlexibleSection = styled("section")`
   max-width: ${({ maxWidth }) => maxWidth || "100%"};
 `;
 
-// Flexible box section element
-export const FlexibleUL = styled("ul")`
+// Flexible box ul element
+export const FlexibleUL = styled("ul").withConfig({ shouldForwardProp })`
   display: flex;
   justify-content: ${({ justifyContent }) => justifyContent || "center"};
   align-items: ${({ alignItems }) => alignItems || "center"};
@@ -55,8 +82,8 @@ export const FlexibleUL = styled("ul")`
   background: ${({ bgColor }) => bgColor || ""};
 `;
 
-// Flexible box section element
-export const FlexibleMain = styled("main")`
+// Flexible box main element
+export const FlexibleMain = styled("main").withConfig({ shouldForwardProp })`
   display: flex;
   justify-content: ${({ justifyContent }) => justifyContent || "center"};
   align-items: ${({ alignItems }) => alignItems || "center"};
@@ -68,7 +95,7 @@ export const FlexibleMain = styled("main")`
 `;
 
 // Gridable div element
-export const GridableDiv = styled("div")`
+export const GridableDiv = styled("div").withConfig({ shouldForwardProp })`
   display: grid;
   grid-template-columns: ${({ gridCol }) => gridCol || "1fr"};
   grid-template-rows: ${({ gridRow }) => gridRow || "auto"};
@@ -76,7 +103,7 @@ export const GridableDiv = styled("div")`
 `;
 
 // Gridable section element
-export const GridSection = styled("section")`
+export const GridSection = styled("section").withConfig({ shouldForwardProp })`
   padding: 50px 0;
   display: grid;
   grid-template-columns: ${({ gridCol }) => gridCol || "1fr  1fr 1fr 1fr"};
@@ -85,7 +112,7 @@ export const GridSection = styled("section")`
 `;
 
 // Gridable main element
-export const GridableMain = styled("main")`
+export const GridableMain = styled("main").withConfig({ shouldForwardProp })`
   display: grid;
   grid-template-columns: ${({ gridCol }) => gridCol || "1fr"};
   grid-template-rows: ${({ gridRow }) => gridRow || "auto"};
@@ -93,7 +120,7 @@ export const GridableMain = styled("main")`
 `;
 
 // Gridable ul element
-export const GridUL = styled("ul")`
+export const GridUL = styled("ul").withConfig({ shouldForwardProp })`
   padding: 50px 0;
   display: grid;
   grid-template-columns: ${({ gridCol }) => gridCol || "1fr  1fr 1fr 1fr"};

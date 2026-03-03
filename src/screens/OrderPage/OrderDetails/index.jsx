@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { OrderDetailsWrapper } from './index.styles';
 import { NameTag } from '../components/nameTag';
 import { useGetOrderById } from '@/network/orders';
-import { formatCurrency } from '@/data-helpers/hooks';
+import { formatCurrency, stripHtml } from '@/data-helpers/hooks';
 
 export default function OrderDetailsScreen() {
     const router = useRouter();
@@ -73,42 +73,74 @@ export default function OrderDetailsScreen() {
         "Product";
 
     const productImage =
+        // detail endpoint sends productImage (array); list endpoint sends images (array)
+        (Array.isArray(firstProduct?.productImage) ? firstProduct.productImage[0] : firstProduct?.productImage) ||
         firstProduct?.images?.[0] ||
         firstProduct?.productImages?.[0] ||
         firstProduct?.image ||
         firstProduct?.product?.productImages?.[0] ||
         "https://placehold.co/150x150";
 
-    const productDescription =
+    const productDescription = stripHtml(
         firstProduct?.description ||
         firstProduct?.productDescription ||
         firstProduct?.product?.description ||
         firstProduct?.product?.productDescription ||
-        "";
+        ""
+    );
 
-    // Per-item price:
-    // Use subtotalUSD (best USD subtotal from backend) divided by number of products
-    const productCount = (order?.products || order?.items || []).length || 1;
-    const subtotalUSDValue = order?.subtotalUSD || 0;
-    const unitPrice = productCount > 0 ? subtotalUSDValue / productCount : subtotalUSDValue;
-    const productPrice = formatCurrency(unitPrice);
+    // ─── Product price ────────────────────────────────────────────────────────────
+    // productAmountUSD = product.totalPrice (NGN) × fxRate → correctly computed USD
+    // by the backend at request time. Use it directly; never recompute on the frontend.
+    // If null (fxRate service was unavailable server-side), show '—' gracefully.
+    const productAmountUSD = firstProduct?.productAmountUSD ?? null;
+    const productPrice = productAmountUSD !== null
+        ? formatCurrency(productAmountUSD)
+        : '—';
 
-    // ─── Address & fees ─────────────────────────────────────────────────────────
+    // Extra product fields
+    const productBrand = firstProduct?.productBrand || "";
+    const color = firstProduct?.color || "";
+    const condition = firstProduct?.condition || "";
+    const productType = firstProduct?.productType || "";
+    const dimension = firstProduct?.dimension || "";
+
+    // ─── Delivery address ────────────────────────────────────────────────────────
     const addr = order?.deliveryAddress || {};
     const address = [addr.address, addr.cityName, addr.countryName]
         .filter(Boolean)
-        .join(", ") || "Address not available";
-    const postalCode = addr.postalCode ? `Postal Code: ${addr.postalCode}` : "";
-    const landmark = order?.landMark || order?.landmark || "";
+        .join(', ') || 'Address not available';
+    const postalCode = addr.postalCode ? `Postal Code: ${addr.postalCode}` : '';
+    const landmark = order?.landMark || order?.landmark || '';
 
-    // deliveryFee: use NGN value if non-zero, else USD value; if both 0 → Free
-    const deliveryFeeRaw = order?.deliveryFee || order?.deliveryFeeUSD || 0;
-    const deliveryFee = deliveryFeeRaw === 0 ? "Free" : formatCurrency(deliveryFeeRaw);
+    // ─── Financial summary ────────────────────────────────────────────────────────
+    //
+    // Backend response — currency type of each field:
+    //
+    //   subtotalUSD   = sum(product.totalPrice [NGN]) × fxRate  → USD ✓  USE THIS
+    //   deliveryFee   = order.deliveryFee saved as shippingFeeUSD → USD ✓  USE THIS
+    //   totalAmount   = Stripe product charge (USD) + deliveryFee  → USD ✓  USE THIS
+    //
+    //   deliveryFeeUSD = deliveryFee (USD) × fxRate → USD×(USD/NGN) ✗  NEVER USE
+    //   totalAmountUSD = totalAmount (USD) × fxRate → USD×(USD/NGN) ✗  NEVER USE
+    //
+    // subtotalUSD can be null when the fxRate service is temporarily down.
+    // Show '—' instead of '$0.00' so the buyer is not misled.
 
-    // ─── Totals ─────────────────────────────────────────────────────────────────
-    // subtotalUSD is the pre-total in USD; totalAmount is the actual final charge in USD
-    const subTotal = formatCurrency(order?.subtotalUSD || 0);
-    const grandTotal = formatCurrency(order?.totalAmount || order?.subtotalUSD || 0);
+    // Subtotal: product cost only (no delivery)
+    const subtotalUSD = order?.subtotalUSD ?? null;
+    console.log(order, "ORDER IS HERE");
+    const subTotal = subtotalUSD !== null ? formatCurrency(subtotalUSD) : '—';
+
+    // Delivery fee: persisted in USD at checkout; 0 means free (or pre-fee legacy order)
+    const deliveryFeeRaw = order?.deliveryFee ?? 0;   // USD — NOT deliveryFeeUSD
+    const deliveryFeeDisplay = deliveryFeeRaw === 0
+        ? 'Free'
+        : formatCurrency(deliveryFeeRaw);
+
+    // Grand total: Stripe product USD + delivery USD — the actual amount buyer was charged
+    const grandTotalRaw = order?.totalAmount ?? null;  // USD — NOT totalAmountUSD
+    const grandTotal = grandTotalRaw !== null ? formatCurrency(grandTotalRaw) : '—';
 
     return (
         <OrderDetailsWrapper>
@@ -155,6 +187,15 @@ export default function OrderDetailsScreen() {
                                     {productDescription}
                                 </p>
                             )}
+
+                            {/* Extra Product Attributes */}
+                            <div className='product_extra_attributes' style={{ marginTop: '12px', display: 'flex', flexWrap: 'wrap', gap: '8px', fontSize: '12px', color: '#555' }}>
+                                {productBrand && <span style={{ background: '#f5f5f5', padding: '4px 8px', borderRadius: '4px' }}><b>Brand:</b> {productBrand}</span>}
+                                {color && <span style={{ background: '#f5f5f5', padding: '4px 8px', borderRadius: '4px' }}><b>Color:</b> {color}</span>}
+                                {condition && <span style={{ background: '#f5f5f5', padding: '4px 8px', borderRadius: '4px' }}><b>Condition:</b> {condition}</span>}
+                                {productType && <span style={{ background: '#f5f5f5', padding: '4px 8px', borderRadius: '4px' }}><b>Type:</b> {productType}</span>}
+                                {dimension && <span style={{ background: '#f5f5f5', padding: '4px 8px', borderRadius: '4px' }}><b>Dimensions:</b> {dimension}</span>}
+                            </div>
                             <div className='product_footer'>
                                 <h3 className='product_price'>{productPrice}</h3>
                                 <p className='product_time'>{createdAt}</p>
@@ -191,7 +232,7 @@ export default function OrderDetailsScreen() {
                         )}
                         <div className='delivery_fee_row'>
                             <p className='fee_label'>Delivery Fee:</p>
-                            <p className='fee_value'>{deliveryFee}</p>
+                            <p className='fee_value'>{deliveryFeeDisplay}</p>
                         </div>
                     </div>
                 </div>

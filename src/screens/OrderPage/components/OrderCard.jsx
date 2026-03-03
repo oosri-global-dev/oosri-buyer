@@ -2,7 +2,7 @@ import React from "react";
 import Image from "next/image";
 import { OrderCardWrapper } from "./orderComponent.styled";
 import { useRouter } from "next/router";
-import { formatCurrency } from "@/data-helpers/hooks";
+import { formatCurrency, stripHtml } from "@/data-helpers/hooks";
 
 export default function OrderCard({ order }) {
   const router = useRouter();
@@ -59,17 +59,19 @@ export default function OrderCard({ order }) {
     firstProduct?.image ||
     firstProduct?.product?.productImages?.[0] ||
     "https://placehold.co/80x80";
-  const productDescription =
+  const productDescription = stripHtml(
     firstProduct?.description ||
     firstProduct?.productDescription ||
     firstProduct?.product?.description ||
     firstProduct?.product?.productDescription ||
-    "";
+    ""
+  );
 
   const extraCount = (order?.products || order?.items || []).length - 1;
 
   // Price: totalAmount is the correct grand total (totalAmountUSD can be near-zero test values)
   const totalAmount = order?.totalAmount || order?.subtotalUSD || order?.totalAmountUSD || 0;
+  console.log(totalAmount, "TOTAL AMOUNT", order);
 
   return (
     <OrderCardWrapper onClick={handleCardClick}>
@@ -79,7 +81,7 @@ export default function OrderCard({ order }) {
           {orderStatus}
         </span>
       </div>
-      <p className="timestamp">{formatDateTime(dateString)}</p>
+      {/* <p className="timestamp">{formatDateTime(dateString)}</p> */}
 
       <div className="card_content">
         <div className="product_image">
