@@ -1,55 +1,56 @@
-import { FlexibleDiv } from "../Box/styles";
-import { PGWrapper } from "./productGrid.styles";
-import SingleGridCard from "./SingleGridCard/singleGridCard";
-import { useWindowSize } from "@/data-helpers/hooks";
-import { useState, useEffect } from "react";
+import React, { useMemo } from "react";
+import ProductCard, { LoadingCard } from "@/components/lib/ProductCard/productCard";
 
-export default function ProductGrid({ gridTitle, loading = false, content }) {
-  const [isMobile, setIsMobile] = useState(false);
-  const [width, height] = useWindowSize();
+/**
+ * Props expected:
+ * - content: array
+ * - gridTitle: string
+ * - loading: boolean
+ * - onViewMore: function (optional)
+ */
+export default function ProductGrid({
+  content = [],
+  gridTitle = "",
+  loading = false,
+  onViewMore,
+}) {
+  const normalizedContent = useMemo(() => {
+    const list = Array.isArray(content) ? content : [];
+    return list.map((item) => {
+      if (item?.type === "VIEW_MORE") return item;
 
-  useEffect(() => {
-    if (width < 440) {
-      setIsMobile(true);
-    } else {
-      setIsMobile(false);
-    }
-  }, [width]);
+      if (item?.__type === "VIEW_MORE") {
+        return {
+          type: "VIEW_MORE",
+          title: "View all",
+          onClick: () => {
+            if (typeof onViewMore === "function") onViewMore();
+          },
+        };
+      }
 
-  if ((!content || content.length === 0) && !loading) return null;
+      return item;
+    });
+  }, [content, onViewMore]);
 
   return (
-    <PGWrapper>
-      <FlexibleDiv flexDir="row" justifyContent="space-between">
-        <h2>{gridTitle}</h2>
-        <p className="view__all__style">View All</p>
-        <FlexibleDiv className="grid__wrapper">
-          {loading ? (
-            <>
-              {Array.from({ length: 6 }).map((_, idx) => (
-                <SingleGridCard key={idx} isLoading={true} />
-              ))}
-            </>
-          ) : (
-            <>
-              {content &&
-                content.map((product, idx) => (
-                  <>
-                    {isMobile ? (
-                      <>
-                        {idx < 4 && (
-                          <SingleGridCard key={idx} product={product} />
-                        )}
-                      </>
-                    ) : (
-                      <SingleGridCard key={idx} product={product} />
-                    )}
-                  </>
-                ))}
-            </>
-          )}
-        </FlexibleDiv>
-      </FlexibleDiv>
-    </PGWrapper>
+    <section style={{ width: "100%", marginTop: 20 }}>
+      {gridTitle ? <h3 style={{ margin: 0 }}>{gridTitle}</h3> : null}
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+          gap: 14,
+          marginTop: 12,
+        }}
+      >
+        {loading
+          ? Array.from({ length: 8 }).map((_, idx) => <LoadingCard key={idx} />)
+          : normalizedContent.map((card, idx) => (
+              <ProductCard key={card?._id || `grid-card-${idx}`} card={card} />
+            ))}
+      </div>
+    </section>
   );
 }

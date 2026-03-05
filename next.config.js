@@ -5,8 +5,12 @@ const nextConfig = {
     styledComponents: true,
   },
   images: {
-    domains: ["oosri.com", "res.cloudinary.com"],
+    remotePatterns: [
+      { protocol: "https", hostname: "oosri.com" },
+      { protocol: "https", hostname: "res.cloudinary.com" },
+      { protocol: "https", hostname: "placehold.co" },
+    ],
   },
 };
 
-module.exports = nextConfig
+module.exports = nextConfig;

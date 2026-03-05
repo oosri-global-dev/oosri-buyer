@@ -7,7 +7,7 @@ import OrderCard from "./components/OrderCard";
 import { useGetUserOrders } from "@/network/orders";
 
 export default function OrderPage() {
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState("inprogress");
   const [skip, setSkip] = useState(0);
   const limit = 10;
 
@@ -16,22 +16,31 @@ export default function OrderPage() {
 
   // Extract orders from API response
   const orders = data?.body?.orders || data?.orders || [];
-  const isEmpty = !isLoading && orders.length === 0;
 
-  // Filter orders based on active tab if needed
-  const getFilteredOrders = () => {
-    if (!orders || orders.length === 0) return [];
-
-    // Tab filtering logic - adjust based on your tab configuration
-    // activeTab 0 = All, 1 = Pending, 2 = Delivered, etc.
-    if (activeTab === 0) return orders;
-
-    // Add your tab-based filtering logic here
-    // Example: return orders.filter(order => order.status === tabStatus);
-    return orders;
+  // Helper to determine status category using the correct field from the API
+  const getStatusCategory = (order) => {
+    const s = (order?.orderStatus || order?.status || "").toLowerCase();
+    if (s.includes("delivered") || s.includes("completed")) return "completed";
+    if (s.includes("cancelled")) return "cancelled";
+    return "inprogress"; // processing, pending, picked, etc.
   };
 
-  const filteredOrders = getFilteredOrders();
+  // Calculate counts for each tab
+  const counts = orders.reduce(
+    (acc, order) => {
+      const category = getStatusCategory(order);
+      acc[category] = (acc[category] || 0) + 1;
+      return acc;
+    },
+    { inprogress: 0, completed: 0, cancelled: 0 }
+  );
+
+  // Filter orders based on active tab
+  const filteredOrders = orders.filter(
+    (order) => getStatusCategory(order) === activeTab
+  );
+
+  const isEmpty = !isLoading && filteredOrders.length === 0;
 
   return (
     <OrderPageWrapper>
@@ -45,6 +54,7 @@ export default function OrderPage() {
           active={(e) => {
             setActiveTab(e);
           }}
+          counts={counts}
         />
       </FlexibleDiv>
 
@@ -64,10 +74,10 @@ export default function OrderPage() {
           }
         />
       ) : (
-              <section className="orders_list">
-                {filteredOrders.map((order) => (
-                  <OrderCard key={order?.id || order?._id} order={order} />
-                ))}
+        <section className="orders_list">
+          {filteredOrders.map((order) => (
+            <OrderCard key={order?.orderId || order?.id || order?._id} order={order} />
+          ))}
         </section>
       )}
     </OrderPageWrapper>
