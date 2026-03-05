@@ -11,7 +11,8 @@ export default function OrderDetailsScreen() {
     const { id } = router.query;
 
     const { data, isLoading, isError } = useGetOrderById(id);
-    // Backend wraps in body or returns directly
+    // The network layer does: const { data } = await instance.get(...)  → data = API response
+    // API response shape: { status, message, body: { orderId, products, sellerFullName, ... } }
     const order = data?.body || data;
 
     if (isLoading) {
@@ -60,34 +61,25 @@ export default function OrderDetailsScreen() {
     const orderStatus = order?.orderStatus || order?.status || "Pending";
     const createdAt = formatDateTime(order?.orderDate || order?.createdAt || order?.date);
 
-    // Vendor — comes from first product's sellerName
-    const firstProduct = order?.products?.[0] || order?.items?.[0] || {};
-    const vendorName = firstProduct?.sellerName || order?.vendorName || order?.seller?.name || "";
-    const vendorImage = order?.vendorImage || order?.seller?.image || "https://placehold.co/24x24";
+    // ─── Vendor ────────────────────────────────────────────────────────────────
+    // The API returns sellerFullName at the order level (not on each product object)
+    const firstProduct = order?.products?.[0] || {};
+    const vendorName = order?.sellerFullName || '';
+    const vendorImage = order?.vendorImage || 'https://placehold.co/24x24';
 
     // ─── Product fields ─────────────────────────────────────────────────────────
-    const productTitle =
-        firstProduct?.productName ||
-        firstProduct?.title ||
-        firstProduct?.product?.productName ||
-        "Product";
+    // API response product object keys (from buyerOrderService retrieveOrderById):
+    //   productName, productDescription, productBrand, color, condition,
+    //   productType, dimension, productImage (array), productAmount (NGN), productAmountUSD
+    const productTitle = firstProduct?.productName || 'Product';
 
-    const productImage =
-        // detail endpoint sends productImage (array); list endpoint sends images (array)
-        (Array.isArray(firstProduct?.productImage) ? firstProduct.productImage[0] : firstProduct?.productImage) ||
-        firstProduct?.images?.[0] ||
-        firstProduct?.productImages?.[0] ||
-        firstProduct?.image ||
-        firstProduct?.product?.productImages?.[0] ||
-        "https://placehold.co/150x150";
+    // productImage is an array of Cloudinary URLs
+    const productImage = Array.isArray(firstProduct?.productImage)
+        ? (firstProduct.productImage[0] || 'https://placehold.co/150x150')
+        : (firstProduct?.productImage || 'https://placehold.co/150x150');
 
-    const productDescription = stripHtml(
-        firstProduct?.description ||
-        firstProduct?.productDescription ||
-        firstProduct?.product?.description ||
-        firstProduct?.product?.productDescription ||
-        ""
-    );
+    // productDescription comes as HTML — strip tags before displaying
+    const productDescription = stripHtml(firstProduct?.productDescription || '');
 
     // ─── Product price ────────────────────────────────────────────────────────────
     // productAmountUSD = product.totalPrice (NGN) × fxRate → correctly computed USD
