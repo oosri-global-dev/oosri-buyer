@@ -44,6 +44,13 @@ const getFirstProductImage = (card) => {
 export default function ProductCard({ card, keyProp, isLoading = false }) {
   const { push } = useRouter();
 
+  // ✅ ALL hooks declared unconditionally at the top — Rules of Hooks
+  const { cart, addToCart, removeFromCart, dispatch, user } = useMainContext();
+  const [isLoadingBtn, setIsLoadingBtn] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(card?.isFavorite || false);
+  const [isSavingFavorite, setIsSavingFavorite] = useState(false);
+  const priceData = useProductPrice(card);
+
   // ✅ 0) If card is empty, don't render anything
   if (!card) return null;
 
@@ -122,11 +129,6 @@ export default function ProductCard({ card, keyProp, isLoading = false }) {
 
   // ✅ Normal product card logic
   const maxLikes = ["", "", "", "", ""];
-  const { cart, addToCart, removeFromCart, dispatch, user } = useMainContext();
-  const [isLoadingBtn, setIsLoadingBtn] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(card?.isFavorite || false);
-  const [isSavingFavorite, setIsSavingFavorite] = useState(false);
-  const priceData = useProductPrice(card);
 
   const isProductInCart = (productId) => {
     return cart.some((item) => item._id === productId);
