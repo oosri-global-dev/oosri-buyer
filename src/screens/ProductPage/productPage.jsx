@@ -21,7 +21,6 @@ import { useRouter } from "next/router";
 import OorsiLoader from "@/components/lib/Loader/loader";
 import { formatCurrency, useProductPrice } from "@/data-helpers/hooks";
 import Image from "next/image";
-import SafeImage from "@/components/lib/SafeImage/SafeImage";
 import { MoreReviews } from "./sections/more-reviews/moreReviews";
 import { getAllReviews } from "@/network/reviews";
 
@@ -190,7 +189,7 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                 >
                   {product?.productImages?.map((sgn, idx) => (
                     <div key={idx} className="images__wrapper">
-                      <SafeImage
+                      <Image
                         src={sgn}
                         onClick={() => {
                           setIdxOfSelectedImage(idx);
@@ -212,14 +211,12 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                       className="main__image"
                       src={selectedImage}
                       alt={`main__1`}
-                      onError={(e) => { e.currentTarget.src = "/images/placeholder.svg"; }}
                     />
                   ) : (
                     <img
                       className="main__image"
-                      src={product?.productImages?.[0] || "/images/placeholder.svg"}
+                      src={product?.productImages?.[0] || ""}
                       alt={`main__1`}
-                      onError={(e) => { e.currentTarget.src = "/images/placeholder.svg"; }}
                     />
                   )}
                 </FlexibleDiv>

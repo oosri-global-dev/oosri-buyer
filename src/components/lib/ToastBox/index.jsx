@@ -34,7 +34,7 @@ export default function Customtoastbox() {
       flexWrap="nowrap"
       justifyContent="flex-start"
       bgColor={toastbox.type === "success" ? "#6DBD28" : "red"}
-      $isVisible={isVisible}
+      isVisible={isVisible}
     >
       {toastbox.type === "success" ? (
         <OkayIcon color="#fff" size={22} />

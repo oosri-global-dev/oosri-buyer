@@ -45,28 +45,12 @@ export const formatCurrency = (amount, currency = "USD") => {
   const formatter = Intl.NumberFormat("en-US", {
     style: "currency",
     currency: currency || "USD",
-    currencyDisplay: "symbol",
+    currencyDisplay: "symbol", // Explicitly use currency symbol (₦, $, €, etc.) instead of code
     useGrouping: true,
-    maximumFractionDigits: 2,
+    maximumFractionDigits: 2, // Up to 2 decimal places
     minimumFractionDigits: 0,
   });
   return formatter.format(amount || 0);
-};
-
-/**
- * Strips all HTML tags from a string and returns plain text.
- * Safe alternative to dangerouslySetInnerHTML — no XSS risk.
- */
-export const stripHtml = (html) => {
-  if (!html) return "";
-  // Use the browser's built-in parser when available (SSR-safe fallback via regex)
-  if (typeof window !== "undefined" && typeof document !== "undefined") {
-    const div = document.createElement("div");
-    div.innerHTML = html;
-    return div.textContent || div.innerText || "";
-  }
-  // SSR fallback: strip tags with regex
-  return html.replace(/<[^>]*>/g, "").trim();
 };
 
 export function truncateString(str, num) {
