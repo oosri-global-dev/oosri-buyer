@@ -3,7 +3,7 @@ import { FlexibleDiv } from "../Box/styles";
 import { SCProductWrapper } from "./single-cart-product.styles";
 import { BsTrash as TrashIcon } from "react-icons/bs";
 import { formatCurrency, useProductPrice } from "@/data-helpers/hooks";
-import Image from "next/image";
+import SafeImage from "@/components/lib/SafeImage/SafeImage";
 import { useMainContext } from "@/context";
 import { useRouter } from "next/router";
 import { Spin } from "antd";
@@ -30,8 +30,8 @@ export default function SingleCartProduct({
         gap="20px"
       >
         <div className="product__image__wrapper">
-          <Image
-            src={item?.productImages[0]}
+          <SafeImage
+            src={item?.productImages?.[0]}
             alt={`${item?._id} product image`}
             layout="fill"
             objectFit="cover"

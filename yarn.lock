@@ -263,6 +263,18 @@
   resolved "https://registry.npmjs.org/@rushstack/eslint-patch/-/eslint-patch-1.5.1.tgz"
   integrity sha512-6i/8UoL0P5y4leBIGzvkZdS85RDMG9y1ihZzmTZQ5LdHUYmZ7pKFoj8X0236s3lusPs1Fa5HTQUpwI+UfTcmeA==
 
+"@stripe/react-stripe-js@^5.6.0":
+  version "5.6.0"
+  resolved "https://registry.npmjs.org/@stripe/react-stripe-js/-/react-stripe-js-5.6.0.tgz"
+  integrity sha512-tucu/vTGc+5NXbo2pUiaVjA4ENdRBET8qGS00BM4BAU8J4Pi3eY6BHollsP2+VSuzzlvXwMg0it3ZLhbCj2fPg==
+  dependencies:
+    prop-types "^15.7.2"
+
+"@stripe/stripe-js@^8.7.0", "@stripe/stripe-js@>=8.0.0 <9.0.0":
+  version "8.8.0"
+  resolved "https://registry.npmjs.org/@stripe/stripe-js/-/stripe-js-8.8.0.tgz"
+  integrity sha512-NNYuyW8qmLjyHnpyFgs/23wUrjB8k0xN9YIZFOMLewCa/pIkIji9e9aY/EgdNryEDDRptc6TcPIHRvG1R0ClFw==
+
 "@swc/helpers@0.5.2":
   version "0.5.2"
   resolved "https://registry.npmjs.org/@swc/helpers/-/helpers-0.5.2.tgz"
@@ -2084,7 +2096,7 @@ prelude-ls@^1.2.1:
   resolved "https://registry.npmjs.org/prelude-ls/-/prelude-ls-1.2.1.tgz"
   integrity sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==
 
-prop-types@^15, prop-types@^15.6.1, prop-types@^15.6.2, prop-types@^15.8.1, "prop-types@15.x.x - 16.x.x":
+prop-types@^15, prop-types@^15.6.1, prop-types@^15.6.2, prop-types@^15.7.2, prop-types@^15.8.1, "prop-types@15.x.x - 16.x.x":
   version "15.8.1"
   resolved "https://registry.npmjs.org/prop-types/-/prop-types-15.8.1.tgz"
   integrity sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==
@@ -2478,7 +2490,7 @@ react-country-flag@^3.1.0:
   resolved "https://registry.npmjs.org/react-country-flag/-/react-country-flag-3.1.0.tgz"
   integrity sha512-JWQFw1efdv9sTC+TGQvTKXQg1NKbDU2mBiAiRWcKM9F1sK+/zjhP2yGmm8YDddWyZdXVkR8Md47rPMJmo4YO5g==
 
-react-dom@*, "react-dom@^0.14.0 || ^15.0.1 || ^16.0.0 || ^17.0.0 || ^18.0.0", "react-dom@^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", react-dom@^18, react-dom@^18.2.0, "react-dom@>= 16.8.0", react-dom@>=16, react-dom@>=16.0.0, react-dom@>=16.11.0, "react-dom@>=16.8.0 || ^19.0 || ^19.0.0-rc", react-dom@>=16.9.0, "react-dom@15.x || 16.x || 17.x || 18.x":
+react-dom@*, "react-dom@^0.14.0 || ^15.0.1 || ^16.0.0 || ^17.0.0 || ^18.0.0", "react-dom@^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", react-dom@^18, react-dom@^18.2.0, "react-dom@>= 16.8.0", react-dom@>=16, react-dom@>=16.0.0, react-dom@>=16.11.0, "react-dom@>=16.8.0 <20.0.0", "react-dom@>=16.8.0 || ^19.0 || ^19.0.0-rc", react-dom@>=16.9.0, "react-dom@15.x || 16.x || 17.x || 18.x":
   version "18.2.0"
   resolved "https://registry.npmjs.org/react-dom/-/react-dom-18.2.0.tgz"
   integrity sha512-6IMTriUmvsjHUjNtEDudZfuDQUoWXVxKHhlEGSk81n4YFS+r/Kl99wXiwlVXtPBtJenozv2P+hxDsw9eA7Xo6g==
@@ -2568,7 +2580,7 @@ react-sticky-box@^2.0.5:
   resolved "https://registry.npmjs.org/react-sticky-box/-/react-sticky-box-2.0.5.tgz"
   integrity sha512-JEIuN7Q3razU1NNS0vddC12GXCUkj7T4aCpC9ZSTjgBddFsBdTcN1RhYXFLjCE/KDOQqX2Ix308BcdrqtSJbkQ==
 
-react@*, "react@^0.14.0 || ^15.0.1 || ^16.0.0 || ^17.0.0 || ^18.0.0", "react@^16 || ^17 || ^18 || ^19", "react@^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react@^16.8.0 || ^17.0.0 || ^18.0.0", react@^18, "react@^18 || ^19", react@^18.2.0, "react@>= 16.8.0", "react@>= 16.8.0 || 17.x.x || ^18.0.0-0", react@>=15.0.0, react@>=16, react@>=16.0.0, react@>=16.11.0, react@>=16.8.0, "react@>=16.8.0 || ^19.0 || ^19.0.0-rc", react@>=16.9.0, "react@15.x || 16.x || 17.x || 18.x":
+react@*, "react@^0.14.0 || ^15.0.1 || ^16.0.0 || ^17.0.0 || ^18.0.0", "react@^16 || ^17 || ^18 || ^19", "react@^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react@^16.8.0 || ^17.0.0 || ^18.0.0", react@^18, "react@^18 || ^19", react@^18.2.0, "react@>= 16.8.0", "react@>= 16.8.0 || 17.x.x || ^18.0.0-0", react@>=15.0.0, react@>=16, react@>=16.0.0, react@>=16.11.0, react@>=16.8.0, "react@>=16.8.0 <20.0.0", "react@>=16.8.0 || ^19.0 || ^19.0.0-rc", react@>=16.9.0, "react@15.x || 16.x || 17.x || 18.x":
   version "18.2.0"
   resolved "https://registry.npmjs.org/react/-/react-18.2.0.tgz"
   integrity sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==

@@ -12,7 +12,9 @@ export default function WishlistPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const { data: savedItemsData, isLoading, isError } = useSavedItemsQuery();
 
-  const savedItems = savedItemsData?.body?.savedItems || [];
+  const savedItems = useMemo(() => {
+    return savedItemsData?.body?.savedItems || [];
+  }, [savedItemsData]);
 
   // Filter saved items based on search query
   const filteredItems = useMemo(() => {
@@ -31,15 +33,16 @@ export default function WishlistPage() {
     });
   }, [savedItems, searchQuery]);
 
-  const isEmpty = !isLoading && filteredItems.length === 0;
+  const hasItems = savedItems.length > 0;
+  const isSearchEmpty = !isLoading && hasItems && filteredItems.length === 0;
+  const isWishlistEmpty = !isLoading && !hasItems;
 
-  console.log(savedItemsData?.body);
 
   return (
     <WishListWrapper flexDir={"column"} alignItems={"start"}>
       <FlexibleDiv className="top_bar" justifyContent={"space-between"}>
         <h1>Saved Items</h1>
-        {!isEmpty && !isLoading && (
+        {hasItems && !isLoading && (
           <TextField
             border="border: 1.5px solid rgba(224, 224, 224, 0.60)"
             style={{
@@ -64,13 +67,18 @@ export default function WishlistPage() {
           >
             <Spin size="large" />
           </FlexibleDiv>
-        ) : isEmpty ? (
+        ) : isWishlistEmpty ? (
           <EmptyState
             title={"You haven't saved an item yet!"}
             paragraph={
               "Spotted something appealing? Simply tap the heart-shaped icon beside the item to save it to your wishlist! All your cherished items will be displayed here."
             }
           />
+          ) : isSearchEmpty ? (
+            <EmptyState
+              title={"No items found"}
+              paragraph={"We couldn't find any items matching your search."}
+            />
         ) : (
           <FlexibleDiv
             width="100%"

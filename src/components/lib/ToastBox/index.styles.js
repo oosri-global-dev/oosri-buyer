@@ -22,8 +22,8 @@ export const CustomToastBoxWrapper = styled(FlexibleDiv)`
   transform: translateX(100%);
   transition: transform 0.3s ease-out;
 
-  ${({ isVisible }) =>
-    isVisible &&
+  ${({ $isVisible }) =>
+    $isVisible &&
     css`
       animation: ${slideIn} 0.3s forwards;
     `}

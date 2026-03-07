@@ -1,86 +1,143 @@
-import {ContactWrapper} from './ContactForm.styles'
+import { ContactWrapper } from './ContactForm.styles'
 import TextField from "@/components/lib/TextField";
-import {TbMessage as Message} from 'react-icons/tb'
-import { IoCallOutline as Phone} from "react-icons/io5";
+import { useState } from "react";
+import toast from "react-hot-toast";
+import { contactUs } from "@/network/contact";
+import { TbMessage as Message } from 'react-icons/tb'
+import { IoCallOutline as Phone } from "react-icons/io5";
 import { PiHouseLight as House } from "react-icons/pi";
 import ContactHeader from "@/assets/images/contactHeader.png";
 import { FlexibleDiv, FlexibleSection } from "@/components/lib/Box/styles";
 import Button from "@/components/lib/Button";
 
 export default function ContactForm() {
-    return (
-      <ContactWrapper>
-        <FlexibleDiv
-          className="contact__header"
-          style={{ backgroundImage: `url(${ContactHeader.src})` }}
-        >
-          <h2>Contact Us</h2>
-          <p>
-            Get in touch with us; we`re here to help! Have questions, feedback,
-            or need assistance? Reach out, and our dedicated team will assist
-            you promptly.
-          </p>
-        </FlexibleDiv>
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    message: "",
+  });
+  const [isLoading, setIsLoading] = useState(false);
 
-        <FlexibleSection className="form__container">
-          <form className="form">
-            <FlexibleDiv
-              className="form__inputs"
-              flexDir="column"
-              alignItems="start"
-            >
-              <label htmlFor="name">Your Name</label>
-              <TextField className="input" id="name" required />
-            </FlexibleDiv>
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
 
-            <FlexibleDiv
-              className="form__inputs"
-              flexDir="column"
-              alignItems="start"
-            >
-              <label htmlFor="email">Email Address</label>
-              <TextField className="input" id="email" required />
-            </FlexibleDiv>
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-            <FlexibleDiv
-              className="form__inputs"
-              flexDir="column"
-              alignItems="start"
-            >
-              <label htmlFor="message">Message</label>
-              <TextField className="textarea" id="message" />
-            </FlexibleDiv>
+    const { fullName, email, message } = formData;
+    if (!fullName || !email || !message) {
+      toast.error("Please fill in all fields.");
+      return;
+    }
 
-            <Button
-              type="submit"
-              color="var(--orrsiWhite)"
-              backgroundColor="var(--orrsiPrimary)"
-              className="form__submit__btn"
-            >
-              Send Message
-            </Button>
-          </form>
+    try {
+      setIsLoading(true);
+      await contactUs(formData);
+      toast.success("Message sent successfully!");
+      setFormData({ fullName: "", email: "", message: "" });
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.message || "Something went wrong. Please try again."
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-          <div className="info">
-            <h2>Info</h2>
-            <FlexibleDiv className="admin__mail admin__details">
-              <Message className="contact__icon" />
-              <p>
-                <a href="mailto:support@oosri.com">support@oosri.com</a>
-              </p>
-            </FlexibleDiv>
-            <FlexibleDiv className="admin__contact admin__details">
-              <Phone className="contact__icon" />
-              <p>
-                <a href="tel:+2347011067109">+2347011067109</a>
-              </p>
-            </FlexibleDiv>
-            {/* <FlexibleDiv className="admin__location admin__details">
-              <House className="contact__icon" />
-              <p>LoremIpsum Lorem Ipsumlorem</p>
-            </FlexibleDiv> */}
-          </div>
-        </FlexibleSection>
-      </ContactWrapper>
-    );
+  return (
+    <ContactWrapper>
+      <FlexibleDiv
+        className="contact__header"
+        style={{ backgroundImage: `url(${ContactHeader.src})` }}
+      >
+        <h2>Contact Us</h2>
+        <p>
+          Get in touch with us; we`re here to help! Have questions, feedback,
+          or need assistance? Reach out, and our dedicated team will assist
+          you promptly.
+        </p>
+      </FlexibleDiv>
+
+      <FlexibleSection className="form__container">
+        <form className="form" onSubmit={handleSubmit}>
+          <FlexibleDiv
+            className="form__inputs"
+            flexDir="column"
+            alignItems="start"
+          >
+            <label htmlFor="fullName">Your Name</label>
+            <TextField
+              className="input"
+              id="fullName"
+              value={formData.fullName}
+              onChange={handleChange}
+              required
+            />
+          </FlexibleDiv>
+
+          <FlexibleDiv
+            className="form__inputs"
+            flexDir="column"
+            alignItems="start"
+          >
+            <label htmlFor="email">Email Address</label>
+            <TextField
+              className="input"
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+          </FlexibleDiv>
+
+          <FlexibleDiv
+            className="form__inputs"
+            flexDir="column"
+            alignItems="start"
+          >
+            <label htmlFor="message">Message</label>
+            <TextField
+              className="textarea"
+              id="message"
+              value={formData.message}
+              onChange={handleChange}
+              required
+            />
+          </FlexibleDiv>
+
+          <Button
+            type="submit"
+            color="var(--orrsiWhite)"
+            backgroundColor="var(--orrsiPrimary)"
+            className="form__submit__btn"
+            disabled={isLoading}
+          >
+            {isLoading ? "Sending..." : "Send Message"}
+          </Button>
+        </form>
+
+        <div className="info">
+          <h2>Info</h2>
+          <FlexibleDiv className="admin__mail admin__details">
+            <Message className="contact__icon" />
+            <p>
+              <a href="mailto:support@oosri.com">support@oosri.com</a>
+            </p>
+          </FlexibleDiv>
+          <FlexibleDiv className="admin__contact admin__details">
+            <Phone className="contact__icon" />
+            <p>
+              <a href="tel:+2347011067109">+2347011067109</a>
+            </p>
+          </FlexibleDiv>
+        </div>
+      </FlexibleSection>
+    </ContactWrapper>
+  );
 }
