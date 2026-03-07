@@ -68,7 +68,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
       document.requestStorageAccess().catch(() => { });
     }
   }, []);
-  const { dispatch, user } = useMainContext();
+  const { dispatch, user, setBuyNowItem } = useMainContext();
   const [form] = Form.useForm();
   const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -389,6 +389,12 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
         message: "Payment successful!",
       },
     });
+
+    // Clear buy now state if this was a buy now checkout
+    if (setBuyNowItem) {
+      setBuyNowItem(null);
+    }
+
     handleCancel();
 
     // Redirect to the order confirmation page
