@@ -1,17 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  compiler: {
+  experimental: {
     styledComponents: true,
   },
   images: {
-    remotePatterns: [
-      { protocol: "https", hostname: "oosri.com" },
-      { protocol: "https", hostname: "res.cloudinary.com" },
-      { protocol: "https", hostname: "placehold.co" },
-      { protocol: "https", hostname: "via.placeholder.com" },
-    ],
+    domains: ["oosri.com", "res.cloudinary.com"],
   },
 };
 
-module.exports = nextConfig;
+module.exports = nextConfig
