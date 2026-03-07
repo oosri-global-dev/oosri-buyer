@@ -30,7 +30,7 @@ export default function NavMenu({ menuItems }) {
           className="nav__menu__input"
           id="nav-check"
           checked={checked}
-          onChange={() => setChecked(!checked)}
+          onClick={() => setChecked(!checked)}
         />
         <span></span>
         <span></span>

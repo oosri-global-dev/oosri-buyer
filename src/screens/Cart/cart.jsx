@@ -24,7 +24,8 @@ export default function CartPage() {
     const priceData = calculateProductPrice(item);
     return acc + (priceData?.price || 0) * item.quantity;
   }, 0);
-  const total = subTotal;
+  const shippingFee = 0;
+  const total = subTotal + shippingFee;
 
 
   return (
@@ -93,6 +94,9 @@ export default function CartPage() {
                 width="fit-content"
               >
                 <h2>Cart Summary</h2>
+                <p className="shipping__fee__text">
+                  Shipping Fee: <span>{formatCurrency(shippingFee || 0)}</span>
+                </p>
                 <p className="shipping__fee__text">
                   Sub Total: <span>{formatCurrency(subTotal || 0)}</span>
                 </p>

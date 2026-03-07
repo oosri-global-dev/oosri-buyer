@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useReducer, useState } from "react";
+import { createContext, useContext, useEffect, useReducer } from "react";
 import { Reducer } from "./reducer";
 import {
   handleAddToCart,
@@ -26,14 +26,11 @@ export const MainContext = createContext({
   cart: [],
   loadingModal: false,
   isLoadingUser: false,
-  buyNowItem: null,
-  setBuyNowItem: () => { },
 });
 
 export const MainProvider = ({ children }) => {
   const initialState = useContext(MainContext);
   const [state, dispatch] = useReducer(Reducer, initialState);
-  const [buyNowItem, setBuyNowItem] = useState(null);
 
   const addToCart = async (item, setIsLoadingBtn) => {
     const cartKey = getDataInCookie("public__cart__key");
@@ -236,8 +233,6 @@ export const MainProvider = ({ children }) => {
     user: state.user,
     toastbox: state.toastbox,
     cart: state.cart,
-    buyNowItem,
-    setBuyNowItem,
     addToCart,
     removeFromCart,
     updateQuantity,
