@@ -35,8 +35,8 @@ function NoOfProductReviews({ numOfReviews }) {
 }
 
 export default function ProductPage({ product, loading, relatedProducts }) {
-  const { push, query } = useRouter();
-  const { cart, addToCart, removeFromCart, updateQuantity, dispatch } =
+  const { push, query, asPath } = useRouter();
+  const { cart, addToCart, removeFromCart, updateQuantity, dispatch, setBuyNowItem, user } =
     useMainContext();
   const [isLoadingBtn, setIsLoadingBtn] = useState(false);
   const [idxOfSelectedImage, setIdxOfSelectedImage] = useState(0);
@@ -353,24 +353,46 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                   >
                     Checkout
                   </Button>
-                  <Button
-                    backgroundColor="#fff"
-                    color="var(--orrsiPrimary)"
-                    className="cart__btn"
-                    onClick={() => {
-                      if (productInCart) {
-                        removeFromCart(product, setIsLoadingBtn);
-                      } else {
-                        addToCart(
-                          { ...product, quantity: numOfProduct },
-                          setIsLoadingBtn
-                        );
-                      }
-                    }}
-                    loading={isLoadingBtn}
-                  >
-                    {productInCart ? "Remove from Cart" : "Add to Cart"}
-                  </Button>
+                  <FlexibleDiv width="100%" flexDir="row" gap="10px">
+                    <Button
+                      width="50%"
+                      backgroundColor="transparent"
+                      color="var(--orrsiPrimary)"
+                      border="1px solid var(--orrsiPrimary)"
+                      hoverBg="var(--orrsiPrimary)"
+                      hoverColor="var(--orrsiWhite)"
+                      className="cart__btn"
+                      onClick={() => {
+                        if (productInCart) {
+                          removeFromCart(product, setIsLoadingBtn);
+                        } else {
+                          addToCart(
+                            { ...product, quantity: numOfProduct },
+                            setIsLoadingBtn
+                          );
+                        }
+                      }}
+                      loading={isLoadingBtn}
+                    >
+                      {productInCart ? "Remove from Cart" : "Add to Cart"}
+                    </Button>
+                    <Button
+                      width="50%"
+                      backgroundColor="var(--orrsiPrimary)"
+                      color="#fff"
+                      className="buy__now__btn"
+                      onClick={() => {
+                        if (!user || (!user._id && !user.id)) {
+                          push(`/login?from=${encodeURIComponent(asPath)}`);
+                          return;
+                        }
+                        setBuyNowItem({ ...product, quantity: numOfProduct });
+                        push("/checkout");
+                      }}
+                    >
+                      Buy Now
+                    </Button>
+                  </FlexibleDiv>
                 </FlexibleDiv>
               </FlexibleDiv>
             </FlexibleSection>

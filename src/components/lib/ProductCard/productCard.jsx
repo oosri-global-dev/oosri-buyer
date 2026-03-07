@@ -42,10 +42,10 @@ const getFirstProductImage = (card) => {
 };
 
 export default function ProductCard({ card, keyProp, isLoading = false }) {
-  const { push } = useRouter();
+  const { push, asPath } = useRouter();
 
   // ✅ ALL hooks declared unconditionally at the top — Rules of Hooks
-  const { cart, addToCart, removeFromCart, dispatch, user } = useMainContext();
+  const { cart, addToCart, removeFromCart, dispatch, user, setBuyNowItem } = useMainContext();
   const [isLoadingBtn, setIsLoadingBtn] = useState(false);
   const [isFavorite, setIsFavorite] = useState(card?.isFavorite || false);
   const [isSavingFavorite, setIsSavingFavorite] = useState(false);
@@ -179,6 +179,16 @@ export default function ProductCard({ card, keyProp, isLoading = false }) {
     }
   };
 
+  const handleBuyNow = (e) => {
+    e.stopPropagation();
+    if (!user || (!user._id && !user.id)) {
+      push(`/login?from=${encodeURIComponent(asPath)}`);
+      return;
+    }
+    setBuyNowItem({ ...card, quantity: 1 });
+    push("/checkout");
+  };
+
   const imgSrc = getFirstProductImage(card);
 
   return (
@@ -268,37 +278,72 @@ export default function ProductCard({ card, keyProp, isLoading = false }) {
       </div>
 
       {isProductInCart(card?._id) ? (
-        <Button
-          width="100%"
-          color="#000"
-          backgroundColor="var(--orrsiSecondary)"
-          hoverBg="var(--orrsiPrimary)"
-          borderColor="#fff"
-          hoverColor="#fff"
-          radius="5px"
-          height="40px"
-          fontSize="0.85rem"
-          border="1px solid #000"
-          loading={isLoadingBtn}
-          onClick={() => removeFromCart(card, setIsLoadingBtn)}
-          className={!isLoadingBtn ? "remove-from-cart-btn" : "loading-btn"}
-        >
-          Remove from cart
-        </Button>
+        <FlexibleDiv gap="10px" width="100%" flexDir="row" flexWrap="nowrap">
+          <Button
+            width="100%"
+            color="#000"
+            backgroundColor="var(--orrsiSecondary)"
+            hoverBg="var(--orrsiPrimary)"
+            borderColor="#fff"
+            hoverColor="#fff"
+            radius="5px"
+            height="40px"
+            fontSize="0.85rem"
+            border="1px solid #000"
+            loading={isLoadingBtn}
+            onClick={(e) => {
+              e.stopPropagation();
+              removeFromCart(card, setIsLoadingBtn);
+            }}
+            className={!isLoadingBtn ? "remove-from-cart-btn" : "loading-btn"}
+          >
+            Remove
+          </Button>
+          <Button
+            width="100%"
+            color="var(--orrsiWhite)"
+            backgroundColor="var(--orrsiPrimary)"
+            radius="5px"
+            height="40px"
+            fontSize="0.85rem"
+            onClick={handleBuyNow}
+          >
+            Buy Now
+          </Button>
+        </FlexibleDiv>
       ) : (
-        <Button
-          width="100%"
-          color="var(--orrsiWhite)"
-          backgroundColor="var(--orrsiPrimary)"
-          radius="5px"
-          height="40px"
-          fontSize="0.85rem"
-          loading={isLoadingBtn}
-          onClick={() => addToCart(card, setIsLoadingBtn)}
-          className={!isLoadingBtn ? "add-to-cart-btn" : "loading-btn"}
-        >
-          Add to cart
-        </Button>
+        <FlexibleDiv gap="10px" width="100%" flexDir="row" flexWrap="nowrap">
+          <Button
+            width="100%"
+            color="var(--orrsiPrimary)"
+            backgroundColor="transparent"
+            border="1px solid var(--orrsiPrimary)"
+            hoverBg="var(--orrsiPrimary)"
+            hoverColor="var(--orrsiWhite)"
+            radius="5px"
+            height="40px"
+            fontSize="0.85rem"
+            loading={isLoadingBtn}
+            onClick={(e) => {
+              e.stopPropagation();
+              addToCart(card, setIsLoadingBtn);
+            }}
+            className={!isLoadingBtn ? "add-to-cart-btn" : "loading-btn"}
+          >
+            Add to cart
+          </Button>
+          <Button
+            width="100%"
+            color="var(--orrsiWhite)"
+            backgroundColor="var(--orrsiPrimary)"
+            radius="5px"
+            height="40px"
+            fontSize="0.85rem"
+            onClick={handleBuyNow}
+          >
+            Buy Now
+          </Button>
+        </FlexibleDiv>
       )}
     </ProductCardWrapper>
   );

@@ -9,6 +9,7 @@ const nextConfig = {
       { protocol: "https", hostname: "oosri.com" },
       { protocol: "https", hostname: "res.cloudinary.com" },
       { protocol: "https", hostname: "placehold.co" },
+      { protocol: "https", hostname: "via.placeholder.com" },
     ],
   },
 };
