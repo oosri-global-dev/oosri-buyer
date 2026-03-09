@@ -1,7 +1,9 @@
 import styled from "styled-components";
 import { FlexibleDiv } from "@/components/lib/Box/styles";
 
-export const NavMenuWrapper = styled(FlexibleDiv)`
+export const NavMenuWrapper = styled(FlexibleDiv).withConfig({
+  shouldForwardProp: (prop) => prop !== "inputChecked",
+})`
   width: fit-content;
 
   label {
