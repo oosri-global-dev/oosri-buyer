@@ -103,3 +103,19 @@ export function useGetShippingFee() {
     mutationFn: handleGetShippingFee,
   });
 }
+
+// Create payment intent
+export const handleCreatePaymentIntent = async (payload) => {
+  const { data } = await instance.post(
+    `/buyer/payment/create-payment-intent`,
+    payload
+  );
+  return data;
+};
+
+// React Query hook for creating payment intent
+export function useCreatePaymentIntent() {
+  return useMutation({
+    mutationFn: handleCreatePaymentIntent,
+  });
+}
