@@ -4,7 +4,7 @@ import { SingleCardWrapper } from "./singleCard.styles";
 import { AiFillStar as LikeIcon } from "react-icons/ai";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-import Image from "next/image";
+import SafeImage from "@/components/lib/SafeImage/SafeImage";
 import { useRouter } from "next/router";
 
 export function LoadingSingleGridCard({ key }) {
@@ -54,8 +54,8 @@ export default function SingleGridCard({ key, product, isLoading = false }) {
           onClick={() => push(`/product/${product?._id}`)}
         >
           <FlexibleDiv className="img__wrapper">
-            <Image
-              src={product?.productImages[0]}
+            <SafeImage
+              src={product?.productImages?.[0]}
               alt={`${product?._id} product image`}
               layout="fill"
               objectFit="cover"
@@ -83,9 +83,8 @@ export default function SingleGridCard({ key, product, isLoading = false }) {
                 <LikeIcon
                   className={`= ${maxLikes.length}`}
                   size={8}
-                  fill={`${
-                    product?.productRating >= idx + 1 ? "#FCCB1B" : "#BDBDBD"
-                  }`}
+                  fill={`${product?.productRating >= idx + 1 ? "#FCCB1B" : "#BDBDBD"
+                    }`}
                   key={idx}
                 />
               ))}
