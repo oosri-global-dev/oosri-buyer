@@ -60,7 +60,7 @@ const countryOptions = COUNTRIES.map((country) => ({
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 console.log(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, "PUBLISHABLE KEY")
 
-export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItems = [] }) {
+export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItems = [], onPaymentSuccess }) {
   const router = useRouter();
   // Request storage access for third‑party Stripe iframe (Chrome partitioning)
   useEffect(() => {
@@ -390,10 +390,15 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
       },
     });
 
-    // Clear buy now state if this was a buy now checkout
-    if (setBuyNowItem) {
-      setBuyNowItem(null);
+    // Signal to the parent that payment succeeded BEFORE closing the modal,
+    // so the parent can skip its /shop fallback redirect.
+    if (onPaymentSuccess) {
+      onPaymentSuccess(paymentIntent);
     }
+
+    // NOT clearing setBuyNowItem(null) here anymore.
+    // Doing so triggers the parent page's useEffect and causes a race 
+    // condition that forces a redirect to /shop before we can hit /order-confirmation.
 
     handleCancel();
 
