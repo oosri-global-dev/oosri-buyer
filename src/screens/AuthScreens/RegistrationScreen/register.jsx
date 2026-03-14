@@ -8,36 +8,39 @@ import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import Link from "next/link";
 import AuthWrapper from "@/components/layouts/AuthWrapper/auth-wrapper";
 import toast, { Toaster } from "react-hot-toast";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { signUpUser } from "@/network/auth";
 import { useRouter } from "next/router";
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import Image from "next/image";
 import Logo from "@/assets/images/homepage/logo.png";
 
+/**
+ * RegisterForm Component
+ * Handles buyer registration and Google account linking.
+ */
 function RegisterForm() {
   const [form] = Form.useForm();
   const [loading, setIsLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const { push } = useRouter();
 
+  /**
+   * Submission handler for manual registration
+   */
   const handleRegisterSubmit = async (values) => {
     setIsLoading(true);
-    if (typeof values?.gender === "undefined") {
-      toast.error(`Please select a gender`, {
-        duration: "400",
-        position: "bottom-center",
-      });
+    
+    // Basic validation
+    if (!values?.gender) {
+      toast.error("Please select your gender", { position: "bottom-center" });
       window.scroll(0, 0);
       setIsLoading(false);
       return;
     }
 
-    if (values?.password?.length < 5) {
-      toast.error(`Password must not be less than 5 characters`, {
-        duration: "400",
-        position: "bottom-center",
-      });
+    if (!values?.password || values.password.length < 5) {
+      toast.error("Password must be at least 5 characters long", { position: "bottom-center" });
       window.scroll(0, 0);
       setIsLoading(false);
       return;
@@ -45,42 +48,32 @@ function RegisterForm() {
 
     try {
       const res = await signUpUser(values);
-
-      //scroll to the top
       window.scroll(0, 0);
-
-      //toast message
-      toast.success(`Signup was successful`, {
-        duration: "500",
-        position: "bottom-center",
-      });
-
+      toast.success("Signup successful! Verifying your email...");
+      
       setTimeout(() => {
-        //redirect to the otp
-        push(`/otp?email=${res?.body?.email}`);
-      }, [1200]);
+        push(`/otp?email=${encodeURIComponent(res?.body?.email)}`);
+      }, 1500);
     } catch (err) {
-      //scroll to the top
       window.scroll(0, 0);
       toast.error(
-        err?.response?.data?.message || "Cannot sign user up at the moment",
-        {
-          duration: "500",
-          position: "bottom-center",
-        }
+        err?.response?.data?.message || "Registration failed. Please try again later.",
+        { position: "bottom-center" }
       );
       setIsLoading(false);
     }
   };
 
-  const handleGoogleLogin = useGoogleLogin({
+  /**
+   * Google "Login" handler during registration
+   * Pre-fills the form with Google profile data.
+   */
+  const handleGoogleAuth = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       setGoogleLoading(true);
       try {
         const userInfoRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-          headers: {
-            Authorization: `Bearer ${tokenResponse.access_token}`,
-          },
+          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
         });
         const userInfo = await userInfoRes.json();
 
@@ -89,33 +82,27 @@ function RegisterForm() {
           email: userInfo.email,
         });
 
-        toast.success(`Welcome ${userInfo.name}! Please complete your registration.`, {
-          duration: 3000,
+        toast.success(`Welcome ${userInfo.name}! Please set a password and gender to complete registration.`, {
+          duration: 4000,
           position: "bottom-center",
         });
       } catch (err) {
-        toast.error("Google sign-in failed. Please try again.", {
-          duration: 500,
-          position: "bottom-center",
-        });
+        toast.error("Google sync failed. Please fill the form manually.", { position: "bottom-center" });
       } finally {
         setGoogleLoading(false);
       }
     },
     onError: () => {
-      toast.error("Google sign-in was cancelled or failed.", {
-        duration: 500,
-        position: "bottom-center",
-      });
+      toast.error("Google authentication was cancelled.", { position: "bottom-center" });
     },
   });
 
   return (
     <LoginWrapper>
+      <Toaster containerClassName="toaster__style" />
       <FlexibleDiv maxWidth="350px" gap="40px" flexDir="column">
-        <Toaster containerClassName="toaster__style" />
 
-        {/* Branding — visible on mobile only */}
+        {/* Branding — mobile optimized */}
         <FlexibleDiv
           flexDir="column"
           alignItems="center"
@@ -125,8 +112,8 @@ function RegisterForm() {
           <Image
             src={Logo}
             alt="Oosri logo"
-            width={100}
-            height={40}
+            width={120}
+            height={48}
             style={{ objectFit: "contain" }}
           />
           <p className="mobile__tagline">
@@ -135,75 +122,77 @@ function RegisterForm() {
         </FlexibleDiv>
 
         <h2>Register</h2>
+
         <Button
           border="1.5px solid rgba(224, 224, 224, 0.60)"
           radius="10px"
           width="100%"
           className="google__auth__btn"
           icon={<GoogleIcon size={25} />}
-          onClick={() => handleGoogleLogin()}
+          onClick={() => handleGoogleAuth()}
           loading={googleLoading}
           type="button"
         >
-          Register with google
+          Register with Google
         </Button>
-        <Form form={form} onFinish={handleRegisterSubmit}>
+
+        <Form form={form} onFinish={handleRegisterSubmit} layout="vertical">
           <FlexibleDiv justifyContent="flex-start">
+            
             <label className="input__label">Full Name</label>
-            <Form.Item name="fullName">
+            <Form.Item 
+              name="fullName"
+              rules={[{ required: true, message: "Please enter your full name" }]}
+            >
               <TextField
-                type="text"
                 className="move__down"
                 borderRadius="10px"
-                autoComplete="new-password"
-                maxLength={50}
-                required
+                placeholder="John Doe"
               />
             </Form.Item>
 
-            <FlexibleDiv className="move__down" flexWrap="nowrap" gap="15px">
-              <Form.Item name="gender" required>
-                <Radio.Group className="radio__group__support">
-                  <Radio value={"Male"} className="radio__box">
-                    Male
-                  </Radio>
-                  <Radio value={"Female"} className="radio__box">
-                    Female
-                  </Radio>
-                </Radio.Group>
-              </Form.Item>
-            </FlexibleDiv>
+            <Form.Item name="gender" rules={[{ required: true }]}>
+              <Radio.Group className="radio__group__support">
+                <Radio value="Male" className="radio__box">Male</Radio>
+                <Radio value="Female" className="radio__box">Female</Radio>
+              </Radio.Group>
+            </Form.Item>
 
-            <label className="input__label">Email</label>
-            <Form.Item name="email">
+            <label className="input__label">Email Address</label>
+            <Form.Item 
+              name="email"
+              rules={[{ required: true, type: "email", message: "Please enter a valid email address" }]}
+            >
               <TextField
-                type="email"
                 className="move__down"
                 borderRadius="10px"
-                required
+                placeholder="example@mail.com"
               />
             </Form.Item>
 
             <label className="input__label">Phone Number</label>
-            <Form.Item name="phoneNumber">
+            <Form.Item 
+              name="phoneNumber"
+              rules={[{ required: true, message: "Please enter your phone number" }]}
+            >
               <TextField
-                type="number"
                 className="move__down"
                 borderRadius="10px"
-                required
+                placeholder="e.g. 08012345678"
               />
             </Form.Item>
 
             <label className="input__label">Create Password</label>
-            <Form.Item name="password">
+            <Form.Item 
+              name="password"
+              rules={[{ required: true, message: "Please create a password" }]}
+            >
               <TextField.Password
-                type="password"
                 className="password__style"
+                placeholder="••••••••"
                 iconRender={(visible) =>
                   visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
                 }
-                autoComplete="new-password"
-                required
               />
             </Form.Item>
 
@@ -219,6 +208,7 @@ function RegisterForm() {
             >
               Register
             </Button>
+
             <p className="no__account__yet">
               I have an account already{" "}
               <Link href={"/login"}>
@@ -232,6 +222,9 @@ function RegisterForm() {
   );
 }
 
+/**
+ * Main Register Page Export
+ */
 export default function Register() {
   return (
     <AuthWrapper>

@@ -121,11 +121,6 @@ export default function ProductCard({ card, keyProp, isLoading = false }) {
     return <LoadingCard keyProp={keyProp} />;
   }
 
-  /**
-   * ✅ NEW: Remove "ghost" products (the exact one you circled)
-   * If it's not VIEW_MORE and it doesn't have a valid product id,
-   * it isn't a real product — so we don't render it.
-   */
   if (!card?._id) return null;
 
   // ✅ Normal product card logic
