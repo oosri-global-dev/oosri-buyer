@@ -12,6 +12,8 @@ import { useState } from "react";
 import { signUpUser } from "@/network/auth";
 import { useRouter } from "next/router";
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
+import Image from "next/image";
+import Logo from "@/assets/images/homepage/logo.png";
 
 function RegisterForm() {
   const [form] = Form.useForm();
@@ -103,6 +105,26 @@ function RegisterForm() {
     <LoginWrapper>
       <FlexibleDiv maxWidth="350px" gap="40px" flexDir="column">
         <Toaster containerClassName="toaster__style" />
+
+        {/* Branding — visible on mobile only */}
+        <FlexibleDiv
+          flexDir="column"
+          alignItems="center"
+          gap="8px"
+          className="mobile__branding"
+        >
+          <Image
+            src={Logo}
+            alt="Oosri logo"
+            width={100}
+            height={40}
+            style={{ objectFit: "contain" }}
+          />
+          <p className="mobile__tagline">
+            Africa's marketplace for the world
+          </p>
+        </FlexibleDiv>
+
         <h2>Register</h2>
         <Button
           border="1.5px solid rgba(224, 224, 224, 0.60)"

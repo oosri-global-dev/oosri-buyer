@@ -17,6 +17,8 @@ import { storeDataInCookie } from "@/data-helpers/auth-session";
 import { loginActions } from "@/utils/user-actions";
 import AuthWrapper from "@/components/layouts/AuthWrapper/auth-wrapper";
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
+import Image from "next/image";
+import Logo from "@/assets/images/homepage/logo.png";
 
 function LoginForm() {
   const [form] = Form.useForm();
@@ -60,7 +62,6 @@ function LoginForm() {
       if (query?.action && query?.from) {
         window.open(`${query?.from}`, "_self");
       } else if (query?.from) {
-        // Redirect back to the page the user came from
         window.open(`${query?.from}`, "_self");
       } else {
         window.open(`/`, "_self");
@@ -92,7 +93,6 @@ function LoginForm() {
     onSuccess: async (tokenResponse) => {
       setGoogleLoading(true);
       try {
-        // Fetch user info from Google
         const userInfoRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
           headers: {
             Authorization: `Bearer ${tokenResponse.access_token}`,
@@ -138,6 +138,26 @@ function LoginForm() {
     <LoginWrapper>
       <Toaster containerClassName="toaster__style" />
       <FlexibleDiv maxWidth="350px" gap="40px" flexDir="column">
+
+        {/* Branding — visible on mobile only */}
+        <FlexibleDiv
+          flexDir="column"
+          alignItems="center"
+          gap="8px"
+          className="mobile__branding"
+        >
+          <Image
+            src={Logo}
+            alt="Oosri logo"
+            width={100}
+            height={40}
+            style={{ objectFit: "contain" }}
+          />
+          <p className="mobile__tagline">
+            Africa's marketplace for the world
+          </p>
+        </FlexibleDiv>
+
         <h2>Login</h2>
         <Button
           border="1.5px solid rgba(224, 224, 224, 0.60)"
