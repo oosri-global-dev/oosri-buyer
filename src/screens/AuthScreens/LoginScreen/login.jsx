@@ -53,8 +53,14 @@ function LoginForm() {
         await action(res?.body?.accessToken);
       }
 
-      // route to 'from' path if exists
-      if (query?.action) {
+      // Fix: restore scroll before navigating away
+      document.body.style.overflow = "unset";
+
+      // route to 'from' path if exists, otherwise go back to previous page
+      if (query?.action && query?.from) {
+        window.open(`${query?.from}`, "_self");
+      } else if (query?.from) {
+        // Redirect back to the page the user came from
         window.open(`${query?.from}`, "_self");
       } else {
         window.open(`/`, "_self");
@@ -99,9 +105,16 @@ function LoginForm() {
           position: "bottom-center",
         });
 
-        // Redirect to homepage after short delay
+        // Fix: restore scroll before navigating away
+        document.body.style.overflow = "unset";
+
+        // Redirect to previous page or homepage
         setTimeout(() => {
-          window.open("/", "_self");
+          if (query?.from) {
+            window.open(`${query?.from}`, "_self");
+          } else {
+            window.open("/", "_self");
+          }
         }, 1500);
 
       } catch (err) {

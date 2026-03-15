@@ -24,8 +24,20 @@ function AppContent({ Component, pageProps, getLayout }) {
     setMounted(true);
   }, []);
 
-  // Extract the pathname from asPath
-  const pathname = router.asPath.split("?")[0];
+  // Fix: restore body scroll on every route change
+  // This prevents the page freeze when navigating back from a page
+  // that had a modal open (which sets overflow:hidden)
+  useEffect(() => {
+    const handleRouteChange = () => {
+      document.body.style.overflow = "unset";
+    };
+    router.events.on("routeChangeComplete", handleRouteChange);
+    router.events.on("routeChangeError", handleRouteChange);
+    return () => {
+      router.events.off("routeChangeComplete", handleRouteChange);
+      router.events.off("routeChangeError", handleRouteChange);
+    };
+  }, [router]);
 
   useEffect(() => {
     const handleStart = () => NProgress.start();
