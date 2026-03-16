@@ -71,7 +71,9 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
 
   const autocompleteRef = useRef(null);
 
-  // Request storage access for third-party Stripe iframe (Chrome partitioning)
+export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItems = [], onPaymentSuccess }) {
+  const router = useRouter();
+  // Request storage access for third‑party Stripe iframe (Chrome partitioning)
   useEffect(() => {
     if (document.requestStorageAccess) {
       document.requestStorageAccess().catch(() => { });
@@ -435,9 +437,15 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
       },
     });
 
-    if (setBuyNowItem) {
-      setBuyNowItem(null);
+    // Signal to the parent that payment succeeded BEFORE closing the modal,
+    // so the parent can skip its /shop fallback redirect.
+    if (onPaymentSuccess) {
+      onPaymentSuccess(paymentIntent);
     }
+
+    // NOT clearing setBuyNowItem(null) here anymore.
+    // Doing so triggers the parent page's useEffect and causes a race 
+    // condition that forces a redirect to /shop before we can hit /order-confirmation.
 
     handleCancel();
 
