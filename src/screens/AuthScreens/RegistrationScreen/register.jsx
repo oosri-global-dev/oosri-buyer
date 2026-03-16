@@ -121,7 +121,7 @@ function RegisterForm() {
             style={{ objectFit: "contain" }}
           />
           <p className="mobile__tagline">
-            Africa's marketplace for the world
+            Africa&apos;s marketplace for the world
           </p>
         </FlexibleDiv>
 
@@ -226,7 +226,7 @@ function RegisterForm() {
 export default function Register() {
   return (
     <AuthWrapper>
-      <GoogleOAuthProvider clientId="519641043381-8fni1j8vbmoakegvomk1lsfrgrnd0q4d.apps.googleusercontent.com">
+      <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}>
         <RegisterForm />
       </GoogleOAuthProvider>
     </AuthWrapper>

@@ -56,7 +56,7 @@ export default function Header() {
     <HeaderWrapper>
       <FlexibleDiv className="logo__section">
         <Link href={"/"}>
-          <img src={Logo.src} className="logo__wrapper" alt="logo" />
+          <Image src={Logo} className="logo__wrapper" alt="logo" />
         </Link>
 
         <div className="nav__menu__wrapper">
@@ -133,10 +133,13 @@ export default function Header() {
                     alignItems="center"
                     gap="10px"
                   >
-                    <img
+                    <Image
                       alt="user-profile"
-                      src={user?.profileImage || ProfileImage.src}
+                      src={user?.profileImage || ProfileImage}
                       className="profile"
+                      width={40}
+                      height={40}
+                      style={{ borderRadius: "50%", objectFit: "cover" }}
                     />
                     <FlexibleDiv
                       justifyContent="flex-start"
