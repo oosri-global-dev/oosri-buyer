@@ -120,11 +120,6 @@ export default function ProductCard({ card, keyProp, isLoading = false }) {
     return <LoadingCard keyProp={keyProp} />;
   }
 
-  /**
-   * ✅ NEW: Remove "ghost" products (the exact one you circled)
-   * If it's not VIEW_MORE and it doesn't have a valid product id,
-   * it isn't a real product — so we don't render it.
-   */
   if (!card?._id) return null;
 
   // ✅ Normal product card logic
@@ -248,14 +243,8 @@ export default function ProductCard({ card, keyProp, isLoading = false }) {
 
         <FlexibleDiv className="product__price__section" justifyContent="start">
           <p className="product__price">
-            {formatCurrency(priceData?.price || 0)}
+            {formatCurrency(priceData?.originalPrice || priceData?.price || 0)}
           </p>
-
-          {priceData?.hasDiscount && priceData?.originalPrice && (
-            <p className="discounted__price">
-              {formatCurrency(priceData?.originalPrice || 0)}
-            </p>
-          )}
         </FlexibleDiv>
 
         <FlexibleDiv className="favorite__wrapper">

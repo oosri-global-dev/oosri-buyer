@@ -206,7 +206,6 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                   ))}
                 </FlexibleDiv>
                 <FlexibleDiv className="main__image__wrapper">
-                  {/* This will handle loader for the product image */}
                   {selectedImage ? (
                     <img
                       className="main__image"
@@ -233,19 +232,7 @@ export default function ProductPage({ product, loading, relatedProducts }) {
               >
                 <p className="item__name">{product?.productName}</p>
                 <h1 className="item__price">
-                  {formatCurrency(priceData?.price || 0)}
-                  {priceData?.hasDiscount && priceData?.originalPrice && (
-                    <span
-                      style={{
-                        textDecoration: "line-through",
-                        fontSize: "0.6em",
-                        color: "#999",
-                        marginLeft: "10px",
-                      }}
-                    >
-                      {formatCurrency(priceData?.originalPrice || 0)}
-                    </span>
-                  )}
+                  {formatCurrency(priceData?.originalPrice || priceData?.price || 0)}
                 </h1>
                 <FlexibleDiv
                   flexDir="row"
@@ -345,54 +332,47 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                       )}
                     </FlexibleDiv>
                   </FlexibleDiv>
+
+                  {/* Buy Now button - takes the Buy Now functionality */}
                   <Button
                     backgroundColor="var(--orrsiPrimary)"
                     color="#fff"
                     className="checkout__btn"
-                    onClick={() => push("/cart")}
+                    onClick={() => {
+                      if (!user || (!user._id && !user.id)) {
+                        push(`/login?from=${encodeURIComponent(asPath)}`);
+                        return;
+                      }
+                      setBuyNowItem({ ...product, quantity: numOfProduct });
+                      push("/checkout");
+                    }}
                   >
-                    Checkout
+                    Buy Now
                   </Button>
-                  <FlexibleDiv width="100%" flexDir="row" gap="10px">
-                    <Button
-                      width="50%"
-                      backgroundColor="transparent"
-                      color="var(--orrsiPrimary)"
-                      border="1px solid var(--orrsiPrimary)"
-                      hoverBg="var(--orrsiPrimary)"
-                      hoverColor="var(--orrsiWhite)"
-                      className="cart__btn"
-                      onClick={() => {
-                        if (productInCart) {
-                          removeFromCart(product, setIsLoadingBtn);
-                        } else {
-                          addToCart(
-                            { ...product, quantity: numOfProduct },
-                            setIsLoadingBtn
-                          );
-                        }
-                      }}
-                      loading={isLoadingBtn}
-                    >
-                      {productInCart ? "Remove from Cart" : "Add to Cart"}
-                    </Button>
-                    <Button
-                      width="50%"
-                      backgroundColor="var(--orrsiPrimary)"
-                      color="#fff"
-                      className="buy__now__btn"
-                      onClick={() => {
-                        if (!user || (!user._id && !user.id)) {
-                          push(`/login?from=${encodeURIComponent(asPath)}`);
-                          return;
-                        }
-                        setBuyNowItem({ ...product, quantity: numOfProduct });
-                        push("/checkout");
-                      }}
-                    >
-                      Buy Now
-                    </Button>
-                  </FlexibleDiv>
+
+                  {/* Add to Cart / Remove from Cart button */}
+                  <Button
+                    width="100%"
+                    backgroundColor="transparent"
+                    color="var(--orrsiPrimary)"
+                    border="1px solid var(--orrsiPrimary)"
+                    hoverBg="var(--orrsiPrimary)"
+                    hoverColor="var(--orrsiWhite)"
+                    className="cart__btn"
+                    onClick={() => {
+                      if (productInCart) {
+                        removeFromCart(product, setIsLoadingBtn);
+                      } else {
+                        addToCart(
+                          { ...product, quantity: numOfProduct },
+                          setIsLoadingBtn
+                        );
+                      }
+                    }}
+                    loading={isLoadingBtn}
+                  >
+                    {productInCart ? "Remove from Cart" : "Add to Cart"}
+                  </Button>
                 </FlexibleDiv>
               </FlexibleDiv>
             </FlexibleSection>
