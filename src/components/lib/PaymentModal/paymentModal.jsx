@@ -200,6 +200,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
       setClientSecret(null);
       setPaymentSummary(null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, addresses.length, form]);
 
   const handleCancel = () => {

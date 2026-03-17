@@ -18,6 +18,7 @@ import { useMainContext } from "@/context";
 import { TbLogout2 as LogoutIcon } from "react-icons/tb";
 import ProfileImage from "@/assets/images/profile/profile-1.svg";
 import { deleteAllCookie } from "@/data-helpers/auth-session";
+import Image from "next/image";
 
 export default function Header() {
   const { asPath, push } = useRouter();
