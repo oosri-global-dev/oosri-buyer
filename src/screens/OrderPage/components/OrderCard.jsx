@@ -58,7 +58,7 @@ export default function OrderCard({ order }) {
     firstProduct?.productImages?.[0] ||
     firstProduct?.image ||
     firstProduct?.product?.productImages?.[0] ||
-    "/images/placeholder.svg";
+    "https://placehold.co/80x80";
   const productDescription = stripHtml(
     firstProduct?.description ||
     firstProduct?.productDescription ||

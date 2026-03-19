@@ -65,7 +65,7 @@ export default function OrderDetailsScreen() {
     // The API returns sellerFullName at the order level (not on each product object)
     const firstProduct = order?.products?.[0] || {};
     const vendorName = order?.sellerFullName || '';
-    const vendorImage = order?.vendorImage || '/images/placeholder.svg';
+    const vendorImage = order?.vendorImage || 'https://placehold.co/24x24';
 
     // ─── Product fields ─────────────────────────────────────────────────────────
     // API response product object keys (from buyerOrderService retrieveOrderById):
@@ -75,8 +75,8 @@ export default function OrderDetailsScreen() {
 
     // productImage is an array of Cloudinary URLs
     const productImage = Array.isArray(firstProduct?.productImage)
-        ? (firstProduct.productImage[0] || '/images/placeholder.svg')
-        : (firstProduct?.productImage || '/images/placeholder.svg');
+        ? (firstProduct.productImage[0] || 'https://placehold.co/150x150')
+        : (firstProduct?.productImage || 'https://placehold.co/150x150');
 
     // productDescription comes as HTML — strip tags before displaying
     const productDescription = stripHtml(firstProduct?.productDescription || '');

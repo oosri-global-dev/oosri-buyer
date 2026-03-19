@@ -12,7 +12,6 @@ const CheckoutPage = () => {
     const { buyNowItem } = useMainContext();
     const { push } = useRouter();
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [paymentSucceeded, setPaymentSucceeded] = useState(false);
 
     useEffect(() => {
         // If there is no buyNowItem, redirect back to shop
@@ -53,14 +52,11 @@ const CheckoutPage = () => {
                         isOpen={isModalOpen}
                         setIsOpen={(val) => {
                             setIsModalOpen(val);
-                            if (!val && !paymentSucceeded) {
-                                // Only redirect to shop if the user cancelled —
-                                // not after a successful payment (which navigates
-                                // to /order-confirmation on its own)
+                            if (!val) {
+                                // If user closes modal, go back to shop
                                 push("/shop");
                             }
                         }}
-                        onPaymentSuccess={() => setPaymentSucceeded(true)}
                         subtotal={subtotal}
                         cartItems={[buyNowItem]}
                     />

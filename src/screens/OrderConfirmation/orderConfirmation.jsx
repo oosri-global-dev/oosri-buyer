@@ -1,27 +1,12 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { MdCheck, MdShoppingBag, MdListAlt } from 'react-icons/md';
 import { ConfirmationContainer } from './orderConfirmation.styles';
-import { useMainContext } from '@/context';
 
 const OrderConfirmation = () => {
     const router = useRouter();
     const { payment_intent } = router.query;
-    const { setBuyNowItem } = useMainContext();
-
-    useEffect(() => {
-        // Clear the buy-now checkout state now that payment is confirmed.
-        // We use a short timeout because if we clear it synchronously, the
-        // CheckoutPage (which is currently unmounting) might detect the state
-        // change and trigger its "empty cart" redirect to /shop before it fully unmounts.
-        if (setBuyNowItem) {
-            const timer = setTimeout(() => {
-                setBuyNowItem(null);
-            }, 500);
-            return () => clearTimeout(timer);
-        }
-    }, [setBuyNowItem]);
 
     return (
         <ConfirmationContainer>

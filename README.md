@@ -1,8 +1,6 @@
-## Oosri Buyer
+##Project Hint:
 
-### How to Get Started
-- npm install
-- npm run dev
-
-Happy Coding
+#Clone the repo
+#Move to a new branch
+#To start the project - use 'yarn dev'.
 

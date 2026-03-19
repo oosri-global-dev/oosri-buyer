@@ -61,7 +61,7 @@ const countryOptions = COUNTRIES.map((country) => ({
 const stripePromise = loadStripe("pk_test_51SPm4AC2phndg2M1sOb1eNDLWAljy9CqwR0APuqYFGJ6Mzzu4oSQTIBuI28xiVVDEmfjqTaCWZpA9tidcJ64bVe400xPe69sNL");
 console.log("PUBLISHABLE KEY loaded");
 
-export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItems = [] }) {
+export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItems = [], onPaymentSuccess }) {
   const router = useRouter();
 
   const { isLoaded: isMapsLoaded } = useLoadScript({
@@ -70,13 +70,8 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
   });
 
   const autocompleteRef = useRef(null);
-<<<<<<< HEAD
 
-export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItems = [], onPaymentSuccess }) {
-  const router = useRouter();
-=======
->>>>>>> parent of 2f79a45 (chore: new issues)
-  // Request storage access for third‑party Stripe iframe (Chrome partitioning)
+  // Request storage access for third-party Stripe iframe (Chrome partitioning)
   useEffect(() => {
     if (document.requestStorageAccess) {
       document.requestStorageAccess().catch(() => { });
@@ -440,15 +435,9 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
       },
     });
 
-    // Signal to the parent that payment succeeded BEFORE closing the modal,
-    // so the parent can skip its /shop fallback redirect.
-    if (onPaymentSuccess) {
-      onPaymentSuccess(paymentIntent);
+    if (setBuyNowItem) {
+      setBuyNowItem(null);
     }
-
-    // NOT clearing setBuyNowItem(null) here anymore.
-    // Doing so triggers the parent page's useEffect and causes a race 
-    // condition that forces a redirect to /shop before we can hit /order-confirmation.
 
     handleCancel();
 
