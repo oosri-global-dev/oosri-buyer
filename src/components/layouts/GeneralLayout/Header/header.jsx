@@ -18,7 +18,6 @@ import { useMainContext } from "@/context";
 import { TbLogout2 as LogoutIcon } from "react-icons/tb";
 import ProfileImage from "@/assets/images/profile/profile-1.svg";
 import { deleteAllCookie } from "@/data-helpers/auth-session";
-import Image from "next/image";
 
 export default function Header() {
   const { asPath, push } = useRouter();
@@ -57,7 +56,7 @@ export default function Header() {
     <HeaderWrapper>
       <FlexibleDiv className="logo__section">
         <Link href={"/"}>
-          <Image src={Logo} className="logo__wrapper" alt="logo" />
+          <img src={Logo.src} className="logo__wrapper" alt="logo" />
         </Link>
 
         <div className="nav__menu__wrapper">
@@ -134,13 +133,10 @@ export default function Header() {
                     alignItems="center"
                     gap="10px"
                   >
-                    <Image
+                    <img
                       alt="user-profile"
-                      src={user?.profileImage || ProfileImage}
+                      src={user?.profileImage || ProfileImage.src}
                       className="profile"
-                      width={40}
-                      height={40}
-                      style={{ borderRadius: "50%", objectFit: "cover" }}
                     />
                     <FlexibleDiv
                       justifyContent="flex-start"

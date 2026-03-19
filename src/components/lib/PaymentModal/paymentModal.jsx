@@ -58,18 +58,24 @@ const countryOptions = COUNTRIES.map((country) => ({
   value: country.code,
 }));
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+const stripePromise = loadStripe("pk_test_51SPm4AC2phndg2M1sOb1eNDLWAljy9CqwR0APuqYFGJ6Mzzu4oSQTIBuI28xiVVDEmfjqTaCWZpA9tidcJ64bVe400xPe69sNL");
 console.log("PUBLISHABLE KEY loaded");
 
-export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItems = [], onPaymentSuccess }) {
+export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItems = [] }) {
   const router = useRouter();
 
   const { isLoaded: isMapsLoaded } = useLoadScript({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
+    googleMapsApiKey: "AIzaSyBleJOF_nOi9TubGBghKaRMV3PmJM50Zyw",
     libraries: GOOGLE_MAPS_LIBRARIES,
   });
 
   const autocompleteRef = useRef(null);
+<<<<<<< HEAD
+
+export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItems = [], onPaymentSuccess }) {
+  const router = useRouter();
+=======
+>>>>>>> parent of 2f79a45 (chore: new issues)
   // Request storage access for third‑party Stripe iframe (Chrome partitioning)
   useEffect(() => {
     if (document.requestStorageAccess) {
@@ -200,7 +206,6 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
       setClientSecret(null);
       setPaymentSummary(null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, addresses.length, form]);
 
   const handleCancel = () => {

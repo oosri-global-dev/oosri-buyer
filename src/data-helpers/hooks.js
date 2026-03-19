@@ -95,20 +95,41 @@ export function truncateString(str, num) {
 export const calculateProductPrice = (product) => {
   if (!product) return { price: 0, originalPrice: null, hasDiscount: false };
 
-  // Use USD values if available (from buyerProductService conversion), falling back to NGN
-  const regular = product.regularPriceUSD || product.productPrice || product.regularPrice || 0;
-  const discounted = product.discountPriceUSD || product.discountPrice || null;
+  const {
+    productPrice,
+    salesPrice,
+    regularPriceUSD,
+    salesPriceUSD,
+    previousPriceUSD,
+  } = product;
 
-  // If a valid discount exists
-  if (discounted && discounted < regular) {
+  // Use USD values if available, falling back to older fields if not
+  const regular = regularPriceUSD || productPrice || 0;
+  const sales = salesPriceUSD || salesPrice;
+  const previous = previousPriceUSD;
+
+  // Logic based on user's simple explanation:
+
+  // 1. When the item is on Sale (Sales Price exists, and no specific previous price overriding it logic-wise)
+  if (sales && !previous) {
     return {
-      price: discounted, // The main price shown
-      originalPrice: regular, // The struck-through price
+      price: sales,
+      originalPrice: regular,
       hasDiscount: true,
     };
   }
 
-  // Default case: no discount (or invalid discount that is somehow higher than regular)
+  // If we have a previous price, that's the crossed out one.
+  // The current selling price is the sales price if it exists, otherwise the regular price.
+  if (previous) {
+    return {
+      price: sales || regular,
+      originalPrice: previous,
+      hasDiscount: true
+    }
+  }
+
+  // Default / Standard Case
   return {
     price: regular,
     originalPrice: null,

@@ -24,7 +24,7 @@ export default function AuthWrapper({ children }) {
     if (user?.id) {
       push("/");
     }
-  }, [user, push]);
+  }, [user]);
 
   const handleGoBack = () => {
     if (typeof window !== "undefined") {

@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import { ChangePasswordWrapper } from "./change-password.styles";
 import { FlexibleDiv } from "@/components/lib/Box/styles";
 import ProfilePic from "@/assets/images/profile/profile-1.svg";

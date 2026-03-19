@@ -154,7 +154,7 @@ function LoginForm() {
             style={{ objectFit: "contain" }}
           />
           <p className="mobile__tagline">
-            Africa&apos;s marketplace for the world
+            Africa's marketplace for the world
           </p>
         </FlexibleDiv>
 
@@ -228,7 +228,7 @@ function LoginForm() {
 export default function Login() {
   return (
     <AuthWrapper>
-      <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}>
+      <GoogleOAuthProvider clientId="519641043381-8fni1j8vbmoakegvomk1lsfrgrnd0q4d.apps.googleusercontent.com">
         <LoginForm />
       </GoogleOAuthProvider>
     </AuthWrapper>

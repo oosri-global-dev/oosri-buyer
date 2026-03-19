@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client"
 // import { APIProvider, Map } from '@vis.gl/react-google-maps'
 import { Popover } from 'antd';

@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import { FlexibleDiv } from "@/components/lib/Box/styles";
 import HeroCarousel from "./HeroCarousel/heroCarousel";
 import { HeroSectionWrapper } from "./heroSection.styles";

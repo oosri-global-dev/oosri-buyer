@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import Image from "next/image";
 import { OrderItemWrapper} from "./orderComponent.styled";
 import React, { useState } from "react";

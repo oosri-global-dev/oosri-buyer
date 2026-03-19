@@ -131,7 +131,7 @@ export default function EditProfile({ setCurrentPage, user, dispatch }) {
     form.setFieldValue("email", user?.email);
     form.setFieldValue("fullName", user?.fullName);
     form.setFieldValue("phoneNumber", user?.phoneNumber);
-  }, [user, form]);
+  }, [user]);
 
   return (
     <EditProfileWrapper>
@@ -150,16 +150,10 @@ export default function EditProfile({ setCurrentPage, user, dispatch }) {
         <h2>Edit Profile</h2>
       </FlexibleDiv>
       <FlexibleDiv className="avatar__wrapper">
-        <Image
+        <img
           src={user?.profileImage || ProfilePic}
           alt="avatar"
-          width={120}
-          height={120}
-          style={{ 
-            opacity: profileImageLoading ? "0.3" : "1",
-            borderRadius: "50%",
-            objectFit: "cover"
-          }}
+          style={{ opacity: profileImageLoading ? "0.3" : "1" }}
         />
         {profileImageLoading && (
           <Spin wrapperClassName="spin__box" size="large" tip="Uploading">

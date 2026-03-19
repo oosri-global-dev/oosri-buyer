@@ -93,7 +93,7 @@ export default function Footer() {
               </Button>
             </FlexibleDiv>
             <p>We Accept</p>
-            <Image src={PaymentMethodImage} alt="payment-methods" />
+            <img src={PaymentMethodImage.src} alt="payment-methods" />
           </FlexibleDiv>
         </TopSectionWrapper>
         <FlexibleDiv className="bottom__section">

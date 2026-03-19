@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import { FlexibleDiv } from "../Box/styles";
 import styled from "styled-components";
 
