@@ -205,6 +205,7 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                   ))}
                 </FlexibleDiv>
                 <FlexibleDiv className="main__image__wrapper">
+                  {/* This will handle loader for the product image */}
                   {selectedImage ? (
                     <img
                       className="main__image"
@@ -229,7 +230,19 @@ export default function ProductPage({ product, loading, relatedProducts }) {
               >
                 <p className="item__name">{product?.productName}</p>
                 <h1 className="item__price">
-                  {formatCurrency(priceData?.originalPrice || priceData?.price || 0)}
+                  {formatCurrency(priceData?.price || 0)}
+                  {priceData?.hasDiscount && priceData?.originalPrice && (
+                    <span
+                      style={{
+                        textDecoration: "line-through",
+                        fontSize: "0.6em",
+                        color: "#999",
+                        marginLeft: "10px",
+                      }}
+                    >
+                      {formatCurrency(priceData?.originalPrice || 0)}
+                    </span>
+                  )}
                 </h1>
                 <FlexibleDiv
                   flexDir="row"

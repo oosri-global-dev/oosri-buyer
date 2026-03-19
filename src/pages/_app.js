@@ -10,7 +10,6 @@ import { useEffect, useState } from "react";
 import NProgress from "nprogress";
 import CustomModal from "@/components/lib/Modal/modal";
 import basketLottie from "@/assets/images/basket.json";
-import PrivacyConsentModal from "@/components/lib/PrivacyConsentModal/PrivacyConsentModal";
 
 const queryClient = new QueryClient();
 
@@ -30,9 +29,11 @@ function AppContent({ Component, pageProps, getLayout }) {
   useEffect(() => {
     const handleStart = () => NProgress.start();
     const handleStop = () => NProgress.done();
+
     router.events.on("routeChangeStart", handleStart);
     router.events.on("routeChangeComplete", handleStop);
     router.events.on("routeChangeError", handleStop);
+
     return () => {
       router.events.off("routeChangeStart", handleStart);
       router.events.off("routeChangeComplete", handleStop);
@@ -44,16 +45,13 @@ function AppContent({ Component, pageProps, getLayout }) {
     <>
       <CustomToastBox />
       {mounted && (
-        <>
-          <CustomModal
-            isOpen={loadingModal}
-            content="Hang on a sec, we are setting up your basket for you."
-            icon={basketLottie}
-            isLottieIcon={true}
-            canClose={false}
-          />
-          <PrivacyConsentModal />
-        </>
+        <CustomModal
+          isOpen={loadingModal}
+          content="Hang on a sec, we are setting up your basket for you."
+          icon={basketLottie}
+          isLottieIcon={true}
+          canClose={false}
+        />
       )}
       {getLayout(<Component {...pageProps} />)}
     </>
@@ -62,6 +60,7 @@ function AppContent({ Component, pageProps, getLayout }) {
 
 export default function App({ Component, pageProps }) {
   const getLayout = Component.getLayout || ((page) => page);
+
   return (
     <>
       <Head>
