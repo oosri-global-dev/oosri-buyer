@@ -1,8 +1,5 @@
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements } from "@stripe/react-stripe-js";
-import StripePaymentForm from "./StripePaymentForm";
 import { Input, Select } from "antd";
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { StyledModal, PaymentModalContent } from "./paymentModal.styles";
 import { FlexibleDiv } from "../Box/styles";
 import Button from "../Button";
@@ -22,12 +19,7 @@ import { TOAST_BOX } from "@/context/types";
 import { useMainContext } from "@/context";
 import { MdEdit as EditIcon, MdDelete as DeleteIcon } from "react-icons/md";
 import { Spin } from "antd";
-import { useRouter } from "next/router";
-import { useLoadScript, Autocomplete } from "@react-google-maps/api";
-
 const { TextArea } = Input;
-
-const GOOGLE_MAPS_LIBRARIES = ["places"];
 
 // Common countries list
 const COUNTRIES = [
@@ -58,26 +50,21 @@ const countryOptions = COUNTRIES.map((country) => ({
   value: country.code,
 }));
 
-const stripePromise = loadStripe("pk_test_51SPm4AC2phndg2M1sOb1eNDLWAljy9CqwR0APuqYFGJ6Mzzu4oSQTIBuI28xiVVDEmfjqTaCWZpA9tidcJ64bVe400xPe69sNL");
-console.log("PUBLISHABLE KEY loaded");
+
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
+import StripePaymentForm from "./StripePaymentForm";
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
 export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItems = [], onPaymentSuccess }) {
   const router = useRouter();
-
-  const { isLoaded: isMapsLoaded } = useLoadScript({
-    googleMapsApiKey: "AIzaSyBleJOF_nOi9TubGBghKaRMV3PmJM50Zyw",
-    libraries: GOOGLE_MAPS_LIBRARIES,
-  });
-
-  const autocompleteRef = useRef(null);
-
-  // Request storage access for third-party Stripe iframe (Chrome partitioning)
+  // Request storage access for third‑party Stripe iframe (Chrome partitioning)
   useEffect(() => {
     if (document.requestStorageAccess) {
       document.requestStorageAccess().catch(() => { });
     }
   }, []);
-
   const { dispatch, user, setBuyNowItem } = useMainContext();
   const [form] = Form.useForm();
   const [selectedAddressId, setSelectedAddressId] = useState(null);
@@ -102,44 +89,6 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
   const shippingFee = shippingInfo?.totalPriceUSD || 0;
   const total = subtotal + shippingFee;
   const maxAddresses = 3;
-
-  // Handle Google Places Autocomplete selection
-  const handlePlaceChanged = useCallback(() => {
-    if (!autocompleteRef.current) return;
-    const place = autocompleteRef.current.getPlace();
-    if (!place || !place.address_components) return;
-
-    let streetNumber = "";
-    let route = "";
-    let city = "";
-    let postalCode = "";
-    let countryCode = "";
-    let countryName = "";
-
-    place.address_components.forEach((component) => {
-      const types = component.types;
-      if (types.includes("street_number")) streetNumber = component.long_name;
-      if (types.includes("route")) route = component.long_name;
-      if (types.includes("locality") || types.includes("postal_town")) city = component.long_name;
-      if (types.includes("postal_code")) postalCode = component.long_name;
-      if (types.includes("country")) {
-        countryCode = component.short_name;
-        countryName = component.long_name;
-      }
-    });
-
-    const fullAddress = streetNumber ? `${streetNumber} ${route}` : route || place.formatted_address || "";
-    const matchedCountry = COUNTRIES.find(
-      (c) => c.code === countryCode || c.name === countryName
-    );
-
-    form.setFieldsValue({
-      address: fullAddress,
-      cityName: city,
-      postalCode: postalCode,
-      country: matchedCountry ? matchedCountry.code : undefined,
-    });
-  }, [form]);
 
   // Function to fetch shipping fee when address is selected
   const fetchShippingFee = async (addressId) => {
@@ -178,13 +127,14 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
   // Handle address selection
   const handleAddressSelect = (addressId) => {
     setSelectedAddressId(addressId);
-    setShippingInfo(null);
+    setShippingInfo(null); // Clear shipping info immediately when address changes
     fetchShippingFee(addressId);
   };
 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
+      // Select first address by default if available
       if (addresses.length > 0 && !selectedAddressId) {
         const firstAddressId = addresses[0]._id || addresses[0].id;
         setSelectedAddressId(firstAddressId);
@@ -205,7 +155,6 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
 
   const handleCancel = () => {
     setIsOpen(false);
-    document.body.style.overflow = "unset";
     form.resetFields();
     setIsEditing(false);
     setEditingAddressId(null);
@@ -240,6 +189,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     setIsEditing(true);
     setEditingAddressId(address._id || address.id);
     setShowAddForm(false);
+    // Find country code from country name or use existing code
     const country = COUNTRIES.find(
       (c) => c.code === address.countryCode || c.name === address.countryName
     );
@@ -271,6 +221,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
           message: "Address deleted successfully",
         },
       });
+      // If deleted address was selected, select first available
       if (selectedAddressId === addressId && addresses.length > 1) {
         const remainingAddresses = addresses.filter(
           (addr) => (addr._id || addr.id) !== addressId
@@ -296,6 +247,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
 
   const handleSubmitAddress = async (values) => {
     try {
+      // Get country details from selected country code
       const selectedCountry = COUNTRIES.find((c) => c.code === values.country);
       if (!selectedCountry) {
         dispatch({
@@ -434,18 +386,8 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
         message: "Payment successful!",
       },
     });
-
-    if (setBuyNowItem) {
-      setBuyNowItem(null);
-    }
-
     handleCancel();
-
-    if (paymentIntent?.id) {
-      router.push(`/order-confirmation?payment_intent=${paymentIntent.id}`);
-    } else {
-      router.push("/order-confirmation");
-    }
+    // Here you might want to redirect to an order confirmation page or refresh orders
   };
 
   return (
@@ -459,7 +401,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
       width={600}
     >
       <PaymentModalContent>
-        {clientSecret && typeof clientSecret === 'string' && clientSecret.length > 5 && stripePromise ? (
+        {clientSecret && stripePromise ? (
           <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe' } }}>
             <StripePaymentForm
               totalAmount={paymentSummary?.totalAmount?.dollars || total}
@@ -499,7 +441,8 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                     return (
                       <div
                         key={addressId}
-                        className={`address__card ${isSelected ? "selected" : ""}`}
+                        className={`address__card ${isSelected ? "selected" : ""
+                          }`}
                         onClick={() => handleAddressSelect(addressId)}
                       >
                         <FlexibleDiv
@@ -549,7 +492,8 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                                 deleteAddress.isPending || deleteAddress.isLoading
                               }
                             >
-                              {deleteAddress.isPending || deleteAddress.isLoading ? (
+                              {deleteAddress.isPending ||
+                                deleteAddress.isLoading ? (
                                 <Spin size="small" />
                               ) : (
                                 <DeleteIcon size={16} />
@@ -640,7 +584,6 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                       alignItems="stretch"
                       width="100%"
                     >
-                      {/* Address field with Google Places Autocomplete */}
                       <div className="form__field__wrapper">
                         <label className="input__label">Address</label>
                         <Form.Item
@@ -649,37 +592,11 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                             { required: true, message: "Please enter address" },
                           ]}
                         >
-                          {isMapsLoaded ? (
-                            <Autocomplete
-                              onLoad={(autocomplete) => {
-                                autocompleteRef.current = autocomplete;
-                              }}
-                              onPlaceChanged={handlePlaceChanged}
-                            >
-                              <input
-                                type="text"
-                                placeholder="Start typing your address..."
-                                style={{
-                                  width: "100%",
-                                  padding: "8px 12px",
-                                  borderRadius: "10px",
-                                  border: "1px solid #d9d9d9",
-                                  fontSize: "14px",
-                                  outline: "none",
-                                  height: "40px",
-                                  boxSizing: "border-box",
-                                }}
-                                onFocus={(e) => e.target.style.borderColor = "var(--orrsiPrimary)"}
-                                onBlur={(e) => e.target.style.borderColor = "#d9d9d9"}
-                              />
-                            </Autocomplete>
-                          ) : (
-                            <TextArea
-                              placeholder="Enter street address"
-                              rows={3}
-                              className="address__textarea"
-                            />
-                          )}
+                          <TextArea
+                            placeholder="Enter street address"
+                            rows={3}
+                            className="address__textarea"
+                          />
                         </Form.Item>
                       </div>
 
@@ -690,7 +607,10 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                         alignItems="flex-start"
                         width="100%"
                       >
-                        <div className="form__field__wrapper" style={{ flex: "1" }}>
+                        <div
+                          className="form__field__wrapper"
+                          style={{ flex: "1" }}
+                        >
                           <label className="input__label">City</label>
                           <Form.Item
                             name="cityName"
@@ -699,7 +619,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                             ]}
                           >
                             <TextField
-                              placeholder="Auto-filled from address"
+                              placeholder="Enter city"
                               borderRadius="10px"
                               className="move__down"
                               width="100%"
@@ -707,16 +627,22 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                           </Form.Item>
                         </div>
 
-                        <div className="form__field__wrapper" style={{ flex: "1" }}>
+                        <div
+                          className="form__field__wrapper"
+                          style={{ flex: "1" }}
+                        >
                           <label className="input__label">Postal Code</label>
                           <Form.Item
                             name="postalCode"
                             rules={[
-                              { required: true, message: "Please enter postal code" },
+                              {
+                                required: true,
+                                message: "Please enter postal code",
+                              },
                             ]}
                           >
                             <TextField
-                              placeholder="Auto-filled from address"
+                              placeholder="Enter postal code"
                               borderRadius="10px"
                               className="move__down"
                               width="100%"
@@ -730,11 +656,14 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                         <Form.Item
                           name="country"
                           rules={[
-                            { required: true, message: "Please select a country" },
+                            {
+                              required: true,
+                              message: "Please select a country",
+                            },
                           ]}
                         >
                           <Select
-                            placeholder="Auto-filled from address"
+                            placeholder="Select country"
                             className="country__select"
                             onChange={handleCountryChange}
                             options={countryOptions}
@@ -792,7 +721,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                   )}
                   {shippingInfo.totalTransitDays && (
                     <span className="shipping__badge">
-                      ⏱ {shippingInfo.totalTransitDays} {shippingInfo.totalTransitDays === 1 ? 'day' : 'days'}
+                      ⏱️ {shippingInfo.totalTransitDays} {shippingInfo.totalTransitDays === 1 ? 'day' : 'days'}
                     </span>
                   )}
                 </FlexibleDiv>

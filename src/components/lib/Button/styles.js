@@ -1,27 +1,7 @@
 import styled from "styled-components";
 import { Button } from "antd";
 
-// Custom props that must not be forwarded to the underlying antd Button / DOM element
-const BUTTON_CUSTOM_PROPS = new Set([
-  "width",
-  "margin",
-  "height",
-  "padding",
-  "borderColor",
-  "border",
-  "backgroundColor",
-  "radius",
-  "boxShadow",
-  "opacity",
-  "fontSize",
-  "color",
-  "hoverBg",
-  "hoverColor",
-]);
-
-export default styled(Button).withConfig({
-  shouldForwardProp: (prop) => !BUTTON_CUSTOM_PROPS.has(prop),
-})`
+export default styled(Button)`
   width: ${({ width }) => width || "max-content"};
   margin: ${({ margin }) => margin};
   height: ${({ height }) => height || "45px"};
@@ -48,13 +28,14 @@ export default styled(Button).withConfig({
     background: ${({ hoverBg }) => hoverBg || "var(--orrsiPrimary)"};
     cursor: pointer;
     border-color: ${({ hoverBg, borderColor }) =>
-    hoverBg ? hoverBg : borderColor || "var(--orrsiPrimary) !important"};
+      hoverBg ? hoverBg : borderColor || "var(--orrsiPrimary) !important"};
     color: ${({ hoverColor }) => hoverColor || "var(--orrsiWhite)"} !important;
     cursor: pointer !important;
+    
 
     span {
       color: ${({ hoverColor }) =>
-    hoverColor || "var(--orrsiWhite)"} !important;
+        hoverColor || "var(--orrsiWhite)"} !important;
     }
   }
 
@@ -74,7 +55,7 @@ export default styled(Button).withConfig({
   :active {
     background: ${({ hoverBg }) => hoverBg || "transparent"};
     border-color: ${({ hoverBg, borderColor }) =>
-    hoverBg ? hoverBg : borderColor || "var(--orrsiPrimary)"};
+      hoverBg ? hoverBg : borderColor || "var(--orrsiPrimary)"};
 
     span,
     small {

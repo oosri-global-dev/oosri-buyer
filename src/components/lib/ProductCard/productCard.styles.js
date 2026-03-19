@@ -15,8 +15,8 @@ export const ProductCardWrapper = styled(FlexibleDiv)`
   box-sizing: border-box;
 
   .add-to-cart-btn {
-    visibility: visible;
-    opacity: 1;
+    visibility: hidden;
+    opacity: 0;
     transition: all 0.3s ease-in-out;
   }
 

@@ -10,32 +10,21 @@ const StripePaymentForm = ({ totalAmount, onSuccess, onBack }) => {
   const elements = useElements();
   const [errorMessage, setErrorMessage] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  // Track whether the PaymentElement iframe has fully mounted
-  const [isElementReady, setIsElementReady] = useState(false);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // Guard: stripe, elements, and the Payment Element must all be ready
-    if (!stripe || !elements || !isElementReady) {
+    if (!stripe || !elements) {
       return;
     }
 
     setIsProcessing(true);
     setErrorMessage(null);
 
-    // Submit the elements form first so Stripe can validate the Payment Element
-    const { error: submitError } = await elements.submit();
-    if (submitError) {
-      setErrorMessage(submitError.message);
-      setIsProcessing(false);
-      return;
-    }
-
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `${window.location.origin}/order-confirmation`,
+        return_url: `${window.location.origin}/payment-success`, // Update with your success URL
       },
       redirect: "if_required",
     });
@@ -52,8 +41,6 @@ const StripePaymentForm = ({ totalAmount, onSuccess, onBack }) => {
     }
   };
 
-  const isSubmitDisabled = !stripe || !isElementReady || isProcessing;
-
   return (
     <form onSubmit={handleSubmit} style={{ width: "100%" }}>
       <FlexibleDiv
@@ -63,19 +50,10 @@ const StripePaymentForm = ({ totalAmount, onSuccess, onBack }) => {
         alignItems="stretch"
         width="100%"
       >
-        <div style={{ padding: "0 5px", minHeight: "200px" }}>
-          {/* Show spinner while Stripe iframe is loading */}
-          {!isElementReady && (
-            <FlexibleDiv justifyContent="center" padding="40px 0">
-              <Spin size="large" tip="Loading payment form..." />
-            </FlexibleDiv>
-          )}
-          <PaymentElement
-            onReady={() => setIsElementReady(true)}
-            options={{ layout: "tabs" }}
-          />
+        <div style={{ padding: "0 5px" }}>
+            <PaymentElement />
         </div>
-
+        
         {errorMessage && (
           <div style={{ color: "red", fontSize: "14px", marginTop: "10px" }}>
             {errorMessage}
@@ -83,7 +61,7 @@ const StripePaymentForm = ({ totalAmount, onSuccess, onBack }) => {
         )}
 
         <FlexibleDiv gap="10px" width="100%" margin="20px 0 0 0">
-          <Button
+           <Button
             type="button"
             onClick={onBack}
             backgroundColor="transparent"
@@ -96,23 +74,19 @@ const StripePaymentForm = ({ totalAmount, onSuccess, onBack }) => {
           >
             Back
           </Button>
-
+          
           <Button
             type="submit"
             htmlType="submit"
-            backgroundColor={
-              isSubmitDisabled
-                ? "#ccc"
-                : "linear-gradient(135deg, var(--orrsiPrimary) 0%, #ff6b6b 100%)"
-            }
+            backgroundColor="linear-gradient(135deg, var(--orrsiPrimary) 0%, #ff6b6b 100%)"
             color="var(--orrsiWhite)"
             radius="10px"
             height="48px"
             width="100%"
-            disabled={isSubmitDisabled}
+            disabled={!stripe || isProcessing}
             loading={isProcessing}
           >
-            {isElementReady ? `Pay ${formatCurrency(totalAmount)}` : "Loading..."}
+            Pay {formatCurrency(totalAmount)}
           </Button>
         </FlexibleDiv>
       </FlexibleDiv>
