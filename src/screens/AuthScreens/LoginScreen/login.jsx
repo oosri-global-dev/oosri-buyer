@@ -16,12 +16,9 @@ import { useRouter } from "next/router";
 import { storeDataInCookie } from "@/data-helpers/auth-session";
 import { loginActions } from "@/utils/user-actions";
 import AuthWrapper from "@/components/layouts/AuthWrapper/auth-wrapper";
-<<<<<<< HEAD
-=======
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import Image from "next/image";
 import Logo from "@/assets/images/homepage/logo.png";
->>>>>>> c08c4d6 (feat: added Oosri branding to login and register pages on mobile)
 
 export default function Login() {
   const [form] = Form.useForm();
@@ -57,10 +54,6 @@ export default function Login() {
         await action(res?.body?.accessToken);
       }
 
-<<<<<<< HEAD
-      //route to 'from' path if exists
-      if (query?.action) {
-=======
       // Fix: restore scroll before navigating away
       document.body.style.overflow = "unset";
 
@@ -68,7 +61,6 @@ export default function Login() {
       if (query?.action && query?.from) {
         window.open(`${query?.from}`, "_self");
       } else if (query?.from) {
->>>>>>> c08c4d6 (feat: added Oosri branding to login and register pages on mobile)
         window.open(`${query?.from}`, "_self");
       } else {
         window.open(`/`, "_self");
@@ -96,8 +88,6 @@ export default function Login() {
     }
   };
 
-<<<<<<< HEAD
-=======
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       setGoogleLoading(true);
@@ -234,74 +224,3 @@ export default function Login() {
   );
 }
 
-export default function Login() {
->>>>>>> c08c4d6 (feat: added Oosri branding to login and register pages on mobile)
-  return (
-    <AuthWrapper>
-      <LoginWrapper>
-        <Toaster containerClassName="toaster__style" />
-        <FlexibleDiv maxWidth="350px" gap="40px" flexDir="column">
-          <h2>Login</h2>
-          <Button
-            border="1.5px solid rgba(224, 224, 224, 0.60)"
-            radius="10px"
-            width="100%"
-            className="google__auth__btn"
-            icon={<GoogleIcon size={25} />}
-          >
-            Login with google
-          </Button>
-          <Form form={form} onFinish={handleLoginSubmit}>
-            <FlexibleDiv justifyContent="flex-start">
-              <label className="input__label">Phone/Email Address</label>
-              <Form.Item name="email">
-                <TextField
-                  type="email"
-                  className="move__down"
-                  borderRadius="10px"
-                />
-              </Form.Item>
-
-              {/* Password field */}
-              <label className="input__label">Password</label>
-              <Form.Item name="password">
-                <TextField.Password
-                  type="password"
-                  className="password__style"
-                  iconRender={(visible) =>
-                    visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
-                  }
-                />
-              </Form.Item>
-
-              <p className="forgot__pass__text">
-                Forgot Password?{" "}
-                <Link href={"/forgot-password"}>
-                  <span>Click here</span>
-                </Link>
-              </p>
-              <Button
-                width="100%"
-                backgroundColor="var(--orrsiPrimary)"
-                type="submit"
-                htmlType="submit"
-                color="var(--orrsiWhite)"
-                radius="10px"
-                margin="15px 0 0 0"
-                loading={loadingBtn}
-              >
-                Login
-              </Button>
-              <p className="no__account__yet">
-                No account yet?{" "}
-                <Link href={"/register"}>
-                  <span>Register here</span>
-                </Link>{" "}
-              </p>
-            </FlexibleDiv>
-          </Form>
-        </FlexibleDiv>
-      </LoginWrapper>
-    </AuthWrapper>
-  );
-}

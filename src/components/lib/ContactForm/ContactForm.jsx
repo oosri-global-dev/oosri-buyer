@@ -49,26 +49,6 @@ export default function ContactForm() {
     }
   };
 
-<<<<<<< HEAD
-          <div className="info">
-            <h2>Info</h2>
-            <FlexibleDiv className="admin__mail admin__details">
-              <Message className="contact__icon" />
-              <p>
-                <a href="mailto:support@oosri.com">support@oosri.com</a>
-              </p>
-            </FlexibleDiv>
-            <FlexibleDiv className="admin__contact admin__details">
-              <Phone className="contact__icon" />
-              <p>
-                <a href="tel:+2347011067109">+2347011067109</a>
-              </p>
-            </FlexibleDiv>
-          </div>
-        </FlexibleSection>
-      </ContactWrapper>
-    );
-=======
   return (
     <ContactWrapper>
       <FlexibleDiv
@@ -160,5 +140,4 @@ export default function ContactForm() {
       </FlexibleSection>
     </ContactWrapper>
   );
->>>>>>> b278768 (Reapply "Implement Buy Now")
 }

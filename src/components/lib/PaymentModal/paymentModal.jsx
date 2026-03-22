@@ -55,22 +55,12 @@ const countryOptions = COUNTRIES.map((country) => ({
 }));
 
 
-<<<<<<< HEAD
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements } from "@stripe/react-stripe-js";
-import StripePaymentForm from "./StripePaymentForm";
-
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
-
-export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItems = [], onPaymentSuccess }) {
-=======
 
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 console.log(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, "PUBLISHABLE KEY")
 
 export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItems = [] }) {
->>>>>>> b278768 (Reapply "Implement Buy Now")
   const router = useRouter();
   // Request storage access for third‑party Stripe iframe (Chrome partitioning)
   useEffect(() => {
@@ -406,9 +396,6 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     }
 
     handleCancel();
-<<<<<<< HEAD
-    // Here you might want to redirect to an order confirmation page or refresh orders
-=======
 
     // Redirect to the order confirmation page
     if (paymentIntent?.id) {
@@ -416,7 +403,6 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     } else {
       router.push("/order-confirmation");
     }
->>>>>>> b278768 (Reapply "Implement Buy Now")
   };
 
   return (
@@ -430,11 +416,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
       width={600}
     >
       <PaymentModalContent>
-<<<<<<< HEAD
-        {clientSecret && stripePromise ? (
-=======
         {clientSecret && typeof clientSecret === 'string' && clientSecret.length > 5 && stripePromise ? (
->>>>>>> b278768 (Reapply "Implement Buy Now")
           <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe' } }}>
             <StripePaymentForm
               totalAmount={paymentSummary?.totalAmount?.dollars || total}

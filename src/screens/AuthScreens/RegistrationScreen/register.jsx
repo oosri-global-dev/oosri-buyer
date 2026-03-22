@@ -11,12 +11,9 @@ import toast, { Toaster } from "react-hot-toast";
 import { useState } from "react";
 import { signUpUser } from "@/network/auth";
 import { useRouter } from "next/router";
-<<<<<<< HEAD
-=======
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import Image from "next/image";
 import Logo from "@/assets/images/homepage/logo.png";
->>>>>>> c08c4d6 (feat: added Oosri branding to login and register pages on mobile)
 
 export default function Register() {
   const [form] = Form.useForm();
@@ -73,8 +70,6 @@ export default function Register() {
     }
   };
 
-<<<<<<< HEAD
-=======
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       setGoogleLoading(true);
@@ -235,7 +230,6 @@ export default function Register() {
 }
 
 export default function Register() {
->>>>>>> c08c4d6 (feat: added Oosri branding to login and register pages on mobile)
   return (
     <AuthWrapper>
       <LoginWrapper>
