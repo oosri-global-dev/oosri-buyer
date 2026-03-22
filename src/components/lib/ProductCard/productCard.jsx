@@ -248,14 +248,8 @@ export default function ProductCard({ card, keyProp, isLoading = false }) {
 
         <FlexibleDiv className="product__price__section" justifyContent="start">
           <p className="product__price">
-            {formatCurrency(priceData?.price || 0)}
+            {formatCurrency(priceData?.originalPrice || priceData?.price || 0)}
           </p>
-
-          {priceData?.hasDiscount && priceData?.originalPrice && (
-            <p className="discounted__price">
-              {formatCurrency(priceData?.originalPrice || 0)}
-            </p>
-          )}
         </FlexibleDiv>
 
         <FlexibleDiv className="favorite__wrapper">

@@ -69,13 +69,8 @@ export default function SingleGridCard({ key, product, isLoading = false }) {
               className="price__wrapper"
             >
               <p className="product__price__grid">
-                {formatCurrency(priceData?.price || 0)}
+                {formatCurrency(priceData?.originalPrice || priceData?.price || 0)}
               </p>
-              {priceData?.hasDiscount && priceData?.originalPrice && (
-                <p className="discounted__price__grid">
-                  {formatCurrency(priceData?.originalPrice || 0)}
-                </p>
-              )}
             </FlexibleDiv>
 
             <div className="likes__wrapper">
