@@ -1,9 +1,10 @@
 [build]
-  command = "npm run build"
+  command = "npm ci && npm run build"
   publish = ".next"
 
 [build.environment]
   SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_BASE_URL"
+  NODE_PACKAGE_MANAGER = "npm"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
