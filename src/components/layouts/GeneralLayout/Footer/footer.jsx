@@ -42,7 +42,12 @@ export default function Footer() {
       linkName: "Terms of Use",
       linkUrl: "/terms-of-use",
     },
+    {
+      linkName: "Privacy Policy",
+      linkUrl: "/privacy-policy",
+    },
   ];
+
   return (
     <FooterWrapper>
       <FlexibleDiv className="footer__content">
@@ -96,6 +101,7 @@ export default function Footer() {
             <CopyrightIcon /> {new Date().getFullYear()} Oosri.com All rights
             reserved
           </p>
+         
         </FlexibleDiv>
       </FlexibleDiv>
     </FooterWrapper>

@@ -7,6 +7,7 @@ import "react-loading-skeleton/dist/skeleton.css";
 import { formatCurrency, useProductPrice } from "@/data-helpers/hooks";
 import { useRouter } from "next/router";
 import Image from "next/image";
+import SafeImage from "../SafeImage/SafeImage";
 import Button from "../Button";
 import { useMainContext } from "@/context";
 import { useState } from "react";
@@ -196,7 +197,7 @@ export default function ProductCard({ card, keyProp, isLoading = false }) {
       <div className="card__wrap">
         <div className="card__image" style={{ position: "relative" }}>
           {imgSrc ? (
-            <Image
+            <SafeImage
               src={imgSrc}
               alt={`${card?._id} product image`}
               layout="fill"
@@ -248,14 +249,8 @@ export default function ProductCard({ card, keyProp, isLoading = false }) {
 
         <FlexibleDiv className="product__price__section" justifyContent="start">
           <p className="product__price">
-            {formatCurrency(priceData?.price || 0)}
+            {formatCurrency(priceData?.originalPrice || priceData?.price || 0)}
           </p>
-
-          {priceData?.hasDiscount && priceData?.originalPrice && (
-            <p className="discounted__price">
-              {formatCurrency(priceData?.originalPrice || 0)}
-            </p>
-          )}
         </FlexibleDiv>
 
         <FlexibleDiv className="favorite__wrapper">

@@ -66,6 +66,7 @@ const CustomModal = ({ isOpen, content, icon, onCancel, canClose = false, isLott
       onCancel={onCancel}
       centered
       maskClosable={canClose}
+      zIndex={10000}
     >
       <ModalContent>
         {icon && (
