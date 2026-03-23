@@ -7,7 +7,7 @@ import TextField from "@/components/lib/TextField";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import Link from "next/link";
 import { useState } from "react";
-import { loginUser } from "@/network/auth";
+import { loginUser, googleLogin as googleLoginUser } from "@/network/auth";
 import { validatePassword } from "@/data-helpers/validator";
 import toast, { Toaster } from "react-hot-toast";
 import { useMainContext } from "@/context";
@@ -20,9 +20,10 @@ import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import Image from "next/image";
 import Logo from "@/assets/images/homepage/logo.png";
 
-export default function Login() {
+function LoginForm() {
   const [form] = Form.useForm();
   const [loadingBtn, setLoadingBtn] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const { dispatch } = useMainContext();
   const { push, query } = useRouter();
 
@@ -92,14 +93,21 @@ export default function Login() {
     onSuccess: async (tokenResponse) => {
       setGoogleLoading(true);
       try {
-        const userInfoRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-          headers: {
-            Authorization: `Bearer ${tokenResponse.access_token}`,
-          },
+        const res = await googleLoginUser({
+          accessToken: tokenResponse.access_token,
         });
-        const userInfo = await userInfoRes.json();
 
-        toast.success(`Welcome back, ${userInfo.name}!`, {
+        // store tokens
+        storeDataInCookie("access_token", res?.body?.accessToken);
+        storeDataInCookie("refresh_token", res?.body?.refreshToken);
+
+        //perform actions from url
+        if (query?.action) {
+          const action = loginActions[query?.action];
+          await action(res?.body?.accessToken);
+        }
+
+        toast.success(`Welcome back, ${res?.body?.user?.fullName}!`, {
           duration: 2000,
           position: "bottom-center",
         });
@@ -115,10 +123,9 @@ export default function Login() {
             window.open("/", "_self");
           }
         }, 1500);
-
       } catch (err) {
         toast.error("Google login failed. Please try again.", {
-          duration: 500,
+          duration: 2000,
           position: "bottom-center",
         });
         setGoogleLoading(false);
@@ -221,6 +228,16 @@ export default function Login() {
         </Form>
       </FlexibleDiv>
     </LoginWrapper>
+  );
+}
+
+export default function Login() {
+  return (
+    <AuthWrapper>
+      <GoogleOAuthProvider clientId="519641043381-8fni1j8vbmoakegvomk1lsfrgrnd0q4d.apps.googleusercontent.com">
+        <LoginForm />
+      </GoogleOAuthProvider>
+    </AuthWrapper>
   );
 }
 

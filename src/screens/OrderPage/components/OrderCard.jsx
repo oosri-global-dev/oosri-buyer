@@ -1,5 +1,6 @@
 import React from "react";
 import Image from "next/image";
+import SafeImage from "@/components/lib/SafeImage/SafeImage";
 import { OrderCardWrapper } from "./orderComponent.styled";
 import { useRouter } from "next/router";
 import { formatCurrency, stripHtml } from "@/data-helpers/hooks";
@@ -85,11 +86,12 @@ export default function OrderCard({ order }) {
 
       <div className="card_content">
         <div className="product_image">
-          <Image
+          <SafeImage
             src={productImage}
-            alt={productTitle}
-            width={80}
-            height={80}
+            alt="product"
+            width={120}
+            height={120}
+            className="product__img"
           />
         </div>
         <div className="product_details">

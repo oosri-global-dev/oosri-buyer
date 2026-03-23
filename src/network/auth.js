@@ -61,4 +61,11 @@ export const resetPassword = async (payload) => {
   return data;
 };
 
+export const googleLogin = async (payload) => {
+  const { data } = await axios.post(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/auth/buyer/google-login`,
+    payload
+  );
 
+  return data;
+};
