@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { FlexibleDiv } from "@/components/lib/Box/styles";
 import styled from "styled-components";
 export const LoginWrapper = styled(FlexibleDiv)`
@@ -87,3 +88,5 @@ export const LoginWrapper = styled(FlexibleDiv)`
     }
   }
 `;
+=======
+>>>>>>> 896c83f (chore: new updates)

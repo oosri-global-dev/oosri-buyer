@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { LoginWrapper } from "./login.styles";
 import { FlexibleDiv } from "@/components/lib/Box/styles";
 import { Form } from "antd";
@@ -234,3 +235,5 @@ export default function Login() {
     </AuthWrapper>
   );
 }
+=======
+>>>>>>> 896c83f (chore: new updates)

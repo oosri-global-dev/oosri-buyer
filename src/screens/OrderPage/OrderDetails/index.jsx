@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
@@ -234,3 +235,5 @@ export default function OrderDetailsScreen() {
         </OrderDetailsWrapper>
     );
 }
+=======
+>>>>>>> 896c83f (chore: new updates)
