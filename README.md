@@ -1,4 +1,4 @@
-##Project Hint:
+## Oosri Buyer Frontend
 
 #Clone the repo
 #Move to a new branch
