@@ -14,7 +14,10 @@ import PrivacyConsentModal from "@/components/lib/PrivacyConsentModal/PrivacyCon
 
 const queryClient = new QueryClient();
 
-// New component to consume context
+/**
+ * AppContent Component
+ * Consumes context and renders global overlays (modals, toasts).
+ */
 function AppContent({ Component, pageProps, getLayout }) {
   const [mounted, setMounted] = useState(false);
   const { loadingModal } = useMainContext();
@@ -23,9 +26,6 @@ function AppContent({ Component, pageProps, getLayout }) {
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  // Extract the pathname from asPath
-  const pathname = router.asPath.split("?")[0];
 
   useEffect(() => {
     const handleStart = () => NProgress.start();
@@ -42,7 +42,14 @@ function AppContent({ Component, pageProps, getLayout }) {
 
   return (
     <>
+      {/* 
+        1. Render page content first.
+        2. Render global overlays LAST to ensure they are on top in the DOM.
+      */}
+      {getLayout(<Component {...pageProps} />)}
+
       <CustomToastBox />
+
       {mounted && (
         <>
           <CustomModal
@@ -55,26 +62,24 @@ function AppContent({ Component, pageProps, getLayout }) {
           <PrivacyConsentModal />
         </>
       )}
-      {getLayout(<Component {...pageProps} />)}
     </>
   );
 }
 
+/**
+ * Main App Entry Point
+ */
 export default function App({ Component, pageProps }) {
   const getLayout = Component.getLayout || ((page) => page);
   return (
     <>
       <Head>
         <title>
-          Oosri is an African marketplace serving international buyers in the
-          USA, UK, Canada, EU, Australia, UAE, and more with authentic African
-          made products
+          Oosri - Authentic African marketplace
         </title>
         <meta
           name="description"
-          content="Oosri is an African marketplace serving international buyers in the
-          USA, UK, Canada, EU, Australia, UAE, and more with authentic African
-          made products"
+          content="Oosri is an African marketplace serving international buyers with authentic African made products."
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />

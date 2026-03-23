@@ -1,22 +1,30 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
+
+const fadeIn = keyframes`
+  from { opacity: 0; }
+  to { opacity: 1; }
+`;
+
+const slideUp = keyframes`
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+`;
 
 const Overlay = styled.div`
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: rgba(0, 0, 0, 0.55);
-  z-index: 9999;
+  z-index: 10001;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 16px;
-  animation: fadeIn 0.25s ease;
-
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
+  animation: ${fadeIn} 0.25s ease-out;
 `;
 
 const ModalBox = styled.div`
@@ -29,16 +37,12 @@ const ModalBox = styled.div`
   display: flex;
   flex-direction: column;
   gap: 16px;
-  animation: slideUp 0.25s ease;
-
-  @keyframes slideUp {
-    from { transform: translateY(30px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
+  animation: ${slideUp} 0.3s ease-out;
 
   .modal__icon {
-    font-size: 2.2rem;
+    font-size: 2.5rem;
     text-align: center;
+    margin-bottom: 4px;
   }
 
   h2 {
@@ -74,16 +78,20 @@ const ModalBox = styled.div`
     padding: 14px;
     border-radius: 10px;
     border: none;
-    background: var(--orrsiPrimary, #e05555);
+    background: var(--orrsiPrimary, #fc5353);
     color: #fff;
     font-size: 0.97rem;
     font-weight: 600;
     cursor: pointer;
-    transition: opacity 0.15s ease;
+    transition: transform 0.1s ease, opacity 0.15s ease;
+  }
+
+  .btn__accept:active {
+    transform: scale(0.98);
   }
 
   .btn__accept:hover {
-    opacity: 0.88;
+    opacity: 0.9;
   }
 
   .btn__reject {
@@ -100,7 +108,7 @@ const ModalBox = styled.div`
   }
 
   .btn__reject:hover {
-    background: #f5f5f5;
+    background: #f9f9f9;
   }
 
   .modal__note {
@@ -113,32 +121,38 @@ const ModalBox = styled.div`
 
 const CONSENT_KEY = "oosri_cookie_consent";
 
+/**
+ * PrivacyConsentModal Component
+ * Shows a cookie consent banner if the user hasn't accepted/rejected yet.
+ */
 export default function PrivacyConsentModal() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    // Must run client-side only
-    try {
-      const consent = localStorage.getItem(CONSENT_KEY);
-      if (!consent) {
+    // Ensuring this only runs on the client side
+    if (typeof window !== "undefined") {
+      try {
+        const consent = localStorage.getItem(CONSENT_KEY);
+        // Explicitly check for lack of definite consent
+        if (consent !== "accepted" && consent !== "rejected") {
+          // Small delay to ensure smooth entry after hydration
+          const timer = setTimeout(() => setVisible(true), 500);
+          return () => clearTimeout(timer);
+        }
+      } catch (err) {
+        console.warn("LocalStorage access failed:", err);
+        // Fallback: show modal if we can't check
         setVisible(true);
       }
-    } catch (e) {
-      // localStorage not available
     }
   }, []);
 
-  const handleAccept = () => {
+  const handleAction = (status) => {
     try {
-      localStorage.setItem(CONSENT_KEY, "accepted");
-    } catch (e) {}
-    setVisible(false);
-  };
-
-  const handleReject = () => {
-    try {
-      localStorage.setItem(CONSENT_KEY, "rejected");
-    } catch (e) {}
+      localStorage.setItem(CONSENT_KEY, status);
+    } catch (e) {
+      console.warn("Failed to save consent:", e);
+    }
     setVisible(false);
   };
 
@@ -156,16 +170,16 @@ export default function PrivacyConsentModal() {
         </p>
         <p>
           Read our{" "}
-          <Link href="/privacy-policy" target="_blank">
+          <Link href="/privacy-policy" target="_blank" rel="noopener noreferrer">
             Privacy Policy
           </Link>{" "}
           to learn more about how we handle your data.
         </p>
         <div className="modal__buttons">
-          <button className="btn__accept" onClick={handleAccept}>
+          <button className="btn__accept" onClick={() => handleAction("accepted")}>
             Accept All
           </button>
-          <button className="btn__reject" onClick={handleReject}>
+          <button className="btn__reject" onClick={() => handleAction("rejected")}>
             Reject Non-Essential
           </button>
         </div>
