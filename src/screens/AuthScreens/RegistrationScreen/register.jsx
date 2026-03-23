@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { LoginWrapper } from "./register.styles";
 import { FlexibleDiv } from "@/components/lib/Box/styles";
 import { Form, Radio } from "antd";
@@ -233,5 +232,3 @@ export default function Register() {
     </AuthWrapper>
   );
 }
-=======
->>>>>>> 896c83f (chore: new updates)

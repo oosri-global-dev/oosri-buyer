@@ -7,17 +7,24 @@ const PLACEHOLDER = "/images/placeholder.svg";
  * SafeImage — a drop-in replacement for next/image that:
  * 1. Validates `src` is a non-empty string before rendering
  * 2. Catches client-side load errors and swaps to a local placeholder
- * 3. Never causes the Next.js server-side image optimizer to fetch dead URLs
+ * 3. Intercepts known dead URLs (like via.placeholder.com) to prevent server-side fetch timeouts
  *
  * Accepts all standard next/image props.
  */
 export default function SafeImage({ src, alt = "product image", fallback = PLACEHOLDER, ...props }) {
-    const validSrc = src && typeof src === "string" && src.trim() !== "" ? src : fallback;
-    const [imgSrc, setImgSrc] = useState(validSrc);
+    // Determine the initially safe source
+    const getSafeSrc = (s) => {
+        if (!s || typeof s !== "string" || s.trim() === "" || s.includes("via.placeholder.com")) {
+            return fallback;
+        }
+        return s;
+    };
+
+    const [imgSrc, setImgSrc] = useState(getSafeSrc(src));
 
     // Sync when the src prop changes (e.g. carousel thumbnail selection)
     useEffect(() => {
-        setImgSrc(src && typeof src === "string" && src.trim() !== "" ? src : fallback);
+        setImgSrc(getSafeSrc(src));
     }, [src, fallback]);
 
     const handleError = () => {

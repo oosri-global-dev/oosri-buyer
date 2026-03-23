@@ -1,7 +1,7 @@
-<<<<<<< HEAD
 import React from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
+import SafeImage from '@/components/lib/SafeImage/SafeImage';
 import { OrderDetailsWrapper } from './index.styles';
 import { NameTag } from '../components/nameTag';
 import { useGetOrderById } from '@/network/orders';
@@ -161,7 +161,7 @@ export default function OrderDetailsScreen() {
                 <div className='product_card'>
                     <div className='product_card_content'>
                         <div className='product_image_container'>
-                            <Image
+                            <SafeImage
                                 src={productImage}
                                 alt={productTitle}
                                 className='product_image'
@@ -235,5 +235,3 @@ export default function OrderDetailsScreen() {
         </OrderDetailsWrapper>
     );
 }
-=======
->>>>>>> 896c83f (chore: new updates)

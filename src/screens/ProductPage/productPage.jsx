@@ -206,21 +206,14 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                   ))}
                 </FlexibleDiv>
                 <FlexibleDiv className="main__image__wrapper">
-                  {selectedImage ? (
-                    <img
-                      className="main__image"
-                      src={selectedImage}
-                      alt={`main__1`}
-                      onError={(e) => { e.currentTarget.src = "/images/placeholder.svg"; }}
-                    />
-                  ) : (
-                    <img
-                      className="main__image"
-                      src={product?.productImages?.[0] || "/images/placeholder.svg"}
-                      alt={`main__1`}
-                      onError={(e) => { e.currentTarget.src = "/images/placeholder.svg"; }}
-                    />
-                  )}
+                  <SafeImage
+                    src={selectedImage || product?.productImages?.[0]}
+                    alt={`main__1`}
+                    className="main__image"
+                    layout="responsive"
+                    width={500}
+                    height={500}
+                  />
                 </FlexibleDiv>
               </FlexibleDiv>
               <FlexibleDiv

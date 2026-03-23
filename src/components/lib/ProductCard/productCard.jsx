@@ -7,6 +7,7 @@ import "react-loading-skeleton/dist/skeleton.css";
 import { formatCurrency, useProductPrice } from "@/data-helpers/hooks";
 import { useRouter } from "next/router";
 import Image from "next/image";
+import SafeImage from "../SafeImage/SafeImage";
 import Button from "../Button";
 import { useMainContext } from "@/context";
 import { useState } from "react";
@@ -191,7 +192,7 @@ export default function ProductCard({ card, keyProp, isLoading = false }) {
       <div className="card__wrap">
         <div className="card__image" style={{ position: "relative" }}>
           {imgSrc ? (
-            <Image
+            <SafeImage
               src={imgSrc}
               alt={`${card?._id} product image`}
               layout="fill"
