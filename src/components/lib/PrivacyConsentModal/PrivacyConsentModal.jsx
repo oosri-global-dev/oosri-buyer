@@ -165,7 +165,7 @@ export default function PrivacyConsentModal() {
         <h2>We value your privacy</h2>
         <p>
           We use cookies to improve your experience, analyze site traffic, and
-          personalize content. By clicking "Accept All", you consent to our use
+          personalize content. By clicking &quot;Accept All&quot;, you consent to our use
           of cookies.
         </p>
         <p>

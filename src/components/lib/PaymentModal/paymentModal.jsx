@@ -2,7 +2,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import StripePaymentForm from "./StripePaymentForm";
 import { Input, Select } from "antd";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { StyledModal, PaymentModalContent } from "./paymentModal.styles";
 import { FlexibleDiv } from "../Box/styles";
 import Button from "../Button";
@@ -88,13 +88,13 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
   const deleteAddress = useDeleteBuyerAddress();
   const getShippingFee = useGetShippingFee();
 
-  const addresses = addressesData?.body || [];
+  const addresses = useMemo(() => addressesData?.body || [], [addressesData]);
   const shippingFee = shippingInfo?.totalPriceUSD || 0;
   const total = subtotal + shippingFee;
   const maxAddresses = 3;
 
   // Function to fetch shipping fee when address is selected
-  const fetchShippingFee = async (addressId) => {
+  const fetchShippingFee = useCallback(async (addressId) => {
     if (!addressId || cartItems.length === 0) {
       setShippingInfo(null);
       return;
@@ -125,7 +125,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     } finally {
       setIsLoadingShippingFee(false);
     }
-  };
+  }, [cartItems, dispatch, getShippingFee]);
 
   // Handle address selection
   const handleAddressSelect = (addressId) => {
@@ -154,7 +154,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
       setClientSecret(null);
       setPaymentSummary(null);
     }
-  }, [isOpen, addresses.length, form]);
+  }, [isOpen, addresses, form, selectedAddressId, fetchShippingFee]);
 
   const handleCancel = () => {
     setIsOpen(false);

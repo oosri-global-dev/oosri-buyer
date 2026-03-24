@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 const PLACEHOLDER = "/images/placeholder.svg";
 
@@ -13,19 +13,19 @@ const PLACEHOLDER = "/images/placeholder.svg";
  */
 export default function SafeImage({ src, alt = "product image", fallback = PLACEHOLDER, ...props }) {
     // Determine the initially safe source
-    const getSafeSrc = (s) => {
+    const getSafeSrc = useCallback((s) => {
         if (!s || typeof s !== "string" || s.trim() === "" || s.includes("via.placeholder.com")) {
             return fallback;
         }
         return s;
-    };
+    }, [fallback]);
 
     const [imgSrc, setImgSrc] = useState(getSafeSrc(src));
 
     // Sync when the src prop changes (e.g. carousel thumbnail selection)
     useEffect(() => {
         setImgSrc(getSafeSrc(src));
-    }, [src, fallback]);
+    }, [src, getSafeSrc]);
 
     const handleError = () => {
         setImgSrc(fallback);

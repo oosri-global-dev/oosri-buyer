@@ -163,7 +163,7 @@ function LoginForm() {
             style={{ objectFit: "contain" }}
           />
           <p className="mobile__tagline">
-            Africa's marketplace for the world
+            Africa&apos;s marketplace for the world
           </p>
         </FlexibleDiv>
 

@@ -207,19 +207,27 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                 </FlexibleDiv>
                 <FlexibleDiv className="main__image__wrapper">
                   {selectedImage ? (
-                    <img
-                      className="main__image"
-                      src={selectedImage}
-                      alt={`main__1`}
-                      onError={(e) => { e.currentTarget.src = "/images/placeholder.svg"; }}
-                    />
+                    <div className="main__image__container" style={{ position: 'relative', width: '100%', height: '400px' }}>
+                      <Image
+                        className="main__image"
+                        src={selectedImage}
+                        alt={`main__1`}
+                        fill
+                        style={{ objectFit: 'contain' }}
+                        onError={(e) => { e.currentTarget.src = "/images/placeholder.svg"; }}
+                      />
+                    </div>
                   ) : (
-                    <img
-                      className="main__image"
-                      src={product?.productImages?.[0] || "/images/placeholder.svg"}
-                      alt={`main__1`}
-                      onError={(e) => { e.currentTarget.src = "/images/placeholder.svg"; }}
-                    />
+                    <div className="main__image__container" style={{ position: 'relative', width: '100%', height: '400px' }}>
+                      <Image
+                        className="main__image"
+                        src={product?.productImages?.[0] || "/images/placeholder.svg"}
+                        alt={`main__1`}
+                        fill
+                        style={{ objectFit: 'contain' }}
+                        onError={(e) => { e.currentTarget.src = "/images/placeholder.svg"; }}
+                      />
+                    </div>
                   )}
                 </FlexibleDiv>
               </FlexibleDiv>

@@ -19,7 +19,7 @@ export default function OrderItem({ order,showCancel=true,delivered=false }){
     <OrderItemWrapper>
       <section className="wrapper">
         <div className="img_container">
-        <img className="avatar_img" src={iPhoneImage1.src}alt="product" />
+        <Image className="avatar_img" src={iPhoneImage1} alt="product" width={80} height={80} objectFit="contain" />
         </div>
         <div className="text_container">
           <span className="top_bar">

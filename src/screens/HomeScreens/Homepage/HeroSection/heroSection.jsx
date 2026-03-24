@@ -5,15 +5,19 @@ import { heroBannerFiles } from "@/data-helpers/homepage-helper";
 import WelcomeImage from "@/assets/images/homepage/welcome.gif";
 import SingleCategoryBox from "@/components/lib/SingleCategoryBox/single-category-box";
 import { LoadingCategoryBox } from "@/components/lib/SingleCategoryBox/loading-category-box";
+import Image from "next/image";
 
 export default function HeroSection({ productCategories, loadingCategories }) {
   return (
     <HeroSectionWrapper>
       <FlexibleDiv flexDir="column">
-        <img
-          src={WelcomeImage.src}
-          alt="welcome__png"
+        <Image
+          src={WelcomeImage}
+          alt="welcome"
           className="welcome__image__box"
+          width={1200}
+          height={150}
+          unoptimized
         />
       </FlexibleDiv>
       <HeroCarousel content={heroBannerFiles} />

@@ -70,7 +70,13 @@ export default function ChangePassword({ setCurrentPage, user, dispatch }) {
         <h2>Change Password</h2>
       </FlexibleDiv>
       <FlexibleDiv className="avatar__wrapper">
-        <img src={user?.profileImage || ProfilePic} alt="avatar" />
+        <Image
+          src={user?.profileImage || ProfilePic}
+          alt="avatar"
+          width={100}
+          height={100}
+          style={{ borderRadius: "50%", objectFit: "cover" }}
+        />
       </FlexibleDiv>
       <Form className="form__box" form={form} onFinish={handleChangePassword}>
         <label className="input__label">Current Password</label>
