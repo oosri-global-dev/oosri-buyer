@@ -337,13 +337,20 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                     backgroundColor="var(--orrsiPrimary)"
                     color="#fff"
                     className="checkout__btn"
-                    onClick={() => push("/cart")}
+                    onClick={() => {
+                      if (!user || (!user._id && !user.id)) {
+                        push(`/login?from=${encodeURIComponent(asPath)}`);
+                        return;
+                      }
+                      setBuyNowItem({ ...product, quantity: numOfProduct });
+                      push("/checkout");
+                    }}
                   >
-                    Checkout
+                    Buy Now
                   </Button>
                   <FlexibleDiv width="100%" flexDir="row" gap="10px">
                     <Button
-                      width="50%"
+                      width="100%"
                       backgroundColor="transparent"
                       color="var(--orrsiPrimary)"
                       border="1px solid var(--orrsiPrimary)"
@@ -363,22 +370,6 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                       loading={isLoadingBtn}
                     >
                       {productInCart ? "Remove from Cart" : "Add to Cart"}
-                    </Button>
-                    <Button
-                      width="50%"
-                      backgroundColor="var(--orrsiPrimary)"
-                      color="#fff"
-                      className="buy__now__btn"
-                      onClick={() => {
-                        if (!user || (!user._id && !user.id)) {
-                          push(`/login?from=${encodeURIComponent(asPath)}`);
-                          return;
-                        }
-                        setBuyNowItem({ ...product, quantity: numOfProduct });
-                        push("/checkout");
-                      }}
-                    >
-                      Buy Now
                     </Button>
                   </FlexibleDiv>
                 </FlexibleDiv>
