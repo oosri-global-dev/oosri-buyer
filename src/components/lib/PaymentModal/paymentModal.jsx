@@ -80,6 +80,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
   // Stripe state
   const [clientSecret, setClientSecret] = useState(null);
   const [paymentSummary, setPaymentSummary] = useState(null);
+  const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   const { data: addressesData, isLoading: isLoadingAddresses } =
     useBuyerAddresses();
@@ -92,6 +93,27 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
   const shippingFee = shippingInfo?.totalPriceUSD || 0;
   const total = subtotal + shippingFee;
   const maxAddresses = 3;
+  const watchedAddress = Form.useWatch("address", form);
+  const watchedCity = Form.useWatch("cityName", form);
+  const watchedCountry = Form.useWatch("country", form);
+
+  const mapPreviewQuery = useMemo(() => {
+    const selectedCountry = COUNTRIES.find((country) => country.code === watchedCountry);
+    return [watchedAddress, watchedCity, selectedCountry?.name]
+      .filter(Boolean)
+      .join(", ")
+      .trim();
+  }, [watchedAddress, watchedCity, watchedCountry]);
+
+  const mapPreviewUrl = useMemo(() => {
+    if (!googleMapsApiKey || !mapPreviewQuery) {
+      return null;
+    }
+
+    return `https://www.google.com/maps/embed/v1/place?key=${googleMapsApiKey}&q=${encodeURIComponent(
+      mapPreviewQuery
+    )}`;
+  }, [googleMapsApiKey, mapPreviewQuery]);
 
   // Function to fetch shipping fee when address is selected
   const fetchShippingFee = useCallback(async (addressId) => {
@@ -613,6 +635,26 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                             className="address__textarea"
                           />
                         </Form.Item>
+                        <div className="map__preview__section">
+                          <p className="map__preview__label">Address Preview</p>
+                          {mapPreviewUrl ? (
+                            <div className="map__preview__frame">
+                              <iframe
+                                title="Address preview map"
+                                src={mapPreviewUrl}
+                                loading="lazy"
+                                allowFullScreen
+                                referrerPolicy="no-referrer-when-downgrade"
+                              />
+                            </div>
+                          ) : (
+                            <div className="map__preview__placeholder">
+                              {googleMapsApiKey
+                                ? "Enter the address details to preview this location on Google Maps."
+                                : "Google Maps preview is unavailable because the API key is missing."}
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       <FlexibleDiv

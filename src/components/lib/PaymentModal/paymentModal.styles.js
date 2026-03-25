@@ -361,6 +361,50 @@ export const PaymentModalContent = styled.div`
         margin-bottom: 0;
       }
 
+      .map__preview__section {
+        margin-top: 10px;
+      }
+
+      .map__preview__label {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #555;
+        margin: 0 0 8px 0;
+      }
+
+      .map__preview__frame {
+        width: 100%;
+        height: 220px;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #ececec;
+        background: #f8f8f8;
+
+        iframe {
+          width: 100%;
+          height: 100%;
+          border: 0;
+          display: block;
+        }
+      }
+
+      .map__preview__placeholder {
+        width: 100%;
+        min-height: 120px;
+        border-radius: 12px;
+        border: 1px dashed #d9d9d9;
+        background: #fafafa;
+        color: #666;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        box-sizing: border-box;
+      }
+
       .country__select {
         width: 100%;
         height: 45px;
