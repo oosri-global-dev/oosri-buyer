@@ -9,8 +9,6 @@ export default function ProfileScreen() {
   const [currentPage, setCurrentPage] = useState("Profile Overview");
   const { user, dispatch } = useMainContext();
 
-  console.log(user);
-
   return (
     <AccountLayout>
       {currentPage === "Profile Overview" && (

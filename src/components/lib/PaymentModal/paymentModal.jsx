@@ -58,7 +58,6 @@ const countryOptions = COUNTRIES.map((country) => ({
 
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
-console.log(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, "PUBLISHABLE KEY")
 
 export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItems = [] }) {
   const router = useRouter();
@@ -80,8 +79,6 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
   // Stripe state
   const [clientSecret, setClientSecret] = useState(null);
   const [paymentSummary, setPaymentSummary] = useState(null);
-  const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-
   const { data: addressesData, isLoading: isLoadingAddresses } =
     useBuyerAddresses();
   const createAddress = useCreateBuyerAddress();
@@ -106,14 +103,14 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
   }, [watchedAddress, watchedCity, watchedCountry]);
 
   const mapPreviewUrl = useMemo(() => {
-    if (!googleMapsApiKey || !mapPreviewQuery) {
+    if (!mapPreviewQuery) {
       return null;
     }
 
-    return `https://www.google.com/maps/embed/v1/place?key=${googleMapsApiKey}&q=${encodeURIComponent(
+    return `https://www.google.com/maps?q=${encodeURIComponent(
       mapPreviewQuery
-    )}`;
-  }, [googleMapsApiKey, mapPreviewQuery]);
+    )}&output=embed`;
+  }, [mapPreviewQuery]);
 
   // Function to fetch shipping fee when address is selected
   const fetchShippingFee = useCallback(async (addressId) => {
@@ -649,9 +646,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                             </div>
                           ) : (
                             <div className="map__preview__placeholder">
-                              {googleMapsApiKey
-                                ? "Enter the address details to preview this location on Google Maps."
-                                : "Google Maps preview is unavailable because the API key is missing."}
+                              Enter the address details to preview this location on Google Maps.
                             </div>
                           )}
                         </div>

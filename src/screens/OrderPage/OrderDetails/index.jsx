@@ -122,7 +122,6 @@ export default function OrderDetailsScreen() {
 
     // Subtotal: product cost only (no delivery)
     const subtotalUSD = order?.subtotalUSD ?? null;
-    console.log(order, "ORDER IS HERE");
     const subTotal = subtotalUSD !== null ? formatCurrency(subtotalUSD) : '—';
 
     // Delivery fee: persisted in USD at checkout; 0 means free (or pre-fee legacy order)

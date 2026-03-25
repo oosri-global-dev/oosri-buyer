@@ -72,7 +72,6 @@ export default function OrderCard({ order }) {
 
   // Price: totalAmount is the correct grand total (totalAmountUSD can be near-zero test values)
   const totalAmount = order?.totalAmount || order?.subtotalUSD || order?.totalAmountUSD || 0;
-  console.log(totalAmount, "TOTAL AMOUNT", order);
 
   return (
     <OrderCardWrapper onClick={handleCardClick}>

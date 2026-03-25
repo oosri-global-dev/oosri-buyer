@@ -12,12 +12,13 @@ import toast, { Toaster } from "react-hot-toast";
 import { useMainContext } from "@/context";
 import { TOAST_BOX } from "@/context/types";
 import { useRouter } from "next/router";
-import { storeDataInCookie } from "@/data-helpers/auth-session";
+import { storeAuthTokens } from "@/data-helpers/auth-session";
 import { loginActions } from "@/utils/user-actions";
 import AuthWrapper from "@/components/layouts/AuthWrapper/auth-wrapper";
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import Image from "next/image";
 import Logo from "@/assets/images/homepage/logo.png";
+import { getSafeRedirectPath } from "@/utils/security";
 
 /**
  * LoginForm Component
@@ -36,10 +37,8 @@ function LoginForm() {
   const handleRedirect = useCallback((targetPath) => {
     // Restore scroll before navigating away
     document.body.style.overflow = "unset";
-    
-    // Use window.open for a clean state reload, or router.push for SPA feel
-    // Given the project's current pattern, window.open is used for state reset
-    window.open(targetPath || "/", "_self");
+
+    window.open(getSafeRedirectPath(targetPath), "_self");
   }, []);
 
   /**
@@ -63,9 +62,7 @@ function LoginForm() {
     try {
       const res = await loginUser(values);
 
-      // Securely store tokens
-      storeDataInCookie("access_token", res?.body?.accessToken);
-      storeDataInCookie("refresh_token", res?.body?.refreshToken);
+      storeAuthTokens(res?.body?.accessToken, res?.body?.refreshToken);
 
       // Execute any pending actions (e.g., merging carts)
       if (query?.action && loginActions[query?.action]) {
@@ -75,7 +72,7 @@ function LoginForm() {
       toast.success("Login successful! Redirecting...");
 
       // Redirect logic: 'from' parameter takes precedence
-      const redirectPath = query?.from || "/";
+      const redirectPath = getSafeRedirectPath(query?.from);
       setTimeout(() => handleRedirect(redirectPath), 1000);
 
     } catch (err) {
@@ -111,8 +108,7 @@ function LoginForm() {
           accessToken: tokenResponse.access_token,
         });
 
-        storeDataInCookie("access_token", res?.body?.accessToken);
-        storeDataInCookie("refresh_token", res?.body?.refreshToken);
+        storeAuthTokens(res?.body?.accessToken, res?.body?.refreshToken);
 
         if (query?.action && loginActions[query?.action]) {
           await loginActions[query?.action](res?.body?.accessToken);
@@ -123,7 +119,7 @@ function LoginForm() {
           position: "bottom-center",
         });
 
-        const redirectPath = query?.from || "/";
+        const redirectPath = getSafeRedirectPath(query?.from);
         setTimeout(() => handleRedirect(redirectPath), 1500);
 
       } catch (err) {
@@ -251,9 +247,11 @@ function LoginForm() {
  * Wrapped with essential providers for Authentication and Google OAuth.
  */
 export default function Login() {
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
+
   return (
     <AuthWrapper>
-      <GoogleOAuthProvider clientId="519641043381-8fni1j8vbmoakegvomk1lsfrgrnd0q4d.apps.googleusercontent.com">
+      <GoogleOAuthProvider clientId={googleClientId}>
         <LoginForm />
       </GoogleOAuthProvider>
     </AuthWrapper>
