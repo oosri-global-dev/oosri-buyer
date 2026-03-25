@@ -150,9 +150,11 @@ export default function OrderDetailsScreen() {
                         {orderStatus}
                     </span>
                 </span>
+                {/*
                 <button className='order_status track' onClick={() => router.push(`/order/${id}/track`)}>
                     Track Order
                 </button>
+                */}
             </div>
 
             <p className='time_frame'>{createdAt}</p>
