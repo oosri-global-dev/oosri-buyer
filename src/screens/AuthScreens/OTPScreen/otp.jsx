@@ -11,7 +11,7 @@ import { useState } from "react";
 import { confirmOTP, resendOTP } from "@/network/auth";
 import { TOAST_BOX } from "@/context/types";
 import { useMainContext } from "@/context";
-import { storeDataInCookie } from "@/data-helpers/auth-session";
+import { storeAuthTokens } from "@/data-helpers/auth-session";
 
 export default function OTP() {
   const [form] = Form.useForm();
@@ -98,9 +98,7 @@ export default function OTP() {
     try {
       const res = await confirmOTP(payload);
 
-      //set token
-      storeDataInCookie("access_token", res?.body?.accessToken);
-      storeDataInCookie("refresh_token", res?.body?.refreshToken);
+      storeAuthTokens(res?.body?.accessToken, res?.body?.refreshToken);
 
       //message
       dispatch({

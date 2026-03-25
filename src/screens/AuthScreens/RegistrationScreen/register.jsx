@@ -226,9 +226,11 @@ function RegisterForm() {
  * Main Register Page Export
  */
 export default function Register() {
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
+
   return (
     <AuthWrapper>
-      <GoogleOAuthProvider clientId="519641043381-8fni1j8vbmoakegvomk1lsfrgrnd0q4d.apps.googleusercontent.com">
+      <GoogleOAuthProvider clientId={googleClientId}>
         <RegisterForm />
       </GoogleOAuthProvider>
     </AuthWrapper>

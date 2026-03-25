@@ -1,17 +1,22 @@
 import {
   getDataInCookie,
-  storeDataInCookie,
+  storeAuthTokens,
+  clearAuthSession,
 } from "@/data-helpers/auth-session";
 import axios from "axios";
 
-let userToken = null;
-let refreshToken = null;
+const getAccessToken = () =>
+  typeof window !== "undefined" ? getDataInCookie("access_token") : null;
 
-if (typeof window !== "undefined") {
-  // Perform sessionStorage action
-  userToken = getDataInCookie("access_token");
-  refreshToken = sessionStorage.getItem("refresh_token");
-}
+const getStoredRefreshToken = () => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  return (
+    getDataInCookie("refresh_token") || window.sessionStorage.getItem("refresh_token")
+  );
+};
 
 if (!process.env.NEXT_PUBLIC_BASE_URL) {
   console.warn("NEXT_PUBLIC_BASE_URL is not defined. API requests may fail.");
@@ -28,16 +33,17 @@ export const instance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BASE_URL,
   headers: {
     "Content-Type": "application/json",
-    Authorization: userToken || "",
   },
 });
 
-
-
 instance.interceptors.request.use(
   async (config) => {
+    const userToken = getAccessToken();
+
     if (userToken) {
-      config.headers["Authorization"] = `Bearer ${userToken}` || null; // for Spring Boot back-end
+      config.headers["Authorization"] = `Bearer ${userToken}`;
+    } else if (config.headers?.Authorization) {
+      delete config.headers.Authorization;
     }
 
     return config;
@@ -56,19 +62,22 @@ instance.interceptors.response.use(
     if (
       err?.response?.status === 401 &&
       !originalConfig._retry &&
-      !!userToken
+      !!getAccessToken()
     ) {
-      originalConfig._retry = true;
+      const refreshToken = getStoredRefreshToken();
+      if (!refreshToken) {
+        return Promise.reject(err);
+      }
 
-      await getRefreshToken(refreshToken, err);
-    } else {
-      return Promise.reject(err);
+      originalConfig._retry = true;
+      return getRefreshToken(refreshToken, originalConfig);
     }
+
+    return Promise.reject(err);
   }
 );
 
-
-export const getRefreshToken = async (token, err) => {
+export const getRefreshToken = async (token, originalConfig) => {
   try {
     const data = await axios.post(
       `${process.env.NEXT_PUBLIC_BASE_URL}/auth/buyer/refresh-token`,
@@ -77,17 +86,29 @@ export const getRefreshToken = async (token, err) => {
       }
     );
 
-    storeDataInCookie.setItem("access_token", data?.data?.body?.accessToken);
-    // storeDataInCookie.setItem("refresh_token", data?.data?.body?.refreshToken);
+    const authPayload = data?.data?.body || {};
+    if (!authPayload?.accessToken) {
+      throw new Error("No access token returned from refresh endpoint");
+    }
 
-    userToken = data?.data?.body?.accessToken;
-    return await instance(err.config);
+    storeAuthTokens(authPayload.accessToken, authPayload.refreshToken || token);
+
+    if (originalConfig?.headers) {
+      originalConfig.headers.Authorization = `Bearer ${authPayload.accessToken}`;
+    }
+
+    return instance(originalConfig);
   } catch (_error) {
+    clearAuthSession();
+
     if (
+      typeof window !== "undefined" &&
       _error?.response?.status === 401 &&
       window.location.pathname !== "/login"
     ) {
       window.location.pathname = "/login";
     }
+
+    return Promise.reject(_error);
   }
 };
