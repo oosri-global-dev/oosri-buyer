@@ -107,9 +107,19 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
       return null;
     }
 
-    return `https://www.google.com/maps?q=${encodeURIComponent(
+    return `https://maps.google.com/maps?hl=en&q=${encodeURIComponent(
       mapPreviewQuery
-    )}&output=embed`;
+    )}&z=14&ie=UTF8&iwloc=B&output=embed`;
+  }, [mapPreviewQuery]);
+
+  const mapExternalUrl = useMemo(() => {
+    if (!mapPreviewQuery) {
+      return null;
+    }
+
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+      mapPreviewQuery
+    )}`;
   }, [mapPreviewQuery]);
 
   // Function to fetch shipping fee when address is selected
@@ -636,13 +646,31 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                           <p className="map__preview__label">Address Preview</p>
                           {mapPreviewUrl ? (
                             <div className="map__preview__frame">
-                              <iframe
-                                title="Address preview map"
-                                src={mapPreviewUrl}
-                                loading="lazy"
-                                allowFullScreen
-                                referrerPolicy="no-referrer-when-downgrade"
-                              />
+                              <>
+                                <iframe
+                                  title="Address preview map"
+                                  src={mapPreviewUrl}
+                                  loading="lazy"
+                                  allowFullScreen
+                                  referrerPolicy="no-referrer-when-downgrade"
+                                />
+                                {mapExternalUrl ? (
+                                  <a
+                                    href={mapExternalUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{
+                                      display: "inline-block",
+                                      marginTop: "8px",
+                                      color: "var(--orrsiPrimary)",
+                                      fontSize: "14px",
+                                      fontWeight: 500,
+                                    }}
+                                  >
+                                    Open in Google Maps
+                                  </a>
+                                ) : null}
+                              </>
                             </div>
                           ) : (
                             <div className="map__preview__placeholder">
