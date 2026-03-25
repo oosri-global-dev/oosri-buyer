@@ -1,6 +1,10 @@
-##Project Hint:
+## Oosri Buyer:
 
-#Clone the repo
-#Move to a new branch
-#To start the project - use 'yarn dev'.
+# Clone the repo
+git clone https://github.com/oosri-global-dev/oosri-buyer.git
+# Move to a new branch
+cd oosri-buyer
+# To start the project
+npm run dev
+
 
