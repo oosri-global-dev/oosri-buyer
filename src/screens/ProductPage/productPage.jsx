@@ -20,7 +20,6 @@ import ProductsGridBox from "../HomeScreens/Homepage/ProductsGridBox/productsGri
 import { useRouter } from "next/router";
 import OorsiLoader from "@/components/lib/Loader/loader";
 import { formatCurrency, useProductPrice } from "@/data-helpers/hooks";
-import Image from "next/image";
 import SafeImage from "@/components/lib/SafeImage/SafeImage";
 import { MoreReviews } from "./sections/more-reviews/moreReviews";
 import { getAllReviews } from "@/network/reviews";
@@ -208,24 +207,22 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                 <FlexibleDiv className="main__image__wrapper">
                   {selectedImage ? (
                     <div className="main__image__container" style={{ position: 'relative', width: '100%', height: '400px' }}>
-                      <Image
+                      <SafeImage
                         className="main__image"
                         src={selectedImage}
                         alt={`main__1`}
                         fill
                         style={{ objectFit: 'contain' }}
-                        onError={(e) => { e.currentTarget.src = "/images/placeholder.svg"; }}
                       />
                     </div>
                   ) : (
                     <div className="main__image__container" style={{ position: 'relative', width: '100%', height: '400px' }}>
-                      <Image
+                      <SafeImage
                         className="main__image"
                         src={product?.productImages?.[0] || "/images/placeholder.svg"}
                         alt={`main__1`}
                         fill
                         style={{ objectFit: 'contain' }}
-                        onError={(e) => { e.currentTarget.src = "/images/placeholder.svg"; }}
                       />
                     </div>
                   )}
