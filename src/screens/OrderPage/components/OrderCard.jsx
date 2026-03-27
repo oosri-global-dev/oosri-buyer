@@ -1,9 +1,6 @@
 import React from "react";
 import Image from "next/image";
-<<<<<<< HEAD
-=======
 import SafeImage from "@/components/lib/SafeImage/SafeImage";
->>>>>>> dadac6ae3e42be6c348c3808c1c5b93e79b835f9
 import { OrderCardWrapper } from "./orderComponent.styled";
 import { useRouter } from "next/router";
 import { formatCurrency, stripHtml } from "@/data-helpers/hooks";
@@ -75,7 +72,6 @@ export default function OrderCard({ order }) {
 
   // Price: totalAmount is the correct grand total (totalAmountUSD can be near-zero test values)
   const totalAmount = order?.totalAmount || order?.subtotalUSD || order?.totalAmountUSD || 0;
-  console.log(totalAmount, "TOTAL AMOUNT", order);
 
   return (
     <OrderCardWrapper onClick={handleCardClick}>
@@ -89,20 +85,12 @@ export default function OrderCard({ order }) {
 
       <div className="card_content">
         <div className="product_image">
-<<<<<<< HEAD
-          <Image
-            src={productImage}
-            alt={productTitle}
-            width={80}
-            height={80}
-=======
           <SafeImage
             src={productImage}
             alt="product"
             width={120}
             height={120}
             className="product__img"
->>>>>>> dadac6ae3e42be6c348c3808c1c5b93e79b835f9
           />
         </div>
         <div className="product_details">

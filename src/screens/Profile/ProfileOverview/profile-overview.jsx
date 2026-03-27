@@ -9,7 +9,13 @@ export default function ProfileOverview({ setCurrentPage, user }) {
   return (
     <ProfileOverviewWrapper>
       <FlexibleDiv className="avatar__wrapper">
-        <img src={user?.profileImage || ProfilePic} alt="avatar" />
+        <Image
+          src={user?.profileImage || ProfilePic}
+          alt="avatar"
+          width={100}
+          height={100}
+          style={{ borderRadius: "50%", objectFit: "cover" }}
+        />
         <span
           className="edit__profile__btn"
           onClick={() => {

@@ -8,7 +8,7 @@ import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import Link from "next/link";
 import AuthWrapper from "@/components/layouts/AuthWrapper/auth-wrapper";
 import toast, { Toaster } from "react-hot-toast";
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { signUpUser } from "@/network/auth";
 import { useRouter } from "next/router";
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
@@ -19,10 +19,75 @@ import Logo from "@/assets/images/homepage/logo.png";
  * RegisterForm Component
  * Handles buyer registration and Google account linking.
  */
-function RegisterForm() {
-  const [form] = Form.useForm();
+function GoogleRegisterButton({ form, setGoogleLoading }) {
+  const handleGoogleAuth = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      setGoogleLoading(true);
+      try {
+        const userInfoRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+        });
+        const userInfo = await userInfoRes.json();
+
+        form.setFieldsValue({
+          fullName: userInfo.name,
+          email: userInfo.email,
+        });
+
+        toast.success(`Welcome ${userInfo.name}! Please set a password and gender to complete registration.`, {
+          duration: 4000,
+          position: "bottom-center",
+        });
+      } catch (err) {
+        toast.error("Google sync failed. Please fill the form manually.", { position: "bottom-center" });
+      } finally {
+        setGoogleLoading(false);
+      }
+    },
+    onError: () => {
+      toast.error("Google authentication was cancelled.", { position: "bottom-center" });
+    },
+  });
+
+  return (
+    <Button
+      border="1.5px solid rgba(224, 224, 224, 0.60)"
+      radius="10px"
+      width="100%"
+      className="google__auth__btn"
+      icon={<GoogleIcon size={25} />}
+      onClick={() => handleGoogleAuth()}
+      type="button"
+    >
+      Register with Google
+    </Button>
+  );
+}
+
+function DisabledGoogleRegisterButton() {
+  return (
+    <Button
+      border="1.5px solid rgba(224, 224, 224, 0.60)"
+      radius="10px"
+      width="100%"
+      className="google__auth__btn"
+      icon={<GoogleIcon size={25} />}
+      onClick={() =>
+        toast.error("Google registration is not configured for this environment.", {
+          duration: 3000,
+          position: "bottom-center",
+        })
+      }
+      type="button"
+      disabled
+    >
+      Register with Google
+    </Button>
+  );
+}
+
+function RegisterForm({ form, googleButton = null, googleLoading = false }) {
   const [loading, setIsLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
   const { push } = useRouter();
 
   /**
@@ -64,39 +129,6 @@ function RegisterForm() {
     }
   };
 
-  /**
-   * Google "Login" handler during registration
-   * Pre-fills the form with Google profile data.
-   */
-  const handleGoogleAuth = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      setGoogleLoading(true);
-      try {
-        const userInfoRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-        });
-        const userInfo = await userInfoRes.json();
-
-        form.setFieldsValue({
-          fullName: userInfo.name,
-          email: userInfo.email,
-        });
-
-        toast.success(`Welcome ${userInfo.name}! Please set a password and gender to complete registration.`, {
-          duration: 4000,
-          position: "bottom-center",
-        });
-      } catch (err) {
-        toast.error("Google sync failed. Please fill the form manually.", { position: "bottom-center" });
-      } finally {
-        setGoogleLoading(false);
-      }
-    },
-    onError: () => {
-      toast.error("Google authentication was cancelled.", { position: "bottom-center" });
-    },
-  });
-
   return (
     <LoginWrapper>
       <Toaster containerClassName="toaster__style" />
@@ -117,24 +149,13 @@ function RegisterForm() {
             style={{ objectFit: "contain" }}
           />
           <p className="mobile__tagline">
-            Africa's marketplace for the world
+            Africa&apos;s marketplace for the world
           </p>
         </FlexibleDiv>
 
         <h2>Register</h2>
 
-        <Button
-          border="1.5px solid rgba(224, 224, 224, 0.60)"
-          radius="10px"
-          width="100%"
-          className="google__auth__btn"
-          icon={<GoogleIcon size={25} />}
-          onClick={() => handleGoogleAuth()}
-          loading={googleLoading}
-          type="button"
-        >
-          Register with Google
-        </Button>
+        <div aria-busy={googleLoading}>{googleButton || <DisabledGoogleRegisterButton />}</div>
 
         <Form form={form} onFinish={handleRegisterSubmit} layout="vertical">
           <FlexibleDiv justifyContent="flex-start">
@@ -226,11 +247,28 @@ function RegisterForm() {
  * Main Register Page Export
  */
 export default function Register() {
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
+  const isGoogleAuthEnabled = Boolean(googleClientId);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [form] = Form.useForm();
+
   return (
     <AuthWrapper>
-      <GoogleOAuthProvider clientId="519641043381-8fni1j8vbmoakegvomk1lsfrgrnd0q4d.apps.googleusercontent.com">
-        <RegisterForm />
-      </GoogleOAuthProvider>
+      {isGoogleAuthEnabled ? (
+        <GoogleOAuthProvider clientId={googleClientId}>
+          <RegisterForm
+            form={form}
+            googleLoading={googleLoading}
+            googleButton={<GoogleRegisterButton form={form} setGoogleLoading={setGoogleLoading} />}
+          />
+        </GoogleOAuthProvider>
+      ) : (
+        <RegisterForm
+          form={form}
+          googleLoading={googleLoading}
+          googleButton={<DisabledGoogleRegisterButton />}
+        />
+      )}
     </AuthWrapper>
   );
 }

@@ -338,27 +338,97 @@ export const PaymentModalContent = styled.div`
         display: block;
       }
 
-      .address__textarea {
-        width: 100% !important;
+      .move__down {
+        margin-bottom: 0;
+      }
+
+      .address__autocomplete {
+        position: relative;
+        width: 100%;
+      }
+
+      .address__input {
+        width: 100%;
+        height: 48px;
         border-radius: 10px;
         border: 2px solid #e8e8e8;
-        padding: 10px 12px;
-        resize: vertical;
-        min-height: 80px;
         transition: all 0.3s ease;
         font-size: 0.9rem;
-        box-sizing: border-box;
 
+        &:hover,
         &:focus,
-        &:focus-within,
-        &:hover {
+        &.ant-input-focused,
+        &:focus-within {
           border-color: var(--orrsiPrimary);
           box-shadow: 0 0 0 3px rgba(252, 83, 83, 0.1);
         }
+
+        &.has__error {
+          border-color: #ff4d4f;
+          box-shadow: 0 0 0 3px rgba(255, 77, 79, 0.12);
+        }
       }
 
-      .move__down {
-        margin-bottom: 0;
+      .address__suggestions {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        right: 0;
+        z-index: 20;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        padding: 8px;
+        border-radius: 12px;
+        border: 1px solid #ececec;
+        background: #fff;
+        box-shadow: 0 14px 30px rgba(0, 0, 0, 0.12);
+        max-height: 260px;
+        overflow-y: auto;
+      }
+
+      .address__suggestion {
+        width: 100%;
+        border: none;
+        border-radius: 10px;
+        background: transparent;
+        padding: 10px 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 3px;
+        text-align: left;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+
+        &:hover {
+          background: #fff5f5;
+        }
+      }
+
+      .address__suggestion__primary {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #333;
+      }
+
+      .address__suggestion__secondary {
+        font-size: 0.8rem;
+        color: #777;
+      }
+
+      .address__helper__text {
+        margin: 8px 0 0;
+        color: #666;
+        font-size: 0.8rem;
+        line-height: 1.5;
+      }
+
+      .address__error__text {
+        margin: 8px 0 0;
+        color: #ff4d4f;
+        font-size: 0.8rem;
+        line-height: 1.4;
       }
 
       .country__select {

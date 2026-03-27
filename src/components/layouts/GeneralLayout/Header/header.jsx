@@ -2,6 +2,7 @@ import { FlexibleDiv } from "@/components/lib/Box/styles";
 import React, { useState, useRef, useEffect } from "react";
 import { HeaderWrapper } from "./header.styles";
 import { useRouter } from "next/router";
+import Image from "next/image";
 import { FiSearch as SearchIcon } from "react-icons/fi";
 import { AiOutlineShoppingCart as CartIcon } from "react-icons/ai";
 import { BsHeart as WishlistIcon } from "react-icons/bs";
@@ -56,7 +57,7 @@ export default function Header() {
     <HeaderWrapper>
       <FlexibleDiv className="logo__section">
         <Link href={"/"}>
-          <img src={Logo.src} className="logo__wrapper" alt="logo" />
+          <Image src={Logo} className="logo__wrapper" alt="logo" width={120} height={40} style={{ objectFit: 'contain' }} />
         </Link>
 
         <div className="nav__menu__wrapper">
@@ -133,10 +134,13 @@ export default function Header() {
                     alignItems="center"
                     gap="10px"
                   >
-                    <img
+                    <Image
                       alt="user-profile"
-                      src={user?.profileImage || ProfileImage.src}
+                      src={user?.profileImage || ProfileImage}
                       className="profile"
+                      width={45}
+                      height={45}
+                      style={{ borderRadius: "50%", objectFit: "cover" }}
                     />
                     <FlexibleDiv
                       justifyContent="flex-start"

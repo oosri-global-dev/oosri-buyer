@@ -20,7 +20,6 @@ import ProductsGridBox from "../HomeScreens/Homepage/ProductsGridBox/productsGri
 import { useRouter } from "next/router";
 import OorsiLoader from "@/components/lib/Loader/loader";
 import { formatCurrency, useProductPrice } from "@/data-helpers/hooks";
-import Image from "next/image";
 import SafeImage from "@/components/lib/SafeImage/SafeImage";
 import { MoreReviews } from "./sections/more-reviews/moreReviews";
 import { getAllReviews } from "@/network/reviews";
@@ -207,19 +206,25 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                 </FlexibleDiv>
                 <FlexibleDiv className="main__image__wrapper">
                   {selectedImage ? (
-                    <img
-                      className="main__image"
-                      src={selectedImage}
-                      alt={`main__1`}
-                      onError={(e) => { e.currentTarget.src = "/images/placeholder.svg"; }}
-                    />
+                    <div className="main__image__container" style={{ position: 'relative', width: '100%', height: '400px' }}>
+                      <SafeImage
+                        className="main__image"
+                        src={selectedImage}
+                        alt={`main__1`}
+                        fill
+                        style={{ objectFit: 'contain' }}
+                      />
+                    </div>
                   ) : (
-                    <img
-                      className="main__image"
-                      src={product?.productImages?.[0] || "/images/placeholder.svg"}
-                      alt={`main__1`}
-                      onError={(e) => { e.currentTarget.src = "/images/placeholder.svg"; }}
-                    />
+                    <div className="main__image__container" style={{ position: 'relative', width: '100%', height: '400px' }}>
+                      <SafeImage
+                        className="main__image"
+                        src={product?.productImages?.[0] || "/images/placeholder.svg"}
+                        alt={`main__1`}
+                        fill
+                        style={{ objectFit: 'contain' }}
+                      />
+                    </div>
                   )}
                 </FlexibleDiv>
               </FlexibleDiv>
@@ -329,13 +334,20 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                     backgroundColor="var(--orrsiPrimary)"
                     color="#fff"
                     className="checkout__btn"
-                    onClick={() => push("/cart")}
+                    onClick={() => {
+                      if (!user || (!user._id && !user.id)) {
+                        push(`/login?from=${encodeURIComponent(asPath)}`);
+                        return;
+                      }
+                      setBuyNowItem({ ...product, quantity: numOfProduct });
+                      push("/checkout");
+                    }}
                   >
-                    Checkout
+                    Buy Now
                   </Button>
                   <FlexibleDiv width="100%" flexDir="row" gap="10px">
                     <Button
-                      width="50%"
+                      width="100%"
                       backgroundColor="transparent"
                       color="var(--orrsiPrimary)"
                       border="1px solid var(--orrsiPrimary)"
@@ -355,22 +367,6 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                       loading={isLoadingBtn}
                     >
                       {productInCart ? "Remove from Cart" : "Add to Cart"}
-                    </Button>
-                    <Button
-                      width="50%"
-                      backgroundColor="var(--orrsiPrimary)"
-                      color="#fff"
-                      className="buy__now__btn"
-                      onClick={() => {
-                        if (!user || (!user._id && !user.id)) {
-                          push(`/login?from=${encodeURIComponent(asPath)}`);
-                          return;
-                        }
-                        setBuyNowItem({ ...product, quantity: numOfProduct });
-                        push("/checkout");
-                      }}
-                    >
-                      Buy Now
                     </Button>
                   </FlexibleDiv>
                 </FlexibleDiv>

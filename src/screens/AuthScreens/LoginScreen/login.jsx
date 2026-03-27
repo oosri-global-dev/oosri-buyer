@@ -12,21 +12,116 @@ import toast, { Toaster } from "react-hot-toast";
 import { useMainContext } from "@/context";
 import { TOAST_BOX } from "@/context/types";
 import { useRouter } from "next/router";
-import { storeDataInCookie } from "@/data-helpers/auth-session";
+import { storeAuthTokens } from "@/data-helpers/auth-session";
 import { loginActions } from "@/utils/user-actions";
 import AuthWrapper from "@/components/layouts/AuthWrapper/auth-wrapper";
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import Image from "next/image";
 import Logo from "@/assets/images/homepage/logo.png";
+import { getSafeRedirectPath } from "@/utils/security";
 
 /**
  * LoginForm Component
  * Handles both regular and Google authentication for buyers.
  */
-function LoginForm() {
+function GoogleLoginButton({ setGoogleLoading }) {
+  const { dispatch } = useMainContext();
+  const { query } = useRouter();
+
+  const handleRedirect = useCallback((targetPath) => {
+    document.body.style.overflow = "unset";
+    window.open(getSafeRedirectPath(targetPath), "_self");
+  }, []);
+
+  const handleGoogleLoginSuccess = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      setGoogleLoading(true);
+      try {
+        const res = await googleLoginUser({
+          accessToken: tokenResponse.access_token,
+        });
+
+        storeAuthTokens(res?.body?.accessToken, res?.body?.refreshToken);
+
+        if (query?.action && loginActions[query?.action]) {
+          await loginActions[query?.action](res?.body?.accessToken);
+        }
+
+        toast.success(`Welcome back, ${res?.body?.user?.fullName || "Buyer"}!`, {
+          duration: 2000,
+          position: "bottom-center",
+        });
+
+        const redirectPath = getSafeRedirectPath(query?.from);
+        setTimeout(() => handleRedirect(redirectPath), 1500);
+      } catch (err) {
+        const errorMessage =
+          err?.response?.data?.message || "Google authentication failed. Please try again.";
+
+        dispatch({
+          type: TOAST_BOX,
+          payload: {
+            type: "error",
+            message: errorMessage,
+          },
+        });
+
+        toast.error(errorMessage, {
+          duration: 3000,
+          position: "bottom-center",
+        });
+        setGoogleLoading(false);
+      }
+    },
+    onError: () => {
+      toast.error("Google login was cancelled.", {
+        duration: 2000,
+        position: "bottom-center",
+      });
+      setGoogleLoading(false);
+    },
+  });
+
+  return (
+    <Button
+      border="1.5px solid rgba(224, 224, 224, 0.60)"
+      radius="10px"
+      width="100%"
+      className="google__auth__btn"
+      icon={<GoogleIcon size={25} />}
+      onClick={() => handleGoogleLoginSuccess()}
+      type="button"
+    >
+      Login with Google
+    </Button>
+  );
+}
+
+function DisabledGoogleLoginButton() {
+  return (
+    <Button
+      border="1.5px solid rgba(224, 224, 224, 0.60)"
+      radius="10px"
+      width="100%"
+      className="google__auth__btn"
+      icon={<GoogleIcon size={25} />}
+      onClick={() =>
+        toast.error("Google login is not configured for this environment.", {
+          duration: 3000,
+          position: "bottom-center",
+        })
+      }
+      type="button"
+      disabled
+    >
+      Login with Google
+    </Button>
+  );
+}
+
+function LoginForm({ googleButton = null, googleLoading = false }) {
   const [form] = Form.useForm();
   const [loadingBtn, setLoadingBtn] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
   const { dispatch } = useMainContext();
   const { push, query } = useRouter();
 
@@ -36,10 +131,8 @@ function LoginForm() {
   const handleRedirect = useCallback((targetPath) => {
     // Restore scroll before navigating away
     document.body.style.overflow = "unset";
-    
-    // Use window.open for a clean state reload, or router.push for SPA feel
-    // Given the project's current pattern, window.open is used for state reset
-    window.open(targetPath || "/", "_self");
+
+    window.open(getSafeRedirectPath(targetPath), "_self");
   }, []);
 
   /**
@@ -63,9 +156,7 @@ function LoginForm() {
     try {
       const res = await loginUser(values);
 
-      // Securely store tokens
-      storeDataInCookie("access_token", res?.body?.accessToken);
-      storeDataInCookie("refresh_token", res?.body?.refreshToken);
+      storeAuthTokens(res?.body?.accessToken, res?.body?.refreshToken);
 
       // Execute any pending actions (e.g., merging carts)
       if (query?.action && loginActions[query?.action]) {
@@ -75,7 +166,7 @@ function LoginForm() {
       toast.success("Login successful! Redirecting...");
 
       // Redirect logic: 'from' parameter takes precedence
-      const redirectPath = query?.from || "/";
+      const redirectPath = getSafeRedirectPath(query?.from);
       setTimeout(() => handleRedirect(redirectPath), 1000);
 
     } catch (err) {
@@ -100,49 +191,6 @@ function LoginForm() {
     }
   };
 
-  /**
-   * Google Login Handler
-   */
-  const handleGoogleLoginSuccess = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      setGoogleLoading(true);
-      try {
-        const res = await googleLoginUser({
-          accessToken: tokenResponse.access_token,
-        });
-
-        storeDataInCookie("access_token", res?.body?.accessToken);
-        storeDataInCookie("refresh_token", res?.body?.refreshToken);
-
-        if (query?.action && loginActions[query?.action]) {
-          await loginActions[query?.action](res?.body?.accessToken);
-        }
-
-        toast.success(`Welcome back, ${res?.body?.user?.fullName || "Buyer"}!`, {
-          duration: 2000,
-          position: "bottom-center",
-        });
-
-        const redirectPath = query?.from || "/";
-        setTimeout(() => handleRedirect(redirectPath), 1500);
-
-      } catch (err) {
-        toast.error("Google authentication failed. Please try again.", {
-          duration: 3000,
-          position: "bottom-center",
-        });
-        setGoogleLoading(false);
-      }
-    },
-    onError: () => {
-      toast.error("Google login was cancelled.", {
-        duration: 2000,
-        position: "bottom-center",
-      });
-      setGoogleLoading(false);
-    },
-  });
-
   return (
     <LoginWrapper>
       <Toaster containerClassName="toaster__style" />
@@ -163,25 +211,14 @@ function LoginForm() {
             style={{ objectFit: "contain" }}
           />
           <p className="mobile__tagline">
-            Africa's marketplace for the world
+            Africa&apos;s marketplace for the world
           </p>
         </FlexibleDiv>
 
         <h2>Login</h2>
 
         {/* Google Authentication Utility */}
-        <Button
-          border="1.5px solid rgba(224, 224, 224, 0.60)"
-          radius="10px"
-          width="100%"
-          className="google__auth__btn"
-          icon={<GoogleIcon size={25} />}
-          onClick={() => handleGoogleLoginSuccess()}
-          loading={googleLoading}
-          type="button"
-        >
-          Login with Google
-        </Button>
+        <div aria-busy={googleLoading}>{googleButton}</div>
 
         <Form form={form} onFinish={handleLoginSubmit} layout="vertical">
           <FlexibleDiv justifyContent="flex-start">
@@ -251,11 +288,25 @@ function LoginForm() {
  * Wrapped with essential providers for Authentication and Google OAuth.
  */
 export default function Login() {
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
+  const isGoogleAuthEnabled = Boolean(googleClientId);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
   return (
     <AuthWrapper>
-      <GoogleOAuthProvider clientId="519641043381-8fni1j8vbmoakegvomk1lsfrgrnd0q4d.apps.googleusercontent.com">
-        <LoginForm />
-      </GoogleOAuthProvider>
+      {isGoogleAuthEnabled ? (
+        <GoogleOAuthProvider clientId={googleClientId}>
+          <LoginForm
+            googleLoading={googleLoading}
+            googleButton={<GoogleLoginButton setGoogleLoading={setGoogleLoading} />}
+          />
+        </GoogleOAuthProvider>
+      ) : (
+        <LoginForm
+          googleLoading={googleLoading}
+          googleButton={<DisabledGoogleLoginButton />}
+        />
+      )}
     </AuthWrapper>
   );
 }

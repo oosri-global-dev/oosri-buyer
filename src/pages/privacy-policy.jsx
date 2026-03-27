@@ -195,7 +195,7 @@ export default function PrivacyPolicy() {
             <li><a href="#cookies">Cookies and Tracking Technologies</a></li>
             <li><a href="#international">International Transfers</a></li>
             <li><a href="#california">California Residents (CCPA/CPRA)</a></li>
-            <li><a href="#children">Children's Privacy</a></li>
+            <li><a href="#children">Children&apos;s Privacy</a></li>
             <li><a href="#changes">Changes to This Policy</a></li>
             <li><a href="#contact">Contact Us</a></li>
           </ol>
@@ -204,18 +204,18 @@ export default function PrivacyPolicy() {
         {/* 1. Who We Are */}
         <h2 id="who-we-are">1. Who We Are</h2>
         <p>
-          Oosri Global ("Oosri," "we," "us," or "our") is an online marketplace
+          Oosri Global (&quot;Oosri,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) is an online marketplace
           that connects independent sellers and buyers internationally. Oosri
           facilitates payments, logistics integrations, and dispute support,
           while buyers contract directly with sellers for purchases. For most
           personal data processed through the platform, Oosri acts as the data
           controller. Sellers are independent controllers for their own
-          processing of buyer data outside of Oosri's platform purposes.
+          processing of buyer data outside of Oosri&apos;s platform purposes.
         </p>
         <p>
           This Privacy Policy applies to all users of the Oosri website,
           mobile applications, and related services (collectively, the
-          "Services").
+          &quot;Services&quot;).
         </p>
 
         {/* 2. Information We Collect */}
@@ -258,8 +258,8 @@ export default function PrivacyPolicy() {
           <li><strong>Personalization:</strong> remembering your preferences and tailoring your experience.</li>
         </ul>
         <p>
-          Where required by law (including under Nigeria's Data Protection Act
-          2023, UK GDPR, and Canada's PIPEDA), we will identify and rely on a
+          Where required by law (including under Nigeria&apos;s Data Protection Act
+          2023, UK GDPR, and Canada&apos;s PIPEDA), we will identify and rely on a
           valid lawful basis for each processing activity, such as contract
           performance, legal obligation, legitimate interests, or consent.
         </p>
@@ -273,7 +273,7 @@ export default function PrivacyPolicy() {
           details, and order information with the relevant seller to enable
           fulfillment, shipping, customer support, and returns. Sellers are
           independent controllers for their own processing of this data and must
-          comply with applicable privacy laws and Oosri's Seller Privacy
+          comply with applicable privacy laws and Oosri&apos;s Seller Privacy
           Addendum.
         </p>
 
@@ -382,7 +382,7 @@ export default function PrivacyPolicy() {
           In the event of a personal data breach that is likely to result in
           risk to your rights and freedoms, we will notify the relevant
           regulatory authority within 72 hours of becoming aware of the breach
-          (as required under Nigeria's NDPA and UK GDPR) and will notify
+          (as required under Nigeria&apos;s NDPA and UK GDPR) and will notify
           affected individuals without undue delay where the breach is high-risk.
           California residents will be notified as required by California breach
           notification law.
@@ -506,7 +506,7 @@ export default function PrivacyPolicy() {
         </p>
 
         {/* 11. Children */}
-        <h2 id="children">11. Children's Privacy</h2>
+        <h2 id="children">11. Children&apos;s Privacy</h2>
         <p>
           Our Services are not directed to children under the age of 13 (or 16
           where required by applicable law). We do not knowingly collect personal
@@ -521,7 +521,7 @@ export default function PrivacyPolicy() {
         <p>
           We may update this Privacy Policy from time to time to reflect changes
           in our practices, technology, legal requirements, or other factors. We
-          will post the updated policy on this page with a revised "last updated"
+          will post the updated policy on this page with a revised &quot;last updated&quot;
           date. For material changes, we will provide additional notice such as
           an email notification or a prominent banner on our website. Your
           continued use of the Services after any changes constitutes acceptance
@@ -549,7 +549,7 @@ export default function PrivacyPolicy() {
           <p>
             You also have the right to lodge a complaint with the relevant data
             protection authority in your jurisdiction, including the Nigeria Data
-            Protection Commission (NDPC), the UK Information Commissioner's
+            Protection Commission (NDPC), the UK Information Commissioner&apos;s
             Office (ICO), or the Office of the Privacy Commissioner of Canada
             (OPC).
           </p>

@@ -7,6 +7,7 @@ import { FlexibleDiv } from '@/components/lib/Box/styles'
 import { FaLocationDot } from "react-icons/fa6";
 import { IoIosCopy } from "react-icons/io";
 import { FiPhone } from "react-icons/fi";
+import Image from "next/image";
 
 export default function OrderMap() {
     const [open, setOpen] = useState(false);
@@ -61,7 +62,7 @@ export default function OrderMap() {
               <FlexibleDiv width="100%" flexDir={"column"} gap={"5px"} alignItems={"start"}>
                 <h3 className='stat_title'>Delivery Man</h3>
                 <FlexibleDiv justifyContent={"start"} className='delivery_options' gap={"6px"} flexWrap={"noWrap"}>
-                    <img src="https://placehold.co/400x600" alt="delivery man" />
+                    <Image src="https://placehold.co/400x600" alt="delivery man" width={40} height={40} style={{ borderRadius: '50%' }} />
                   <FlexibleDiv flexDir={"column"} justifyContent={"start"} alignItems={"start"}>
                     <h3>Donatus Okene</h3>
                     <p>KD083836</p>

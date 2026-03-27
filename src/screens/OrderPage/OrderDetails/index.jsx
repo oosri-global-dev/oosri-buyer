@@ -1,10 +1,7 @@
 import React from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
-<<<<<<< HEAD
-=======
 import SafeImage from '@/components/lib/SafeImage/SafeImage';
->>>>>>> dadac6ae3e42be6c348c3808c1c5b93e79b835f9
 import { OrderDetailsWrapper } from './index.styles';
 import { NameTag } from '../components/nameTag';
 import { useGetOrderById } from '@/network/orders';
@@ -125,7 +122,6 @@ export default function OrderDetailsScreen() {
 
     // Subtotal: product cost only (no delivery)
     const subtotalUSD = order?.subtotalUSD ?? null;
-    console.log(order, "ORDER IS HERE");
     const subTotal = subtotalUSD !== null ? formatCurrency(subtotalUSD) : '—';
 
     // Delivery fee: persisted in USD at checkout; 0 means free (or pre-fee legacy order)
@@ -153,9 +149,11 @@ export default function OrderDetailsScreen() {
                         {orderStatus}
                     </span>
                 </span>
+                {/*
                 <button className='order_status track' onClick={() => router.push(`/order/${id}/track`)}>
                     Track Order
                 </button>
+                */}
             </div>
 
             <p className='time_frame'>{createdAt}</p>
@@ -167,11 +165,7 @@ export default function OrderDetailsScreen() {
                 <div className='product_card'>
                     <div className='product_card_content'>
                         <div className='product_image_container'>
-<<<<<<< HEAD
-                            <Image
-=======
                             <SafeImage
->>>>>>> dadac6ae3e42be6c348c3808c1c5b93e79b835f9
                                 src={productImage}
                                 alt={productTitle}
                                 className='product_image'
