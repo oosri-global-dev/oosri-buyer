@@ -58,7 +58,7 @@ const countryOptions = COUNTRIES.map((country) => ({
 
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
-console.log(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, "PUBLISHABLE KEY")
+
 
 export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItems = [] }) {
   const router = useRouter();

@@ -55,10 +55,6 @@ export default function ProductCarousel({
     const el = scrollerRef.current;
     if (!el) return;
 
-<<<<<<< HEAD
-    // if already at end, redirect (your requirement)
-=======
->>>>>>> dadac6ae3e42be6c348c3808c1c5b93e79b835f9
     const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 10;
     if (atEnd) {
       if (typeof onViewMore === "function") onViewMore();
@@ -69,73 +65,6 @@ export default function ProductCarousel({
   };
 
   const handlePrev = () => scrollByCards("prev");
-<<<<<<< HEAD
-
-  return (
-    <section style={{ width: "100%", marginTop: 20 }}>
-      {carouselTitle ? (
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h3 style={{ margin: 0 }}>{carouselTitle}</h3>
-
-          <div style={{ display: "flex", gap: 8 }}>
-            <button
-              type="button"
-              onClick={handlePrev}
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 999,
-                border: "1px solid rgba(0,0,0,0.15)",
-                background: "#fff",
-                cursor: "pointer",
-              }}
-              aria-label="Previous"
-            >
-              ←
-            </button>
-
-            <button
-              type="button"
-              onClick={handleNext}
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 999,
-                border: "1px solid rgba(0,0,0,0.15)",
-                background: "#fff",
-                cursor: "pointer",
-              }}
-              aria-label="Next"
-            >
-              →
-            </button>
-          </div>
-        </div>
-      ) : null}
-
-      <div
-        ref={scrollerRef}
-        style={{
-          display: "flex",
-          gap: 14,
-          overflowX: "auto",
-          paddingBottom: 8,
-          marginTop: 12,
-          scrollBehavior: "smooth",
-        }}
-      >
-        {loading
-          ? Array.from({ length: 8 }).map((_, idx) => (
-              <div key={idx} style={{ minWidth: 220, flex: "0 0 auto" }}>
-                <LoadingCard />
-              </div>
-            ))
-          : normalizedContent.map((card, idx) => (
-              <div key={card?._id || `carousel-card-${idx}`} style={{ minWidth: 220, flex: "0 0 auto" }}>
-                <ProductCard card={card} />
-              </div>
-            ))}
-=======
 
   const arrowStyle = {
     position: "absolute",
@@ -212,7 +141,6 @@ export default function ProductCarousel({
           →
         </button>
 
->>>>>>> dadac6ae3e42be6c348c3808c1c5b93e79b835f9
       </div>
     </section>
   );
