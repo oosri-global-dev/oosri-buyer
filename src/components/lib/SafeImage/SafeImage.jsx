@@ -1,7 +1,17 @@
 import Image from "next/image";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 
 const PLACEHOLDER = "/images/placeholder.svg";
+
+/**
+ * Determine the initially safe source
+ */
+const getSafeSrc = (s, fallback) => {
+    if (!s || typeof s !== "string" || s.trim() === "" || s.includes("via.placeholder.com")) {
+        return fallback;
+    }
+    return s;
+};
 
 /**
  * SafeImage — a drop-in replacement for next/image that:
@@ -12,20 +22,12 @@ const PLACEHOLDER = "/images/placeholder.svg";
  * Accepts all standard next/image props.
  */
 export default function SafeImage({ src, alt = "product image", fallback = PLACEHOLDER, ...props }) {
-    // Determine the initially safe source
-    const getSafeSrc = useCallback((s) => {
-        if (!s || typeof s !== "string" || s.trim() === "" || s.includes("via.placeholder.com")) {
-            return fallback;
-        }
-        return s;
-    }, [fallback]);
-
-    const [imgSrc, setImgSrc] = useState(getSafeSrc(src));
+    const [imgSrc, setImgSrc] = useState(getSafeSrc(src, fallback));
 
     // Sync when the src prop changes (e.g. carousel thumbnail selection)
     useEffect(() => {
-        setImgSrc(getSafeSrc(src));
-    }, [src, getSafeSrc]);
+        setImgSrc(getSafeSrc(src, fallback));
+    }, [src, fallback]);
 
     const handleError = () => {
         setImgSrc(fallback);

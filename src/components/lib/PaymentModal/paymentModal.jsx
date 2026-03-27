@@ -57,15 +57,12 @@ const countryOptions = COUNTRIES.map((country) => ({
   label: country.name,
   value: country.code,
 }));
-
-const stripePromise = loadStripe("pk_test_51SPm4AC2phndg2M1sOb1eNDLWAljy9CqwR0APuqYFGJ6Mzzu4oSQTIBuI28xiVVDEmfjqTaCWZpA9tidcJ64bVe400xPe69sNL");
-console.log("PUBLISHABLE KEY loaded");
-
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItems = [] }) {
   const router = useRouter();
 
   const { isLoaded: isMapsLoaded } = useLoadScript({
-    googleMapsApiKey: "AIzaSyBleJOF_nOi9TubGBghKaRMV3PmJM50Zyw",
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
     libraries: GOOGLE_MAPS_LIBRARIES,
   });
 
