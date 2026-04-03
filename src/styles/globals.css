@@ -1,0 +1,120 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap");
+
+html {
+  box-sizing: border-box;
+  font-size: 14px;
+  -ms-overflow-style: -ms-autohiding-scrollbar;
+}
+
+body {
+  background-color: var(--orrsiWhite);
+  -ms-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  color: var(--orrsiBlack);
+  scroll-behavior: smooth;
+  font-family: "Inter", sans-serif;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+::-webkit-scrollbar-button {
+  width: 0;
+  height: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+}
+
+.ant-form {
+  width: 100%;
+}
+
+.ant-form-item {
+  margin: 0;
+  width: 100%;
+}
+
+/* modal styling */
+
+.modal__style {
+  width: 460px !important;
+
+  @media (max-width: 550px) {
+    width: fit-content;
+  }
+
+  .ant-modal-title {
+    font-size: 1.3rem;
+  }
+
+  .modal__subtext {
+    color: #777;
+    margin-bottom: 45px;
+  }
+
+  .cta__section {
+    flex-wrap: nowrap;
+
+    @media (max-width: 550px) {
+      min-width: fit-content;
+      gap: 0;
+      justify-content: space-between;
+    }
+
+    @media (max-width: 380px) {
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .cta__button span {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: nowrap;
+      gap: 10px;
+      min-width: 40%;
+      height: fit-content;
+
+      p {
+        padding: 0px;
+        margin: 0px;
+      }
+
+      @media (max-width: 550px) {
+        min-width: fit-content;
+      }
+
+      @media (max-width: 380px) {
+        min-width: 40%;
+      }
+
+      p {
+        font-size: 0.8rem;
+      }
+    }
+
+    .loading__btn {
+      background: var(--orrsiPrimary);
+
+      span {
+        min-width: auto;
+      }
+    }
+  }
+}
+
+.ant-spin-dot-item {
+  background-color: var(--orrsiPrimary) !important;
+}

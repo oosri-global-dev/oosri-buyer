@@ -1,0 +1,937 @@
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
+import StripePaymentForm from "./StripePaymentForm";
+import { Input, Select } from "antd";
+import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
+import { StyledModal, PaymentModalContent } from "./paymentModal.styles";
+import { FlexibleDiv } from "../Box/styles";
+import Button from "../Button";
+import TextField from "../TextField";
+import { Form } from "antd";
+import { MdAdd as AddIcon, MdLocationOn as LocationIcon } from "react-icons/md";
+import {
+  useBuyerAddresses,
+  useCreateBuyerAddress,
+  useUpdateBuyerAddress,
+  useDeleteBuyerAddress,
+  useGetShippingFee,
+  useCreatePaymentIntent,
+} from "@/network/checkout";
+import { formatCurrency } from "@/data-helpers/hooks";
+import { TOAST_BOX } from "@/context/types";
+import { useMainContext } from "@/context";
+import { MdEdit as EditIcon, MdDelete as DeleteIcon } from "react-icons/md";
+import { Spin } from "antd";
+import { useRouter } from "next/router";
+import { useLoadScript, Autocomplete } from "@react-google-maps/api";
+
+const { TextArea } = Input;
+
+const GOOGLE_MAPS_LIBRARIES = ["places"];
+
+// Common countries list
+const COUNTRIES = [
+  { code: "NG", name: "Nigeria" },
+  { code: "GH", name: "Ghana" },
+  { code: "KE", name: "Kenya" },
+  { code: "ZA", name: "South Africa" },
+  { code: "EG", name: "Egypt" },
+  { code: "US", name: "United States" },
+  { code: "GB", name: "United Kingdom" },
+  { code: "CA", name: "Canada" },
+  { code: "AU", name: "Australia" },
+  { code: "FR", name: "France" },
+  { code: "DE", name: "Germany" },
+  { code: "IT", name: "Italy" },
+  { code: "ES", name: "Spain" },
+  { code: "NL", name: "Netherlands" },
+  { code: "BE", name: "Belgium" },
+  { code: "CH", name: "Switzerland" },
+  { code: "AT", name: "Austria" },
+  { code: "SE", name: "Sweden" },
+  { code: "NO", name: "Norway" },
+  { code: "DK", name: "Denmark" },
+];
+
+const countryOptions = COUNTRIES.map((country) => ({
+  label: country.name,
+  value: country.code,
+}));
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+console.log("PUBLISHABLE KEY loaded");
+
+export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItems = [] }) {
+  const router = useRouter();
+
+  const { isLoaded: isMapsLoaded } = useLoadScript({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
+    libraries: GOOGLE_MAPS_LIBRARIES,
+  });
+
+  const autocompleteRef = useRef(null);
+
+  // Request storage access for third-party Stripe iframe (Chrome partitioning)
+  useEffect(() => {
+    if (document.requestStorageAccess) {
+      document.requestStorageAccess().catch(() => { });
+    }
+  }, []);
+
+  const { dispatch, user, setBuyNowItem } = useMainContext();
+  const [form] = Form.useForm();
+  const [selectedAddressId, setSelectedAddressId] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingAddressId, setEditingAddressId] = useState(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [shippingInfo, setShippingInfo] = useState(null);
+  const [selectedServiceType, setSelectedServiceType] = useState(null);
+  const [isLoadingShippingFee, setIsLoadingShippingFee] = useState(false);
+
+  // Stripe state
+  const [clientSecret, setClientSecret] = useState(null);
+  const [paymentSummary, setPaymentSummary] = useState(null);
+
+  const { data: addressesData, isLoading: isLoadingAddresses } =
+    useBuyerAddresses();
+  const createAddress = useCreateBuyerAddress();
+  const updateAddress = useUpdateBuyerAddress();
+  const deleteAddress = useDeleteBuyerAddress();
+  const getShippingFee = useGetShippingFee();
+
+  const addresses = useMemo(() => addressesData?.body || [], [addressesData?.body]);
+  const shippingEstimates = Array.isArray(shippingInfo?.estimates)
+    ? shippingInfo.estimates
+    : [];
+  const selectedShippingOption = shippingEstimates.find(
+    (estimate) => estimate?.serviceType === selectedServiceType
+  ) || shippingEstimates[0] || null;
+  const shippingFee = selectedShippingOption?.estimateUSD || shippingInfo?.totalPriceUSD || 0;
+  const selectedShippingServiceName =
+    selectedShippingOption?.serviceName || shippingInfo?.selectedServiceName || shippingInfo?.product;
+  const selectedShippingEta =
+    selectedShippingOption?.estimatedDeliveryDate || shippingInfo?.estimatedDeliveryDate;
+  const selectedShippingTransitDays =
+    selectedShippingOption?.totalTransitDays || shippingInfo?.totalTransitDays;
+  const total = subtotal + shippingFee;
+  const maxAddresses = 3;
+
+  // Handle Google Places Autocomplete selection
+  const handlePlaceChanged = useCallback(() => {
+    if (!autocompleteRef.current) return;
+    const place = autocompleteRef.current.getPlace();
+    if (!place || !place.address_components) return;
+
+    let streetNumber = "";
+    let route = "";
+    let city = "";
+    let postalCode = "";
+    let countryCode = "";
+    let countryName = "";
+
+    place.address_components.forEach((component) => {
+      const types = component.types;
+      if (types.includes("street_number")) streetNumber = component.long_name;
+      if (types.includes("route")) route = component.long_name;
+      if (types.includes("locality") || types.includes("postal_town")) city = component.long_name;
+      if (types.includes("postal_code")) postalCode = component.long_name;
+      if (types.includes("country")) {
+        countryCode = component.short_name;
+        countryName = component.long_name;
+      }
+    });
+
+    const fullAddress = streetNumber ? `${streetNumber} ${route}` : route || place.formatted_address || "";
+    const matchedCountry = COUNTRIES.find(
+      (c) => c.code === countryCode || c.name === countryName
+    );
+
+    form.setFieldsValue({
+      address: fullAddress,
+      cityName: city,
+      postalCode: postalCode,
+      country: matchedCountry ? matchedCountry.code : undefined,
+    });
+  }, [form]);
+
+  // Function to fetch shipping fee when address is selected
+  const fetchShippingFee = useCallback(async (addressId, preferredServiceType = null) => {
+    if (!addressId || cartItems.length === 0) {
+      setShippingInfo(null);
+      setSelectedServiceType(null);
+      return;
+    }
+
+    setIsLoadingShippingFee(true);
+    try {
+      const payload = {
+        addressId,
+        ...(preferredServiceType ? { serviceType: preferredServiceType } : {}),
+        items: cartItems.map((item) => ({
+          productId: item._id,
+          quantity: item.quantity,
+        })),
+      };
+
+      const response = await getShippingFee.mutateAsync(payload);
+      const nextShippingInfo = response?.body || null;
+      setShippingInfo(nextShippingInfo);
+      const defaultSelectedServiceType =
+        nextShippingInfo?.selectedServiceType ||
+        nextShippingInfo?.productCode ||
+        nextShippingInfo?.estimates?.[0]?.serviceType ||
+        null;
+      setSelectedServiceType(defaultSelectedServiceType);
+    } catch (error) {
+      console.error("Error fetching shipping fee:", error);
+      dispatch({
+        type: TOAST_BOX,
+        payload: {
+          type: "error",
+          message: error?.response?.data?.message || "Failed to get shipping fee",
+        },
+      });
+      setShippingInfo(null);
+      setSelectedServiceType(null);
+    } finally {
+      setIsLoadingShippingFee(false);
+    }
+  }, [cartItems, dispatch, getShippingFee]);
+
+  // Handle address selection
+  const handleAddressSelect = (addressId) => {
+    setSelectedAddressId(addressId);
+    setShippingInfo(null);
+    setSelectedServiceType(null);
+    fetchShippingFee(addressId);
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+      if (addresses.length > 0 && !selectedAddressId) {
+        const firstAddressId = addresses[0]._id || addresses[0].id;
+        setSelectedAddressId(firstAddressId);
+        fetchShippingFee(firstAddressId);
+      }
+    } else {
+      document.body.style.overflow = "unset";
+      form.resetFields();
+      setIsEditing(false);
+      setEditingAddressId(null);
+      setSelectedAddressId(null);
+      setShowAddForm(false);
+      setShippingInfo(null);
+      setSelectedServiceType(null);
+      setClientSecret(null);
+      setPaymentSummary(null);
+    }
+  }, [isOpen, addresses, selectedAddressId, fetchShippingFee, form]);
+
+  const handleCancel = () => {
+    setIsOpen(false);
+    document.body.style.overflow = "unset";
+    form.resetFields();
+    setIsEditing(false);
+    setEditingAddressId(null);
+    setShowAddForm(false);
+    setSelectedServiceType(null);
+    setClientSecret(null);
+    setPaymentSummary(null);
+  };
+
+  const handleShowAddForm = () => {
+    if (addresses.length >= maxAddresses) {
+      dispatch({
+        type: TOAST_BOX,
+        payload: {
+          type: "error",
+          message: `You can only add up to ${maxAddresses} addresses`,
+        },
+      });
+      return;
+    }
+    setIsEditing(false);
+    setEditingAddressId(null);
+    setShowAddForm(true);
+    form.resetFields();
+  };
+
+  const handleCancelAddForm = () => {
+    setShowAddForm(false);
+    form.resetFields();
+  };
+
+  const handleEditAddress = (address) => {
+    setIsEditing(true);
+    setEditingAddressId(address._id || address.id);
+    setShowAddForm(false);
+    const country = COUNTRIES.find(
+      (c) => c.code === address.countryCode || c.name === address.countryName
+    );
+    form.setFieldsValue({
+      address: address.address,
+      postalCode: address.postalCode,
+      cityName: address.cityName,
+      country: country ? country.code : address.countryCode,
+    });
+  };
+
+  const handleCountryChange = (countryCode) => {
+    const selectedCountry = COUNTRIES.find((c) => c.code === countryCode);
+    if (selectedCountry) {
+      form.setFieldsValue({
+        countryCode: selectedCountry.code,
+        countryName: selectedCountry.name,
+      });
+    }
+  };
+
+  const handleDeleteAddress = async (addressId) => {
+    try {
+      await deleteAddress.mutateAsync(addressId);
+      dispatch({
+        type: TOAST_BOX,
+        payload: {
+          type: "success",
+          message: "Address deleted successfully",
+        },
+      });
+      if (selectedAddressId === addressId && addresses.length > 1) {
+        const remainingAddresses = addresses.filter(
+          (addr) => (addr._id || addr.id) !== addressId
+        );
+        if (remainingAddresses.length > 0) {
+          const nextAddressId = remainingAddresses[0]._id || remainingAddresses[0].id;
+          handleAddressSelect(nextAddressId);
+        } else {
+          setSelectedAddressId(null);
+          setShippingInfo(null);
+        }
+      }
+    } catch (error) {
+      dispatch({
+        type: TOAST_BOX,
+        payload: {
+          type: "error",
+          message: error?.response?.data?.message || "Failed to delete address",
+        },
+      });
+    }
+  };
+
+  const handleSubmitAddress = async (values) => {
+    try {
+      const selectedCountry = COUNTRIES.find((c) => c.code === values.country);
+      if (!selectedCountry) {
+        dispatch({
+          type: TOAST_BOX,
+          payload: {
+            type: "error",
+            message: "Please select a valid country",
+          },
+        });
+        return;
+      }
+
+      const addressData = {
+        address: values.address,
+        postalCode: values.postalCode,
+        cityName: values.cityName,
+        countryCode: selectedCountry.code,
+        countryName: selectedCountry.name,
+      };
+
+      if (isEditing && editingAddressId) {
+        await updateAddress.mutateAsync({
+          addressId: editingAddressId,
+          addressData,
+        });
+        dispatch({
+          type: TOAST_BOX,
+          payload: {
+            type: "success",
+            message: "Address updated successfully",
+          },
+        });
+      } else {
+        await createAddress.mutateAsync(addressData);
+        dispatch({
+          type: TOAST_BOX,
+          payload: {
+            type: "success",
+            message: "Address added successfully",
+          },
+        });
+      }
+      form.resetFields();
+      setIsEditing(false);
+      setEditingAddressId(null);
+      setShowAddForm(false);
+    } catch (error) {
+      dispatch({
+        type: TOAST_BOX,
+        payload: {
+          type: "error",
+          message: error?.response?.data?.message || "Failed to save address",
+        },
+      });
+    }
+  };
+
+  const createPaymentIntent = useCreatePaymentIntent();
+
+  const handleCompletePayment = async () => {
+    if (!selectedAddressId) {
+      dispatch({
+        type: TOAST_BOX,
+        payload: {
+          type: "error",
+          message: "Please select a delivery address",
+        },
+      });
+      return;
+    }
+
+    if (!user?._id && !user?.id) {
+      dispatch({
+        type: TOAST_BOX,
+        payload: {
+          type: "error",
+          message: "User not found. Please log in.",
+        },
+      });
+      return;
+    }
+
+    try {
+      const payload = {
+        buyerId: user._id || user.id,
+        addressId: selectedAddressId,
+        serviceType: selectedServiceType || selectedShippingOption?.serviceType || shippingInfo?.productCode,
+        items: cartItems.map((item) => ({
+          productId: item._id,
+          quantity: item.quantity,
+        })),
+      };
+
+      const response = await createPaymentIntent.mutateAsync(payload);
+
+      if (response && response.clientSecret) {
+        setClientSecret(response.clientSecret);
+        setPaymentSummary(response.summary);
+      } else {
+        dispatch({
+          type: TOAST_BOX,
+          payload: {
+            type: "success",
+            message: response?.message || "Payment intent created successfully",
+          },
+        });
+        handleCancel();
+      }
+
+    } catch (error) {
+      console.error("Error creating payment intent:", error);
+
+      let errorMessage = error?.response?.data?.message || error?.response?.data?.error || "Failed to create payment intent";
+
+      if (error?.response?.data?.stockIssues?.length > 0) {
+        const issues = error.response.data.stockIssues.map(issue =>
+          `${issue.productName} (Requested: ${issue.requestedQuantity}, Available: ${issue.availableStock})`
+        ).join('; ');
+        errorMessage = `Insufficient stock for: ${issues}`;
+      }
+
+      dispatch({
+        type: TOAST_BOX,
+        payload: {
+          type: "error",
+          message: errorMessage,
+        },
+      });
+    }
+  };
+
+  const handlePaymentSuccess = (paymentIntent) => {
+    dispatch({
+      type: TOAST_BOX,
+      payload: {
+        type: "success",
+        message: "Payment successful!",
+      },
+    });
+
+    if (setBuyNowItem) {
+      setBuyNowItem(null);
+    }
+
+    handleCancel();
+
+    if (paymentIntent?.id) {
+      router.push(`/order-confirmation?payment_intent=${paymentIntent.id}`);
+    } else {
+      router.push("/order-confirmation");
+    }
+  };
+
+  return (
+    <StyledModal
+      title={clientSecret ? "Secure Payment" : "Complete Payment"}
+      open={isOpen}
+      onCancel={handleCancel}
+      centered
+      footer={null}
+      closable={true}
+      width={600}
+    >
+      <PaymentModalContent>
+        {clientSecret && typeof clientSecret === 'string' && clientSecret.length > 5 && stripePromise ? (
+          <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe' } }}>
+            <StripePaymentForm
+              totalAmount={paymentSummary?.totalAmount?.dollars || total}
+              onSuccess={handlePaymentSuccess}
+              onBack={() => {
+                setClientSecret(null);
+                setPaymentSummary(null);
+              }}
+            />
+          </Elements>
+        ) : (
+          <FlexibleDiv
+            flexDir="column"
+            gap="25px"
+            justifyContent="flex-start"
+            alignItems="flex-start"
+          >
+            {/* Address Selection Section */}
+            <div className="address__section">
+              <h3 className="section__title">
+                <LocationIcon size={18} color="var(--orrsiPrimary)" />
+                Select Delivery Address
+              </h3>
+              {isLoadingAddresses ? (
+                <FlexibleDiv justifyContent="center" padding="20px">
+                  <Spin size="large" />
+                </FlexibleDiv>
+              ) : addresses.length === 0 ? (
+                <p className="no__address__text">
+                  No addresses found. Please add an address below.
+                </p>
+              ) : (
+                <div className="address__list">
+                  {addresses.map((addr) => {
+                    const addressId = addr._id || addr.id;
+                    const isSelected = selectedAddressId === addressId;
+                    return (
+                      <div
+                        key={addressId}
+                        className={`address__card ${isSelected ? "selected" : ""}`}
+                        onClick={() => handleAddressSelect(addressId)}
+                      >
+                        <FlexibleDiv
+                          justifyContent="space-between"
+                          alignItems="flex-start"
+                          width="100%"
+                        >
+                          <FlexibleDiv
+                            flexDir="column"
+                            gap="4px"
+                            flex="1"
+                            justifyContent="flex-start"
+                            alignItems="flex-start"
+                          >
+                            <p className="address__text">{addr.address}</p>
+                            <p className="address__details">
+                              {addr.cityName}, {addr.postalCode}
+                            </p>
+                            <p className="address__details">
+                              {addr.countryName} ({addr.countryCode})
+                            </p>
+                          </FlexibleDiv>
+                          <FlexibleDiv
+                            gap="8px"
+                            flexWrap="nowrap"
+                            justifyContent="flex-start"
+                            alignItems="center"
+                          >
+                            <button
+                              className="icon__button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditAddress(addr);
+                              }}
+                              type="button"
+                            >
+                              <EditIcon size={16} />
+                            </button>
+                            <button
+                              className="icon__button delete__btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteAddress(addressId);
+                              }}
+                              type="button"
+                              disabled={
+                                deleteAddress.isPending || deleteAddress.isLoading
+                              }
+                            >
+                              {deleteAddress.isPending || deleteAddress.isLoading ? (
+                                <Spin size="small" />
+                              ) : (
+                                <DeleteIcon size={16} />
+                              )}
+                            </button>
+                          </FlexibleDiv>
+                        </FlexibleDiv>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Add/Edit Address Form */}
+            <div className="address__form__section">
+              {!showAddForm && !isEditing ? (
+                <FlexibleDiv
+                  justifyContent="flex-start"
+                  alignItems="center"
+                  margin="0"
+                >
+                  <Button
+                    onClick={handleShowAddForm}
+                    backgroundColor="var(--orrsiPrimary)"
+                    color="var(--orrsiWhite)"
+                    radius="8px"
+                    height="40px"
+                    padding="0px 16px"
+                    fontSize="0.9rem"
+                    disabled={addresses.length >= maxAddresses}
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <FlexibleDiv
+                      gap="6px"
+                      justifyContent="flex-start"
+                      alignItems="center"
+                      flexWrap="nowrap"
+                    >
+                      <AddIcon size={16} style={{ margin: "0px" }} />
+                      <span>Add New Address</span>
+                    </FlexibleDiv>
+                  </Button>
+                  {addresses.length >= maxAddresses && (
+                    <p
+                      className="max__address__warning"
+                      style={{ marginLeft: "12px", marginTop: 0 }}
+                    >
+                      Maximum {maxAddresses} addresses allowed
+                    </p>
+                  )}
+                </FlexibleDiv>
+              ) : (
+                <>
+                  <FlexibleDiv
+                    justifyContent="space-between"
+                    alignItems="center"
+                    margin="0 0 20px 0"
+                  >
+                    <h3 className="section__title">
+                      {isEditing ? "Edit Address" : "Add New Address"}
+                    </h3>
+                    <button
+                      className="cancel__edit__btn"
+                      onClick={() => {
+                        if (isEditing) {
+                          setIsEditing(false);
+                          setEditingAddressId(null);
+                        } else {
+                          handleCancelAddForm();
+                        }
+                        form.resetFields();
+                      }}
+                      type="button"
+                    >
+                      {isEditing ? "Cancel Edit" : "Cancel"}
+                    </button>
+                  </FlexibleDiv>
+                  <Form form={form} onFinish={handleSubmitAddress}>
+                    <FlexibleDiv
+                      flexDir="column"
+                      gap="15px"
+                      justifyContent="flex-start"
+                      alignItems="stretch"
+                      width="100%"
+                    >
+                      {/* Address field with Google Places Autocomplete */}
+                      <div className="form__field__wrapper">
+                        <label className="input__label">Address</label>
+                        <Form.Item
+                          name="address"
+                          rules={[
+                            { required: true, message: "Please enter address" },
+                          ]}
+                        >
+                          {isMapsLoaded ? (
+                            <Autocomplete
+                              onLoad={(autocomplete) => {
+                                autocompleteRef.current = autocomplete;
+                              }}
+                              onPlaceChanged={handlePlaceChanged}
+                            >
+                              <input
+                                type="text"
+                                placeholder="Start typing your address..."
+                                style={{
+                                  width: "100%",
+                                  padding: "8px 12px",
+                                  borderRadius: "10px",
+                                  border: "1px solid #d9d9d9",
+                                  fontSize: "14px",
+                                  outline: "none",
+                                  height: "40px",
+                                  boxSizing: "border-box",
+                                }}
+                                onFocus={(e) => e.target.style.borderColor = "var(--orrsiPrimary)"}
+                                onBlur={(e) => e.target.style.borderColor = "#d9d9d9"}
+                              />
+                            </Autocomplete>
+                          ) : (
+                            <TextArea
+                              placeholder="Enter street address"
+                              rows={3}
+                              className="address__textarea"
+                            />
+                          )}
+                        </Form.Item>
+                      </div>
+
+                      <FlexibleDiv
+                        gap="15px"
+                        flexWrap="nowrap"
+                        justifyContent="flex-start"
+                        alignItems="flex-start"
+                        width="100%"
+                      >
+                        <div className="form__field__wrapper" style={{ flex: "1" }}>
+                          <label className="input__label">City</label>
+                          <Form.Item
+                            name="cityName"
+                            rules={[
+                              { required: true, message: "Please enter city" },
+                            ]}
+                          >
+                            <TextField
+                              placeholder="Auto-filled from address"
+                              borderRadius="10px"
+                              className="move__down"
+                              width="100%"
+                            />
+                          </Form.Item>
+                        </div>
+
+                        <div className="form__field__wrapper" style={{ flex: "1" }}>
+                          <label className="input__label">Postal Code</label>
+                          <Form.Item
+                            name="postalCode"
+                            rules={[
+                              { required: true, message: "Please enter postal code" },
+                            ]}
+                          >
+                            <TextField
+                              placeholder="Auto-filled from address"
+                              borderRadius="10px"
+                              className="move__down"
+                              width="100%"
+                            />
+                          </Form.Item>
+                        </div>
+                      </FlexibleDiv>
+
+                      <div className="form__field__wrapper">
+                        <label className="input__label">Country</label>
+                        <Form.Item
+                          name="country"
+                          rules={[
+                            { required: true, message: "Please select a country" },
+                          ]}
+                        >
+                          <Select
+                            placeholder="Auto-filled from address"
+                            className="country__select"
+                            onChange={handleCountryChange}
+                            options={countryOptions}
+                            showSearch
+                            filterOption={(input, option) =>
+                              (option?.label ?? "")
+                                .toLowerCase()
+                                .includes(input.toLowerCase())
+                            }
+                          />
+                        </Form.Item>
+                      </div>
+
+                      <Button
+                        type="submit"
+                        htmlType="submit"
+                        backgroundColor="var(--orrsiPrimary)"
+                        color="var(--orrsiWhite)"
+                        radius="10px"
+                        height="40px"
+                        loading={
+                          createAddress.isPending ||
+                          createAddress.isLoading ||
+                          updateAddress.isPending ||
+                          updateAddress.isLoading
+                        }
+                      >
+                        {isEditing ? "Update Address" : "Add Address"}
+                      </Button>
+                    </FlexibleDiv>
+                  </Form>
+                </>
+              )}
+            </div>
+
+            {/* Shipping Details - Compact */}
+            {shippingInfo && (
+              <div className="shipping__details__compact">
+                <FlexibleDiv
+                  gap="8px"
+                  flexWrap="wrap"
+                  justifyContent="flex-start"
+                  alignItems="center"
+                >
+                  <span className="shipping__badge">
+                    📦 {selectedShippingServiceName}
+                  </span>
+                  {selectedShippingEta && (
+                    <span className="shipping__badge">
+                      🚚 Arrives on or before {new Date(selectedShippingEta).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric'
+                      })}
+                    </span>
+                  )}
+                  {selectedShippingTransitDays && (
+                    <span className="shipping__badge">
+                      ⏱ {selectedShippingTransitDays} {selectedShippingTransitDays === 1 ? 'day' : 'days'}
+                    </span>
+                  )}
+                </FlexibleDiv>
+              </div>
+            )}
+
+            {shippingEstimates.length > 0 && (
+              <div className="shipping__service__section">
+                <h3 className="section__title">Select Shipping Service</h3>
+                <div className="shipping__service__list">
+                  {shippingEstimates.map((estimate) => {
+                    const isSelected = selectedServiceType === estimate.serviceType;
+                    return (
+                      <button
+                        key={estimate.serviceType}
+                        type="button"
+                        className={`shipping__service__card ${isSelected ? "selected" : ""}`}
+                        onClick={() => setSelectedServiceType(estimate.serviceType)}
+                      >
+                        <FlexibleDiv justifyContent="space-between" alignItems="center">
+                          <p className="shipping__service__name">{estimate.serviceName}</p>
+                          <p className="shipping__service__price">
+                            {formatCurrency(estimate.estimateUSD || 0)}
+                          </p>
+                        </FlexibleDiv>
+                        {estimate.description && (
+                          <p className="shipping__service__description">{estimate.description}</p>
+                        )}
+                        {Array.isArray(estimate.features) && estimate.features.length > 0 && (
+                          <FlexibleDiv className="shipping__service__features" gap="6px" flexWrap="wrap" justifyContent="flex-start" alignItems="center">
+                            {estimate.features.map((feature) => (
+                              <span key={`${estimate.serviceType}-${feature}`} className="shipping__service__feature">
+                                {feature}
+                              </span>
+                            ))}
+                          </FlexibleDiv>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Payment Summary */}
+            <div className="payment__summary">
+              <h3 className="section__title">Payment Summary</h3>
+              <FlexibleDiv
+                flexDir="column"
+                gap="8px"
+                className="summary__details"
+                justifyContent="flex-start"
+                alignItems="stretch"
+              >
+                <FlexibleDiv justifyContent="space-between" alignItems="center">
+                  <p className="summary__label">Subtotal:</p>
+                  <p className="summary__value">{formatCurrency(subtotal)}</p>
+                </FlexibleDiv>
+                <FlexibleDiv justifyContent="space-between" alignItems="center">
+                  <p className="summary__label">Shipping Fee:</p>
+                  <p className="summary__value">
+                    {isLoadingShippingFee ? (
+                      <span className="calculating__loader">
+                        Calculating<span className="dots"></span>
+                      </span>
+                    ) : (
+                      formatCurrency(shippingFee)
+                    )}
+                  </p>
+                </FlexibleDiv>
+                <FlexibleDiv
+                  justifyContent="space-between"
+                  alignItems="center"
+                  className="total__row"
+                >
+                  <p className="summary__label total__label">Total:</p>
+                  <p className="summary__value total__value">
+                    {formatCurrency(total)}
+                  </p>
+                </FlexibleDiv>
+              </FlexibleDiv>
+            </div>
+
+            {/* Complete Payment Button */}
+            <Button
+              onClick={handleCompletePayment}
+              backgroundColor={
+                !selectedAddressId || !shippingFee || isLoadingShippingFee
+                  ? "#ccc"
+                  : "linear-gradient(135deg, var(--orrsiPrimary) 0%, #ff6b6b 100%)"
+              }
+              color="var(--orrsiWhite)"
+              radius="10px"
+              height="48px"
+              width="100%"
+              fontSize="0.95rem"
+              fontWeight="600"
+              loading={createPaymentIntent.isPending || createPaymentIntent.isLoading}
+              disabled={!selectedAddressId || !shippingFee || isLoadingShippingFee || createPaymentIntent.isPending || createPaymentIntent.isLoading}
+              style={{
+                boxShadow: !selectedAddressId || !shippingFee || isLoadingShippingFee || createPaymentIntent.isPending || createPaymentIntent.isLoading
+                  ? "none"
+                  : "0 4px 20px rgba(252, 83, 83, 0.3)",
+                transition: "all 0.3s ease",
+              }}
+              className="complete__payment__btn"
+            >
+              Complete Payment ({formatCurrency(total)})
+            </Button>
+          </FlexibleDiv>
+        )}
+      </PaymentModalContent>
+    </StyledModal>
+  );
+}
