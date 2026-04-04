@@ -1,4 +1,4 @@
-## Oosri Buyer:
+## Oosri Buyer App:
 
 # Clone the repo
 git clone https://github.com/oosri-global-dev/oosri-buyer.git
