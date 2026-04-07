@@ -114,6 +114,14 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     selectedShippingOption?.estimatedDeliveryDate || shippingInfo?.estimatedDeliveryDate;
   const selectedShippingTransitDays =
     selectedShippingOption?.totalTransitDays || shippingInfo?.totalTransitDays;
+  const selectedShippingProvider = shippingInfo?.providerDisplayName || shippingInfo?.provider || null;
+  const selectedShippingDescription =
+    selectedShippingOption?.description || shippingInfo?.description || null;
+  const selectedShippingFeatures = Array.isArray(selectedShippingOption?.features)
+    ? selectedShippingOption.features
+    : Array.isArray(shippingInfo?.features)
+    ? shippingInfo.features
+    : [];
   const total = subtotal + shippingFee;
   const maxAddresses = 3;
 
@@ -754,12 +762,9 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                   <span className="shipping__badge">
                     📦 {selectedShippingServiceName}
                   </span>
-                  {selectedShippingEta && (
+                  {selectedShippingProvider && (
                     <span className="shipping__badge">
-                      🚚 Arrives on or before {new Date(selectedShippingEta).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric'
-                      })}
+                      🚛 via {selectedShippingProvider}
                     </span>
                   )}
                   {selectedShippingTransitDays && (
@@ -767,11 +772,40 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                       ⏱ {selectedShippingTransitDays} {selectedShippingTransitDays === 1 ? 'day' : 'days'}
                     </span>
                   )}
+                  {selectedShippingEta && (
+                    <span className="shipping__badge">
+                      🗓 Arrives on or before {new Date(selectedShippingEta).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric'
+                      })}
+                    </span>
+                  )}
                 </FlexibleDiv>
+                {selectedShippingDescription && (
+                  <p className="shipping__service__description" style={{ marginTop: '8px' }}>
+                    {selectedShippingDescription}
+                  </p>
+                )}
+                {selectedShippingFeatures.length > 0 && (
+                  <FlexibleDiv
+                    className="shipping__service__features"
+                    gap="6px"
+                    flexWrap="wrap"
+                    justifyContent="flex-start"
+                    alignItems="center"
+                    style={{ marginTop: '8px' }}
+                  >
+                    {selectedShippingFeatures.map((feature) => (
+                      <span key={feature} className="shipping__service__feature">
+                        {feature}
+                      </span>
+                    ))}
+                  </FlexibleDiv>
+                )}
               </div>
             )}
 
-            {shippingEstimates.length > 0 && (
+            {shippingEstimates.length > 1 && (
               <div className="shipping__service__section">
                 <h3 className="section__title">Select Shipping Service</h3>
                 <div className="shipping__service__list">
