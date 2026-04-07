@@ -23,7 +23,8 @@ import { useMainContext } from "@/context";
 import { MdEdit as EditIcon, MdDelete as DeleteIcon } from "react-icons/md";
 import { Spin } from "antd";
 import { useRouter } from "next/router";
-import { useLoadScript, Autocomplete } from "@react-google-maps/api";
+import { useLoadScript } from "@react-google-maps/api";
+import AddressAutocompleteField from "./AddressAutocompleteField";
 
 const { TextArea } = Input;
 
@@ -69,7 +70,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     libraries: GOOGLE_MAPS_LIBRARIES,
   });
 
-  const autocompleteRef = useRef(null);
+  const [selectedCountryCode, setSelectedCountryCode] = useState(undefined);
 
   // Request storage access for third-party Stripe iframe (Chrome partitioning)
   useEffect(() => {
@@ -116,43 +117,18 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
   const total = subtotal + shippingFee;
   const maxAddresses = 3;
 
-  // Handle Google Places Autocomplete selection
-  const handlePlaceChanged = useCallback(() => {
-    if (!autocompleteRef.current) return;
-    const place = autocompleteRef.current.getPlace();
-    if (!place || !place.address_components) return;
-
-    let streetNumber = "";
-    let route = "";
-    let city = "";
-    let postalCode = "";
-    let countryCode = "";
-    let countryName = "";
-
-    place.address_components.forEach((component) => {
-      const types = component.types;
-      if (types.includes("street_number")) streetNumber = component.long_name;
-      if (types.includes("route")) route = component.long_name;
-      if (types.includes("locality") || types.includes("postal_town")) city = component.long_name;
-      if (types.includes("postal_code")) postalCode = component.long_name;
-      if (types.includes("country")) {
-        countryCode = component.short_name;
-        countryName = component.long_name;
-      }
-    });
-
-    const fullAddress = streetNumber ? `${streetNumber} ${route}` : route || place.formatted_address || "";
-    const matchedCountry = COUNTRIES.find(
-      (c) => c.code === countryCode || c.name === countryName
-    );
-
-    form.setFieldsValue({
-      address: fullAddress,
-      cityName: city,
-      postalCode: postalCode,
-      country: matchedCountry ? matchedCountry.code : undefined,
-    });
-  }, [form]);
+  // Called by AddressAutocompleteField when a suggestion geocode result comes back
+  const onAddressAutocompleteSelect = useCallback(
+    ({ address, cityName, postalCode, countryCode, countryName }) => {
+      form.setFieldsValue({ address, cityName, postalCode });
+      // Match against known list; fall back to raw Google code for unlisted countries
+      const matched = COUNTRIES.find(
+        (c) => c.code === countryCode || c.name === countryName
+      );
+      setSelectedCountryCode(matched?.code || countryCode || undefined);
+    },
+    [form]
+  );
 
   // Function to fetch shipping fee when address is selected
   const fetchShippingFee = useCallback(async (addressId, preferredServiceType = null) => {
@@ -217,6 +193,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     } else {
       document.body.style.overflow = "unset";
       form.resetFields();
+      setSelectedCountryCode(undefined);
       setIsEditing(false);
       setEditingAddressId(null);
       setSelectedAddressId(null);
@@ -232,6 +209,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     setIsOpen(false);
     document.body.style.overflow = "unset";
     form.resetFields();
+    setSelectedCountryCode(undefined);
     setIsEditing(false);
     setEditingAddressId(null);
     setShowAddForm(false);
@@ -255,11 +233,13 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     setEditingAddressId(null);
     setShowAddForm(true);
     form.resetFields();
+    setSelectedCountryCode(undefined);
   };
 
   const handleCancelAddForm = () => {
     setShowAddForm(false);
     form.resetFields();
+    setSelectedCountryCode(undefined);
   };
 
   const handleEditAddress = (address) => {
@@ -273,18 +253,13 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
       address: address.address,
       postalCode: address.postalCode,
       cityName: address.cityName,
-      country: country ? country.code : address.countryCode,
     });
+    setAddressInputValue(address.address || "");
+    setSelectedCountryCode(country ? country.code : address.countryCode || undefined);
   };
 
-  const handleCountryChange = (countryCode) => {
-    const selectedCountry = COUNTRIES.find((c) => c.code === countryCode);
-    if (selectedCountry) {
-      form.setFieldsValue({
-        countryCode: selectedCountry.code,
-        countryName: selectedCountry.name,
-      });
-    }
+  const handleCountryChange = (code) => {
+    setSelectedCountryCode(code);
   };
 
   const handleDeleteAddress = async (addressId) => {
@@ -322,17 +297,17 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
 
   const handleSubmitAddress = async (values) => {
     try {
-      const selectedCountry = COUNTRIES.find((c) => c.code === values.country);
-      if (!selectedCountry) {
+      if (!selectedCountryCode) {
         dispatch({
           type: TOAST_BOX,
           payload: {
             type: "error",
-            message: "Please select a valid country",
+            message: "Please select a country",
           },
         });
         return;
       }
+      const selectedCountry = COUNTRIES.find((c) => c.code === selectedCountryCode);
 
       const addressData = {
         address: values.address,
@@ -365,6 +340,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
         });
       }
       form.resetFields();
+      setSelectedCountryCode(undefined);
       setIsEditing(false);
       setEditingAddressId(null);
       setShowAddForm(false);
@@ -653,6 +629,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                           handleCancelAddForm();
                         }
                         form.resetFields();
+                        setSelectedCountryCode(undefined);
                       }}
                       type="button"
                     >
@@ -667,7 +644,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                       alignItems="stretch"
                       width="100%"
                     >
-                      {/* Address field with Google Places Autocomplete */}
+                      {/* Address field — custom autocomplete using AutocompleteService + Geocoder */}
                       <div className="form__field__wrapper">
                         <label className="input__label">Address</label>
                         <Form.Item
@@ -676,37 +653,11 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                             { required: true, message: "Please enter address" },
                           ]}
                         >
-                          {isMapsLoaded ? (
-                            <Autocomplete
-                              onLoad={(autocomplete) => {
-                                autocompleteRef.current = autocomplete;
-                              }}
-                              onPlaceChanged={handlePlaceChanged}
-                            >
-                              <input
-                                type="text"
-                                placeholder="Start typing your address..."
-                                style={{
-                                  width: "100%",
-                                  padding: "8px 12px",
-                                  borderRadius: "10px",
-                                  border: "1px solid #d9d9d9",
-                                  fontSize: "14px",
-                                  outline: "none",
-                                  height: "40px",
-                                  boxSizing: "border-box",
-                                }}
-                                onFocus={(e) => e.target.style.borderColor = "var(--orrsiPrimary)"}
-                                onBlur={(e) => e.target.style.borderColor = "#d9d9d9"}
-                              />
-                            </Autocomplete>
-                          ) : (
-                            <TextArea
-                              placeholder="Enter street address"
-                              rows={3}
-                              className="address__textarea"
-                            />
-                          )}
+                          <AddressAutocompleteField
+                            onAddressSelect={onAddressAutocompleteSelect}
+                            placeholder="Start typing your address..."
+                            disabled={!isMapsLoaded}
+                          />
                         </Form.Item>
                       </div>
 
@@ -754,25 +705,19 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
 
                       <div className="form__field__wrapper">
                         <label className="input__label">Country</label>
-                        <Form.Item
-                          name="country"
-                          rules={[
-                            { required: true, message: "Please select a country" },
-                          ]}
-                        >
-                          <Select
-                            placeholder="Auto-filled from address"
-                            className="country__select"
-                            onChange={handleCountryChange}
-                            options={countryOptions}
-                            showSearch
-                            filterOption={(input, option) =>
-                              (option?.label ?? "")
-                                .toLowerCase()
-                                .includes(input.toLowerCase())
-                            }
-                          />
-                        </Form.Item>
+                        <Select
+                          placeholder="Auto-filled from address"
+                          className="country__select"
+                          value={selectedCountryCode}
+                          onChange={handleCountryChange}
+                          options={countryOptions}
+                          showSearch
+                          filterOption={(input, option) =>
+                            (option?.label ?? "")
+                              .toLowerCase()
+                              .includes(input.toLowerCase())
+                          }
+                        />
                       </div>
 
                       <Button
