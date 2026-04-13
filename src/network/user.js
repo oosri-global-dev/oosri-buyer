@@ -1,6 +1,4 @@
 import { instance } from "./axios";
-import axios from "axios";
-import { getDataInCookie } from "@/data-helpers/auth-session";
 
 export const updateUserProfile = async (payload) => {
   const { data } = await instance.put(`/profile/buyer/update-profile`, payload);
@@ -9,18 +7,7 @@ export const updateUserProfile = async (payload) => {
 };
 
 export const updateProfileImage = async (payload) => {
-  const userToken =
-    typeof window !== "undefined" ? getDataInCookie("access_token") : null;
-
-  const { data } = await axios.post(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/profile/buyer/profile-image`,
-    payload,
-    {
-      headers: {
-        ...(userToken ? { Authorization: `Bearer ${userToken}` } : {}),
-      },
-    }
-  );
+  const { data } = await instance.post(`/profile/buyer/profile-image`, payload);
 
   return data;
 };

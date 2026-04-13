@@ -1,11 +1,4 @@
-import { getDataInCookie } from "@/data-helpers/auth-session";
 import { instance } from "./axios";
-
-let userToken;
-
-if (typeof window !== "undefined") {
-  userToken = getDataInCookie("access_token");
-}
 
 export const handleGenerateUniqueCartKey = async () => {
   const { data } = await instance.get(`/buyer/cart/generate-cart-key`);
@@ -40,13 +33,8 @@ export const handleGetCartItems = async (cartKey) => {
   return data;
 };
 
-export const handleMergeUserCartWithCartKey = async (payload, token) => {
-  const { data } = await instance.post(`/buyer/cart/merge`, payload, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export const handleMergeUserCartWithCartKey = async (payload) => {
+  const { data } = await instance.post(`/buyer/cart/merge`, payload);
 
   return data;
 };

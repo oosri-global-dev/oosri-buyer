@@ -19,6 +19,7 @@ import { useMainContext } from "@/context";
 import { TbLogout2 as LogoutIcon } from "react-icons/tb";
 import ProfileImage from "@/assets/images/profile/profile-1.svg";
 import { deleteAllCookie } from "@/data-helpers/auth-session";
+import { logoutUser } from "@/network/auth";
 
 export default function Header() {
   const { asPath, push } = useRouter();
@@ -161,8 +162,11 @@ export default function Header() {
                       className={`auth__btn ${
                         asPath === lk.link ? "active__auth__btn" : ""
                       }`}
-                      onClick={() => {
+                      onClick={async () => {
                         if (lk.link === "/login") {
+                          try {
+                            await logoutUser();
+                          } catch (_error) {}
                           deleteAllCookie();
                           window.open(lk.link, "_self");
                           return;

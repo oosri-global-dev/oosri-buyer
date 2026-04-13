@@ -41,10 +41,10 @@ function GoogleLoginButton({ setGoogleLoading }) {
           accessToken: tokenResponse.access_token,
         });
 
-        storeAuthTokens(res?.body?.accessToken, res?.body?.refreshToken);
+        storeAuthTokens(true, true);
 
         if (query?.action && loginActions[query?.action]) {
-          await loginActions[query?.action](res?.body?.accessToken);
+          await loginActions[query?.action]();
         }
 
         toast.success(`Welcome back, ${res?.body?.user?.fullName || "Buyer"}!`, {
@@ -156,11 +156,11 @@ function LoginForm({ googleButton = null, googleLoading = false }) {
     try {
       const res = await loginUser(values);
 
-      storeAuthTokens(res?.body?.accessToken, res?.body?.refreshToken);
+      storeAuthTokens(true, true);
 
       // Execute any pending actions (e.g., merging carts)
       if (query?.action && loginActions[query?.action]) {
-        await loginActions[query?.action](res?.body?.accessToken);
+        await loginActions[query?.action]();
       }
 
       toast.success("Login successful! Redirecting...");

@@ -1,4 +1,11 @@
-import { createContext, useContext, useEffect, useReducer, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import { Reducer } from "./reducer";
 import {
   handleAddToCart,
@@ -14,6 +21,8 @@ import {
   UPDATE_QUANTITY,
 } from "./types";
 import {
+  clearAuthSession,
+  hasBuyerSession,
   getDataInCookie,
   storeDataInCookie,
 } from "@/data-helpers/auth-session";
@@ -34,6 +43,7 @@ export const MainProvider = ({ children }) => {
   const initialState = useContext(MainContext);
   const [state, dispatch] = useReducer(Reducer, initialState);
   const [buyNowItem, setBuyNowItem] = useState(null);
+  const hasBootstrapped = useRef(false);
 
   const addToCart = async (item, setIsLoadingBtn) => {
     const cartKey = getDataInCookie("public__cart__key");
@@ -41,15 +51,11 @@ export const MainProvider = ({ children }) => {
 
     //api to add to cart before dispatching
     try {
-      const res = await handleAddToCart({
+      await handleAddToCart({
         items: [{ productId: item?._id, quantity: 1 }],
         ...(_.isEmpty(state.user) && { cartKey }), //add cartkey is user is empty
       });
-
-      dispatch({
-        type: "ADD_TO_CART",
-        payload: { ...item, quantity: item?.quantity ? item?.quantity : 1 },
-      });
+      await handleUpdateCartItemsInContext(cartKey, { silent: true });
     } catch (err) {
       dispatch({
         type: TOAST_BOX,
@@ -74,15 +80,11 @@ export const MainProvider = ({ children }) => {
         params.cartKey = cartKey;
       }
 
-      const res = await handleRemoveFromCart(
+      await handleRemoveFromCart(
         item?._id,
         params.cartKey // will be undefined if conditions aren't met
       );
-
-      dispatch({
-        type: "REMOVE_FROM_CART",
-        payload: item,
-      });
+      await handleUpdateCartItemsInContext(params.cartKey, { silent: true });
     } catch (err) {
       dispatch({
         type: TOAST_BOX,
@@ -107,15 +109,11 @@ export const MainProvider = ({ children }) => {
 
     //api to update prouct quantity before dispatching
     try {
-      const res = await handleAddToCart({
+      await handleAddToCart({
         items: [{ productId: item?._id, quantity }],
         ...(_.isEmpty(state.user) && { cartKey }), //add cartkey is user is empty
       });
-
-      dispatch({
-        type: UPDATE_QUANTITY,
-        payload: { ...item, quantity },
-      });
+      await handleUpdateCartItemsInContext(cartKey, { silent: true });
     } catch (err) {
       dispatch({
         type: TOAST_BOX,
@@ -129,11 +127,16 @@ export const MainProvider = ({ children }) => {
     }
   };
 
-  const handleUpdateCartItemsInContext = async (cartKey) => {
-    dispatch({
-      type: LOADING_MODAL,
-      payload: true,
-    });
+  const handleUpdateCartItemsInContext = async (
+    cartKey,
+    { silent = false } = {}
+  ) => {
+    if (!silent) {
+      dispatch({
+        type: LOADING_MODAL,
+        payload: true,
+      });
+    }
     try {
       const res = await handleGetCartItems(cartKey || "");
       const remoteCart = res?.body?.cartItems;
@@ -145,10 +148,12 @@ export const MainProvider = ({ children }) => {
     } catch (err) {
       console.log(err);
     } finally {
-      dispatch({
-        type: LOADING_MODAL,
-        payload: false,
-      });
+      if (!silent) {
+        dispatch({
+          type: LOADING_MODAL,
+          payload: false,
+        });
+      }
     }
   };
 
@@ -170,6 +175,7 @@ export const MainProvider = ({ children }) => {
         },
       });
     } catch (err) {
+      clearAuthSession();
       // If fetch fails, user doesn't exist or token is invalid
       // Redirect to login if not already on login page
       // Note: Using window.location.href causes a full page reload,
@@ -210,27 +216,27 @@ export const MainProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    const userToken = getDataInCookie("access_token");
+    if (hasBootstrapped.current) {
+      return;
+    }
+
+    hasBootstrapped.current = true;
+
+    const userHasSession = hasBuyerSession();
     const publicCartKey = getDataInCookie("public__cart__key");
 
-    if (userToken && _.isEmpty(state.user)) {
-      //update user
+    if (userHasSession) {
       handleUpdateCurrentUser();
-
-      //update cart items
-      handleUpdateCartItemsInContext();
+      handleUpdateCartItemsInContext(undefined, { silent: true });
+      return;
     }
 
-    //if user is not logged in
-    if (_.isEmpty(state.user)) {
-      if (!publicCartKey && !userToken) {
-        handleGenerateCartKeyForVisitor();
-      } else {
-        //update the cart
-        handleUpdateCartItemsInContext(publicCartKey);
-      }
+    if (!publicCartKey) {
+      handleGenerateCartKeyForVisitor();
+    } else {
+      handleUpdateCartItemsInContext(publicCartKey, { silent: true });
     }
-  }, [state.user]);
+  }, []);
 
   const value = {
     user: state.user,
