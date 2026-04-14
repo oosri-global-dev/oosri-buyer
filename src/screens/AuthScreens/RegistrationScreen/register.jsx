@@ -132,7 +132,7 @@ function RegisterForm({ form, googleButton = null, googleLoading = false }) {
   return (
     <LoginWrapper>
       <Toaster containerClassName="toaster__style" />
-      <FlexibleDiv maxWidth="350px" gap="40px" flexDir="column">
+      <FlexibleDiv maxWidth="420px" width="100%" gap="32px" flexDir="column">
 
         {/* Branding — mobile optimized */}
         <FlexibleDiv
