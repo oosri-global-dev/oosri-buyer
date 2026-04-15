@@ -532,7 +532,7 @@ export default function ShopPage() {
             {searchQuery ? (
               <div style={{ marginBottom: "16px" }}>
                 <p style={{ margin: 0, fontWeight: 600 }}>
-                  Search results for: "{searchQuery}"
+                  Search results for: &quot;{searchQuery}&quot;
                 </p>
               </div>
             ) : null}
