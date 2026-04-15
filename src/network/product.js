@@ -1,13 +1,5 @@
-import { getDataInCookie } from "@/data-helpers/auth-session";
 import { instance, publicInstance } from "./axios";
 import { useQuery } from "@tanstack/react-query";
-
-let userToken;
-
-if (typeof window !== "undefined") {
-  // Perform sessionStorage action
-  userToken = getDataInCookie("access_token");
-}
 
 export const handleFetchProducts = async (category = [], limit, skip) => {
   const params = {};
@@ -80,13 +72,15 @@ export function useProductCategoriesQuery() {
   });
 }
 
-export function useProductQuery(productId) {
+export function useProductQuery(productId, queryOptions = {}) {
   return useQuery({
     queryKey: ["product", productId],
     queryFn: () => handleGetSingleProduct(productId),
     enabled: !!productId,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
+    staleTime: 1000 * 60,
+    ...queryOptions,
   });
 }
 

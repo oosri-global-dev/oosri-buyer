@@ -4,7 +4,7 @@ import Footer from "./Footer/footer";
 import { GeneralLayoutWrapper, AuthOverlay } from "./generalLayout.styles";
 import Header from "./Header/header";
 import { useMainContext } from "@/context";
-import { getDataInCookie } from "@/data-helpers/auth-session";
+import { hasBuyerSession } from "@/data-helpers/auth-session";
 import OorsiLoader from "@/components/lib/Loader/loader";
 import _ from "lodash";
 
@@ -22,12 +22,12 @@ export default function GeneralLayout({
 
   useEffect(() => {
     if (isAuth) {
-      const userToken = getDataInCookie("access_token");
+      const hasSession = hasBuyerSession();
 
       // If no token exists, redirect immediately
       // Use replace instead of push to remove protected page from history
       // This way, history.back() will go to the page before the protected route
-      if (!userToken) {
+      if (!hasSession) {
         setIsRedirecting(true);
         router.replace("/login");
       }

@@ -3,6 +3,7 @@ import { AccountLayoutWrapper } from "./account-layout.styles";
 import { accountMenuItems } from "@/data-helpers/profile-helper";
 import { useState } from "react";
 import { deleteAllCookie } from "@/data-helpers/auth-session";
+import { logoutUser } from "@/network/auth";
 
 export default function AccountLayout({ children }) {
   const [activeMenu, setActiveMenu] = useState("Profile");
@@ -37,8 +38,11 @@ export default function AccountLayout({ children }) {
               alignItems="center"
               gap="8px"
               key={idx}
-              onClick={() => {
+              onClick={async () => {
                 if (sgn.name === "Log out") {
+                  try {
+                    await logoutUser();
+                  } catch (_error) {}
                   deleteAllCookie();
                   window.open("/login", "_self");
                 }
