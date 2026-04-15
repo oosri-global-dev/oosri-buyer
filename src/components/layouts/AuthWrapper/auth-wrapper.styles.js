@@ -3,8 +3,8 @@ import styled from "styled-components";
 
 export const AuthWrapperBox = styled(FlexibleDiv)`
   flex-direction: column;
+  width: 100%;
   min-height: calc(100dvh - 160px);
-  max-height: fit-content;
   background-color: #eee;
   padding: 0 25px 25px 25px;
   box-sizing: border-box;
@@ -12,8 +12,9 @@ export const AuthWrapperBox = styled(FlexibleDiv)`
   .top__navigation {
     padding: 8px 0;
     cursor: pointer;
+
     p {
-      margin: 0px;
+      margin: 0;
       font-size: 1rem;
       margin-left: 5px;
     }
@@ -21,7 +22,13 @@ export const AuthWrapperBox = styled(FlexibleDiv)`
 
   .auth__content__wrapper {
     flex-grow: 1;
+    width: 100%;
     background: var(--orrsiWhite);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    box-sizing: border-box;
   }
 
   @media (max-width: 550px) {
@@ -43,9 +50,8 @@ export const AuthWrapperBox = styled(FlexibleDiv)`
     }
 
     .auth__content__wrapper {
-      padding: 80px 0;
+      padding: 40px 16px;
+      align-items: flex-start;
     }
   }
-
-
 `;

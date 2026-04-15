@@ -5,7 +5,6 @@ import TextField from "@/components/lib/TextField";
 import { CiSearch as SearchIcon } from "react-icons/ci";
 import { FlexibleDiv } from "@/components/lib/Box/styles";
 import { FaArrowsRotate as RotateIcon } from "react-icons/fa6";
-import { searchProducts } from "@/network/search";
 import { Spin } from "antd";
 
 const RECENT_SEARCHES_KEY = "recent_searches";
@@ -17,35 +16,29 @@ export default function Search() {
   const [recentSearched, setRecentSearched] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
 
-  // Load recent searches from localStorage on mount
   useEffect(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem(RECENT_SEARCHES_KEY);
+
       if (stored) {
         try {
           const parsed = JSON.parse(stored);
           setRecentSearched(Array.isArray(parsed) ? parsed : []);
-        } catch (e) {
+        } catch (error) {
           setRecentSearched([]);
         }
       }
     }
   }, []);
 
-  // Save recent searches to localStorage
   const saveRecentSearch = (query) => {
     if (!query || !query.trim()) return;
 
     const trimmedQuery = query.trim();
     let updated = [...recentSearched];
 
-    // Remove if already exists
     updated = updated.filter((item) => item !== trimmedQuery);
-
-    // Add to beginning
     updated.unshift(trimmedQuery);
-
-    // Keep only last 3
     updated = updated.slice(0, MAX_RECENT_SEARCHES);
 
     setRecentSearched(updated);
@@ -55,41 +48,34 @@ export default function Search() {
     }
   };
 
-  // Handle search
   const handleSearch = async (query) => {
     if (!query || !query.trim()) return;
 
+    const trimmedQuery = query.trim();
     setIsSearching(true);
+
     try {
-      await searchProducts(query.trim());
-      saveRecentSearch(query.trim());
-      // Navigate to shop page with search query
-      router.push(`/shop?q=${encodeURIComponent(query.trim())}`);
+      saveRecentSearch(trimmedQuery);
+      await router.push(`/shop?q=${encodeURIComponent(trimmedQuery)}`);
     } catch (error) {
-      console.error("Search error:", error);
-      // Still save the search even if API fails
-      saveRecentSearch(query.trim());
-      router.push(`/shop?q=${encodeURIComponent(query.trim())}`);
+      console.error("Search navigation error:", error);
     } finally {
       setIsSearching(false);
     }
   };
 
-  // Handle search input enter key
   const handlePressEnter = (e) => {
-    const query = e.target.value;
-    handleSearch(query);
+    handleSearch(e.target.value);
   };
 
-  // Handle recent search item click
   const handleRecentSearchClick = (query) => {
     setSearchQuery(query);
     handleSearch(query);
   };
 
-  // Clear all recent searches
   const handleClearAll = () => {
     setRecentSearched([]);
+
     if (typeof window !== "undefined") {
       localStorage.removeItem(RECENT_SEARCHES_KEY);
     }
@@ -113,6 +99,7 @@ export default function Search() {
           disabled={isSearching}
           suffix={isSearching ? <Spin size="small" /> : null}
         />
+
         {recentSearched.length > 0 ? (
           <FlexibleDiv
             className="recent__searched__box"
@@ -122,6 +109,7 @@ export default function Search() {
           >
             <div>
               <p className="header__text">Recent Searched</p>
+
               {recentSearched.map((sgn, idx) => (
                 <p
                   className="single__search__result"
@@ -135,6 +123,7 @@ export default function Search() {
                 </p>
               ))}
             </div>
+
             <div>
               <p className="clear__all__text" onClick={handleClearAll}>
                 Clear all
