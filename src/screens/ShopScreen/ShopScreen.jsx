@@ -2,6 +2,8 @@ import Breadcrumb from "@/components/lib/Breadcrumb/breadcrumb";
 import { ShopPageWrapper } from "./ShopScreen.styles";
 import { FlexibleDiv } from "@/components/lib/Box/styles";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/router";
+import { useProductSearch } from "@/data-helpers/useProductSearch";
 import {
   Checkbox,
   Select,
@@ -18,8 +20,9 @@ import { useProductsQuery, useProductCategoriesQuery } from "@/network/product";
 import { FaFilter } from "react-icons/fa";
 
 const MAX_PRICE_USD = 7000;
+const SEARCH_PAGE_SIZE = 12;
+const SEARCH_PAGE_COUNT = 5; // 5 pages × 12 = up to 60 products for search
 
-/** Deterministic seeded shuffle (stable during a visit, changes on refresh) */
 function mulberry32(seed) {
   return function () {
     let t = (seed += 0x6d2b79f5);
@@ -28,6 +31,7 @@ function mulberry32(seed) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
+
 function seededShuffle(arr, seed) {
   const a = [...arr];
   const rand = mulberry32(seed);
@@ -38,11 +42,6 @@ function seededShuffle(arr, seed) {
   return a;
 }
 
-/**
- * Robust USD parser:
- * Handles numbers and strings like "$1,200.50", "1200", "1,200", "USD 1200".
- * Includes a safe-ish cents heuristic within the 0..7000 range.
- */
 function parseUsdPrice(value) {
   if (value === null || value === undefined) return NaN;
 
@@ -52,7 +51,7 @@ function parseUsdPrice(value) {
       value > MAX_PRICE_USD &&
       value <= MAX_PRICE_USD * 100
     ) {
-      return value / 100; // cents → dollars
+      return value / 100;
     }
     return value;
   }
@@ -78,7 +77,6 @@ function parseUsdPrice(value) {
   return n;
 }
 
-/** Price getter aligned with common data shapes (direct, alternates, variants min) */
 function getEffectiveProductPrice(product) {
   const direct = parseUsdPrice(product?.productPrice);
   if (Number.isFinite(direct)) return direct;
@@ -102,7 +100,6 @@ function getEffectiveProductPrice(product) {
   return NaN;
 }
 
-/** Try to read category/subcategory names from different possible product shapes */
 function getCategoryName(product) {
   return (
     product?.category?.name ||
@@ -112,6 +109,7 @@ function getCategoryName(product) {
     ""
   );
 }
+
 function getSubCategoryName(product) {
   return (
     product?.subcategory?.name ||
@@ -125,9 +123,13 @@ function getSubCategoryName(product) {
 }
 
 export default function ShopPage() {
+  const router = useRouter();
+  const searchQuery =
+    typeof router.query.q === "string" ? router.query.q.trim() : "";
+
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedSubCategories, setSelectedSubCategories] = useState({});
-  const [priceRange, setPriceRange] = useState([0, MAX_PRICE_USD]); // [min, max]
+  const [priceRange, setPriceRange] = useState([0, MAX_PRICE_USD]);
   const [currentPage, setCurrentPage] = useState(1);
   const [openSelects, setOpenSelects] = useState({});
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
@@ -136,7 +138,6 @@ export default function ShopPage() {
 
   const itemsPerPage = 12;
 
-  // stable shuffle per visit; changes on refresh
   useEffect(() => {
     setShuffleSeed(Date.now());
   }, []);
@@ -154,8 +155,67 @@ export default function ShopPage() {
     isError: isErrorProducts,
   } = useProductsQuery("", itemsPerPage, "products", itemOffset);
 
+  // Multiple queries for search pool
+  const { data: searchPage1 } = useProductsQuery("", SEARCH_PAGE_SIZE, "products", 0);
+  const { data: searchPage2 } = useProductsQuery("", SEARCH_PAGE_SIZE, "products", 12);
+  const { data: searchPage3 } = useProductsQuery("", SEARCH_PAGE_SIZE, "products", 24);
+  const { data: searchPage4 } = useProductsQuery("", SEARCH_PAGE_SIZE, "products", 36);
+  const { data: searchPage5 } = useProductsQuery("", SEARCH_PAGE_SIZE, "products", 48);
+
   const productsList = useMemo(() => products?.body?.products || [], [products]);
   const totalProducts = products?.body?.total || 0;
+
+  const searchProductsList = useMemo(() => {
+    const combined = [
+      ...(searchPage1?.body?.products || []),
+      ...(searchPage2?.body?.products || []),
+      ...(searchPage3?.body?.products || []),
+      ...(searchPage4?.body?.products || []),
+      ...(searchPage5?.body?.products || []),
+    ];
+
+    const uniqueMap = new Map();
+
+    combined.forEach((product) => {
+      const id = product?._id || product?.id;
+      if (id && !uniqueMap.has(id)) {
+        uniqueMap.set(id, product);
+      }
+    });
+
+    return Array.from(uniqueMap.values());
+  }, [searchPage1, searchPage2, searchPage3, searchPage4, searchPage5]);
+
+  useEffect(() => {
+    console.log("productsList:", productsList.length);
+    console.log("searchProductsList:", searchProductsList.length);
+    console.log("sample searchProductsList:", searchProductsList.slice(0, 3));
+  }, [productsList, searchProductsList]);
+
+  const normalizedProducts = useMemo(() => {
+    return searchProductsList.map((product) => ({
+      id: product?._id || product?.id,
+      name: product?.name || product?.productName || "",
+      description: product?.description || product?.shortDescription || "",
+      price: Number(product?.productPrice || product?.price || 0),
+      category: getCategoryName(product),
+      subcategory: getSubCategoryName(product),
+      brand: product?.brand?.name || product?.brand || "",
+      tags: Array.isArray(product?.tags) ? product.tags : [],
+      stock: Number(product?.stock || product?.quantity || 0),
+      image: product?.image || product?.thumbnail || "",
+      sku: product?.sku || "",
+    }));
+  }, [searchProductsList]);
+
+  const { results: searchResults, updateQuery } = useProductSearch(
+    normalizedProducts
+  );
+
+  useEffect(() => {
+    updateQuery(searchQuery || "");
+    setCurrentPage(1);
+  }, [searchQuery, updateQuery]);
 
   const formatCategory = useCallback((cat = []) => {
     return cat.map((ct) => ({ label: ct.name, value: ct.name }));
@@ -168,7 +228,6 @@ export default function ShopPage() {
   const handleCategoryChange = useCallback((checkedValues) => {
     setSelectedCategories(checkedValues);
 
-    // remove subcategory selections for removed categories
     setSelectedSubCategories((prev) => {
       const next = { ...prev };
       Object.keys(next).forEach((category) => {
@@ -176,6 +235,9 @@ export default function ShopPage() {
       });
       return next;
     });
+
+    setCurrentPage(1);
+    setItemOffset(0);
   }, []);
 
   const handleSubCategoryChange = useCallback((categoryName, values) => {
@@ -183,6 +245,8 @@ export default function ShopPage() {
       ...prev,
       [categoryName]: values,
     }));
+    setCurrentPage(1);
+    setItemOffset(0);
   }, []);
 
   const handleDropdownVisibleChange = useCallback((open, categoryName) => {
@@ -192,25 +256,31 @@ export default function ShopPage() {
   const handleRemoveSubCategory = useCallback((removedTag) => {
     setSelectedSubCategories((prev) => {
       const next = { ...prev };
+
       for (const category in next) {
         const idx = next[category].indexOf(removedTag);
         if (idx > -1) {
           const updated = [...next[category]];
           updated.splice(idx, 1);
+
           if (updated.length === 0) delete next[category];
           else next[category] = updated;
+
           break;
         }
       }
+
       return next;
     });
+
+    setCurrentPage(1);
+    setItemOffset(0);
   }, []);
 
   const allSelectedSubCategories = useMemo(() => {
     return Object.values(selectedSubCategories).flat();
   }, [selectedSubCategories]);
 
-  // max at 7000 acts as "All prices" (Infinity) so items above 7000 don't disappear.
   const effectivePriceRange = useMemo(() => {
     const min = Number(priceRange?.[0] ?? 0);
     const maxRaw = Number(priceRange?.[1] ?? MAX_PRICE_USD);
@@ -221,10 +291,18 @@ export default function ShopPage() {
   const filteredProducts = useMemo(() => {
     const [minPrice, maxPrice] = effectivePriceRange;
 
-    return productsList.filter((product) => {
+    let baseProducts = productsList;
+
+    if (searchQuery) {
+      const matchedIds = new Set(searchResults.map((p) => p.id));
+      baseProducts = searchProductsList.filter((product) =>
+        matchedIds.has(product?._id || product?.id)
+      );
+    }
+
+    return baseProducts.filter((product) => {
       const price = getEffectiveProductPrice(product);
 
-      // If price can't be parsed, keep it visible (forgiving UX).
       if (Number.isFinite(price)) {
         if (price < minPrice) return false;
         if (price > maxPrice) return false;
@@ -244,22 +322,44 @@ export default function ShopPage() {
     });
   }, [
     productsList,
+    searchProductsList,
+    searchQuery,
+    searchResults,
     effectivePriceRange,
     selectedCategories,
     allSelectedSubCategories,
   ]);
 
-  const randomizedProducts = useMemo(() => {
-    if (!shuffleSeed) return filteredProducts;
-    return seededShuffle(filteredProducts, shuffleSeed);
-  }, [filteredProducts, shuffleSeed]);
+  const paginatedFilteredProducts = useMemo(() => {
+    if (searchQuery) {
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      return filteredProducts.slice(start, end);
+    }
 
-  const handlePageChange = useCallback((page, pageSize) => {
-    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-    const newOffset = (page - 1) * pageSize;
-    setItemOffset(newOffset);
-    setCurrentPage(page);
-  }, []);
+    return filteredProducts;
+  }, [filteredProducts, searchQuery, currentPage, itemsPerPage]);
+
+  const randomizedProducts = useMemo(() => {
+    if (!shuffleSeed) return paginatedFilteredProducts;
+    return seededShuffle(paginatedFilteredProducts, shuffleSeed);
+  }, [paginatedFilteredProducts, shuffleSeed]);
+
+  const handlePageChange = useCallback(
+    (page, pageSize) => {
+      window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+
+      if (searchQuery) {
+        setCurrentPage(page);
+        return;
+      }
+
+      const newOffset = (page - 1) * pageSize;
+      setItemOffset(newOffset);
+      setCurrentPage(page);
+    },
+    [searchQuery]
+  );
 
   const showFilterModal = useCallback(() => setIsFilterModalVisible(true), []);
   const handleFilterModalCancel = useCallback(
@@ -272,7 +372,11 @@ export default function ShopPage() {
     setSelectedSubCategories({});
     setPriceRange([0, MAX_PRICE_USD]);
     setOpenSelects({});
+    setCurrentPage(1);
+    setItemOffset(0);
   }, []);
+
+  const totalForPagination = searchQuery ? filteredProducts.length : totalProducts;
 
   const FilterContent = () => (
     <div className="category__filters">
@@ -286,7 +390,11 @@ export default function ShopPage() {
         isSuccessCategories && (
           <>
             <div className="filter__meta">
-              <button className="filter__clear" onClick={clearFilters} type="button">
+              <button
+                className="filter__clear"
+                onClick={clearFilters}
+                type="button"
+              >
                 Clear
               </button>
             </div>
@@ -311,7 +419,11 @@ export default function ShopPage() {
                 max={MAX_PRICE_USD}
                 step={1}
                 value={priceRange}
-                onChange={(val) => setPriceRange(val)}
+                onChange={(val) => {
+                  setPriceRange(val);
+                  setCurrentPage(1);
+                  setItemOffset(0);
+                }}
                 tooltip={{
                   formatter: (v) => `$${Number(v).toLocaleString()}`,
                 }}
@@ -326,11 +438,13 @@ export default function ShopPage() {
               const category = productCategories?.data?.find(
                 (cat) => cat.name === categoryName
               );
+
               if (!category?.subcategories?.length) return null;
 
               return (
                 <div key={categoryName} className="subcategory__select">
                   <label>{categoryName}</label>
+
                   <Select
                     mode="multiple"
                     allowClear
@@ -395,7 +509,7 @@ export default function ShopPage() {
 
   return (
     <>
-      <Breadcrumb numOfProducts={productsList.length} />
+      <Breadcrumb numOfProducts={filteredProducts.length} />
 
       <ShopPageWrapper>
         <hr />
@@ -406,7 +520,6 @@ export default function ShopPage() {
           gap="22px"
           flexWrap="nowrap"
         >
-          {/* ✅ Sidebar filter card like screenshot */}
           <aside className="filter__box">
             <div className="filter__header">
               <p className="filter__title">CATEGORY</p>
@@ -416,6 +529,14 @@ export default function ShopPage() {
           </aside>
 
           <FlexibleDiv width="100%" flexDir="column">
+            {searchQuery ? (
+              <div style={{ marginBottom: "16px" }}>
+                <p style={{ margin: 0, fontWeight: 600 }}>
+                  Search results for: "{searchQuery}"
+                </p>
+              </div>
+            ) : null}
+
             <FlexibleDiv
               width="100%"
               justifyContent={
@@ -451,8 +572,16 @@ export default function ShopPage() {
 
                   {!randomizedProducts.length && (
                     <Alert
-                      message="No products match your filters"
-                      description="Try widening the price range or clearing filters."
+                      message={
+                        searchQuery
+                          ? `No products match "${searchQuery}"`
+                          : "No products match your filters"
+                      }
+                      description={
+                        searchQuery
+                          ? "Try a different search term or clear some filters."
+                          : "Try widening the price range or clearing filters."
+                      }
                       type="info"
                       showIcon
                       style={{ width: "100%" }}
@@ -462,12 +591,12 @@ export default function ShopPage() {
               )}
             </FlexibleDiv>
 
-            {totalProducts > 0 && (
+            {totalForPagination > 0 && (
               <FlexibleDiv className="pagination__wrapper">
                 <Pagination
                   current={currentPage}
                   pageSize={itemsPerPage}
-                  total={totalProducts}
+                  total={totalForPagination}
                   onChange={handlePageChange}
                   showSizeChanger={false}
                   responsive
