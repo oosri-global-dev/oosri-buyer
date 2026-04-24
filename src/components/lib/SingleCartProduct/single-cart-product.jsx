@@ -7,6 +7,7 @@ import SafeImage from "@/components/lib/SafeImage/SafeImage";
 import { useMainContext } from "@/context";
 import { useRouter } from "next/router";
 import { Spin } from "antd";
+import { getOptimizedCloudinaryUrl } from "@/utils/cloudinary-helper";
 
 export default function SingleCartProduct({
   item,
@@ -31,7 +32,7 @@ export default function SingleCartProduct({
       >
         <div className="product__image__wrapper">
           <SafeImage
-            src={item?.productImages?.[0]}
+            src={getOptimizedCloudinaryUrl(item?.productImages?.[0], 200)}
             alt={`${item?._id} product image`}
             layout="fill"
             objectFit="cover"

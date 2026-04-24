@@ -13,6 +13,7 @@ import { useMainContext } from "@/context";
 import { useState } from "react";
 import { handleAddProductToSavedItems } from "@/network/product";
 import { TOAST_BOX } from "@/context/types";
+import { getOptimizedCloudinaryUrl } from "@/utils/cloudinary-helper";
 
 export function LoadingCard({ keyProp }) {
   return (
@@ -51,6 +52,8 @@ export default function ProductCard({ card, keyProp, isLoading = false }) {
   const [isFavorite, setIsFavorite] = useState(card?.isFavorite || false);
   const [isSavingFavorite, setIsSavingFavorite] = useState(false);
   const priceData = useProductPrice(card);
+  const productBrandName =
+    card?.brandArtist || card?.artist || card?.sellerName || "";
 
   // ✅ 0) If card is empty, don't render anything
   if (!card) return null;
@@ -186,6 +189,7 @@ export default function ProductCard({ card, keyProp, isLoading = false }) {
   };
 
   const imgSrc = getFirstProductImage(card);
+  const optimizedImgSrc = getOptimizedCloudinaryUrl(imgSrc, 400);
 
   return (
     <ProductCardWrapper key={keyProp}>
@@ -193,7 +197,7 @@ export default function ProductCard({ card, keyProp, isLoading = false }) {
         <div className="card__image" style={{ position: "relative" }}>
           {imgSrc ? (
             <SafeImage
-              src={imgSrc}
+              src={optimizedImgSrc}
               alt={`${card?._id} product image`}
               layout="fill"
               objectFit="cover"
@@ -262,7 +266,7 @@ export default function ProductCard({ card, keyProp, isLoading = false }) {
 
         <FlexibleDiv className="seller__info" justifyContent="flex-start">
           <p className="seller__text">
-            From <span>{card?.sellerName || ""}</span>
+            From <span>{productBrandName}</span>
           </p>
         </FlexibleDiv>
       </div>

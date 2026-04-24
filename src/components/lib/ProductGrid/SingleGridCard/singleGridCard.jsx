@@ -6,6 +6,7 @@ import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import SafeImage from "@/components/lib/SafeImage/SafeImage";
 import { useRouter } from "next/router";
+import { getOptimizedCloudinaryUrl } from "@/utils/cloudinary-helper";
 
 export function LoadingSingleGridCard({ key }) {
   return (
@@ -55,7 +56,7 @@ export default function SingleGridCard({ key, product, isLoading = false }) {
         >
           <FlexibleDiv className="img__wrapper">
             <SafeImage
-              src={product?.productImages?.[0]}
+              src={getOptimizedCloudinaryUrl(product?.productImages?.[0], 400)}
               alt={`${product?._id} product image`}
               layout="fill"
               objectFit="cover"

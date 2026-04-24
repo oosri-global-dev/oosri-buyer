@@ -23,6 +23,7 @@ import { formatCurrency, useProductPrice } from "@/data-helpers/hooks";
 import SafeImage from "@/components/lib/SafeImage/SafeImage";
 import { MoreReviews } from "./sections/more-reviews/moreReviews";
 import { getAllReviews } from "@/network/reviews";
+import { getOptimizedCloudinaryUrl } from "@/utils/cloudinary-helper";
 
 function NoOfProductReviews({ numOfReviews }) {
   return (
@@ -190,7 +191,7 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                   {product?.productImages?.map((sgn, idx) => (
                     <div key={idx} className="images__wrapper">
                       <SafeImage
-                        src={sgn}
+                        src={getOptimizedCloudinaryUrl(sgn, 800)}
                         onClick={() => {
                           setIdxOfSelectedImage(idx);
                           setSelectedImage(sgn);
@@ -209,7 +210,7 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                     <div className="main__image__container" style={{ position: 'relative', width: '100%', height: '400px' }}>
                       <SafeImage
                         className="main__image"
-                        src={selectedImage}
+                        src={getOptimizedCloudinaryUrl(selectedImage, 1200)}
                         alt={`main__1`}
                         fill
                         style={{ objectFit: 'contain' }}
@@ -219,7 +220,7 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                     <div className="main__image__container" style={{ position: 'relative', width: '100%', height: '400px' }}>
                       <SafeImage
                         className="main__image"
-                        src={product?.productImages?.[0] || "/images/placeholder.svg"}
+                        src={getOptimizedCloudinaryUrl(product?.productImages?.[0], 1200) || "/images/placeholder.svg"}
                         alt={`main__1`}
                         fill
                         style={{ objectFit: 'contain' }}
