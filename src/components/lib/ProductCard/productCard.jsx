@@ -42,6 +42,17 @@ const getFirstProductImage = (card) => {
   return null;
 };
 
+const getDisplayBrandName = (card) => {
+  return (
+    card?.brandName ||
+    card?.productBrand ||
+    card?.brandArtist ||
+    card?.artist ||
+    card?.sellerName ||
+    ""
+  );
+};
+
 export default function ProductCard({ card, keyProp, isLoading = false }) {
   const { push, asPath } = useRouter();
 
@@ -262,7 +273,7 @@ export default function ProductCard({ card, keyProp, isLoading = false }) {
 
         <FlexibleDiv className="seller__info" justifyContent="flex-start">
           <p className="seller__text">
-            From <span>{card?.sellerName || ""}</span>
+            <span>{getDisplayBrandName(card)}</span>
           </p>
         </FlexibleDiv>
       </div>

@@ -11,6 +11,7 @@ import NProgress from "nprogress";
 import CustomModal from "@/components/lib/Modal/modal";
 import basketLottie from "@/assets/images/basket.json";
 import PrivacyConsentModal from "@/components/lib/PrivacyConsentModal/PrivacyConsentModal";
+import ErrorBoundary from "@/components/lib/ErrorBoundaries/ErrorBoundary";
 
 const queryClient = new QueryClient();
 
@@ -46,7 +47,9 @@ function AppContent({ Component, pageProps, getLayout }) {
         1. Render page content first.
         2. Render global overlays LAST to ensure they are on top in the DOM.
       */}
-      {getLayout(<Component {...pageProps} />)}
+      <ErrorBoundary>
+        {getLayout(<Component {...pageProps} />)}
+      </ErrorBoundary>
 
       <CustomToastBox />
 

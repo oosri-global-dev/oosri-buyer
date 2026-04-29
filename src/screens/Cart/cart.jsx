@@ -18,11 +18,16 @@ export default function CartPage() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const { push, pathname } = useRouter();
-  const cartIsEmpty = cart.length === 0;
+  // Defensive Array bounds check in case localStorage is corrupted
+  const safeCart = Array.isArray(cart) ? cart : [];
+  const cartIsEmpty = safeCart.length === 0;
 
-  const subTotal = cart.reduce((acc, item) => {
+  const subTotal = safeCart.reduce((acc, item) => {
+    if (!item) return acc; // Defensive null check for malformed array items
     const priceData = calculateProductPrice(item);
-    return acc + (priceData?.price || 0) * item.quantity;
+    // Ensure quantity is a valid number to prevent NaN propagation
+    const qty = (typeof item.quantity === 'number' && item.quantity > 0) ? item.quantity : 1;
+    return acc + (priceData?.price || 0) * qty;
   }, 0);
   const total = subTotal;
 
@@ -70,13 +75,15 @@ export default function CartPage() {
       ) : (
         <>
           <FlexibleDiv className="cart__section">
-            {cart.map((item, idx) => (
-              <SingleCartProduct
-                item={item}
-                key={idx}
-                setIsModalOpen={setIsModalOpen}
-                setSelectedItem={setSelectedItem}
-              />
+            {safeCart.map((item, idx) => (
+              item ? (
+                <SingleCartProduct
+                  item={item}
+                  key={item._id || item.id || idx}
+                  setIsModalOpen={setIsModalOpen}
+                  setSelectedItem={setSelectedItem}
+                />
+              ) : null
             ))}
             <FlexibleDiv
               className="summary__box"

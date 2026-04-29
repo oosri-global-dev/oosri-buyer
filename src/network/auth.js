@@ -13,7 +13,8 @@ export const signUpUser = async (payload) => {
 export const loginUser = async (payload) => {
   const { data } = await axios.post(
     `${process.env.NEXT_PUBLIC_BASE_URL}/auth/buyer/login`,
-    payload
+    payload,
+    { withCredentials: true }
   );
 
   return data;
@@ -31,7 +32,8 @@ export const resendOTP = async (payload) => {
 export const confirmOTP = async (payload) => {
   const { data } = await axios.post(
     `${process.env.NEXT_PUBLIC_BASE_URL}/auth/buyer/confirm-otp`,
-    payload
+    payload,
+    { withCredentials: true }
   );
 
   return data;
@@ -64,8 +66,14 @@ export const resetPassword = async (payload) => {
 export const googleLogin = async (payload) => {
   const { data } = await axios.post(
     `${process.env.NEXT_PUBLIC_BASE_URL}/auth/buyer/google-login`,
-    payload
+    payload,
+    { withCredentials: true }
   );
 
+  return data;
+};
+
+export const logoutUser = async () => {
+  const { data } = await instance.post(`/auth/buyer/logout`);
   return data;
 };

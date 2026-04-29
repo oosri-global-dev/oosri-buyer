@@ -119,3 +119,25 @@ export function useCreatePaymentIntent() {
     mutationFn: handleCreatePaymentIntent,
   });
 }
+
+export const handleGetPaymentStatus = async (paymentIntentId) => {
+  const { data } = await instance.get(
+    `/buyer/payment/status/${paymentIntentId}`
+  );
+  return data;
+};
+
+export function usePaymentStatus(paymentIntentId, options = {}) {
+  return useQuery({
+    queryKey: ["payment-status", paymentIntentId],
+    queryFn: () => handleGetPaymentStatus(paymentIntentId),
+    enabled: !!paymentIntentId && (options.enabled ?? true),
+    staleTime: 0,
+    refetchOnWindowFocus: false,
+    refetchInterval: (query) => {
+      const state = query.state.data?.state;
+      return state === "processing" ? 3000 : false;
+    },
+    ...options,
+  });
+}

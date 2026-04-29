@@ -1,4 +1,4 @@
-## Oosri Buyer App:
+## Oosri - Buyer App:
 Oosri is helping sell African products to the world. 
 # Clone the repo
 git clone https://github.com/oosri-global-dev/oosri-buyer.git

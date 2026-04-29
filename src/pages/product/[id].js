@@ -44,7 +44,7 @@ const Product = ({ product, id }) => {
     : showError
     ? "No product found."
     : "Loading product details...";
-  const metaImage = metaProduct.images?.[0] || "/favicon.ico";
+  const metaImage = metaProduct.productImages?.[0] || "/favicon.ico";
   const metaUrl = `${process.env.NEXT_PUBLIC_WEBSITE_URL}/product/${id}`;
 
   return (

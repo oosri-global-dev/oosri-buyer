@@ -274,7 +274,7 @@ export default function ShopPage() {
     setOpenSelects({});
   }, []);
 
-  const FilterContent = () => (
+  const filterContentNode = useMemo(() => (
     <div className="category__filters">
       {isLoadingCategories ? (
         <div className="loader_wrapper">
@@ -391,7 +391,24 @@ export default function ShopPage() {
         )
       )}
     </div>
-  );
+  ), [
+    isLoadingCategories, 
+    isErrorCategories, 
+    isSuccessCategories, 
+    clearFilters, 
+    categoryOptions, 
+    handleCategoryChange, 
+    selectedCategories, 
+    priceRange, 
+    productCategories, 
+    handleSubCategoryChange, 
+    handleDropdownVisibleChange, 
+    openSelects, 
+    formatCategory, 
+    allSelectedSubCategories, 
+    handleRemoveSubCategory,
+    selectedSubCategories
+  ]);
 
   return (
     <>
@@ -412,7 +429,7 @@ export default function ShopPage() {
               <p className="filter__title">CATEGORY</p>
             </div>
 
-            <FilterContent />
+            {filterContentNode}
           </aside>
 
           <FlexibleDiv width="100%" flexDir="column">
@@ -496,7 +513,7 @@ export default function ShopPage() {
           footer={null}
           width={300}
         >
-          <FilterContent />
+          {filterContentNode}
         </Modal>
       </ShopPageWrapper>
     </>

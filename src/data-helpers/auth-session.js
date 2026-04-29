@@ -1,4 +1,5 @@
 const DEFAULT_COOKIE_EXP_DAYS = 7;
+const BUYER_SESSION_COOKIE = "buyer_session";
 
 const getCookieAttributes = (expDays = DEFAULT_COOKIE_EXP_DAYS) => {
   const attributes = ["path=/", "SameSite=Lax"];
@@ -57,21 +58,20 @@ export function deleteDataInCookie(cName) {
 }
 
 export function storeAuthTokens(accessToken, refreshToken) {
-  storeDataInCookie("access_token", accessToken);
-  storeDataInCookie("refresh_token", refreshToken);
-
-  if (typeof window !== "undefined") {
-    window.sessionStorage.removeItem("refresh_token");
+  if (typeof window !== "undefined" && (accessToken || refreshToken)) {
+    storeDataInCookie(BUYER_SESSION_COOKIE, "1");
   }
 }
 
 export function clearAuthSession() {
   if (typeof window !== "undefined") {
     deleteDataInCookie("_id");
-    deleteDataInCookie("access_token");
-    deleteDataInCookie("refresh_token");
-    window.sessionStorage.removeItem("refresh_token");
+    deleteDataInCookie(BUYER_SESSION_COOKIE);
   }
+}
+
+export function hasBuyerSession() {
+  return getDataInCookie(BUYER_SESSION_COOKIE) === "1";
 }
 
 export function deleteAllCookie() {
