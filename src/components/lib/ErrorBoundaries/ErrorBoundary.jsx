@@ -26,7 +26,7 @@ class ErrorBoundary extends React.Component {
         <div style={{ padding: "40px", textAlign: "center", minHeight: "60vh", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
           <h2>Oops! Something went wrong.</h2>
           <p style={{ color: "#666", marginBottom: "20px", maxWidth: "500px" }}>
-            We're having trouble displaying this page. Our technical team has been notified.
+            We&apos;re having trouble displaying this page. Our technical team has been notified.
             If the problem persists, please try refreshing the page or checking your internet connection.
           </p>
           <Button 
