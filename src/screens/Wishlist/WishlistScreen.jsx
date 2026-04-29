@@ -25,11 +25,13 @@ export default function WishlistPage() {
       // Handle different response structures
       const product = item?.product || item;
       const productName = product?.productName?.toLowerCase() || "";
-      const sellerName =
+      const brandName =
+        product?.brandName?.toLowerCase() ||
+        item?.brandName?.toLowerCase() ||
         product?.sellerName?.toLowerCase() ||
         item?.sellerName?.toLowerCase() ||
         "";
-      return productName.includes(query) || sellerName.includes(query);
+      return productName.includes(query) || brandName.includes(query);
     });
   }, [savedItems, searchQuery]);
 
@@ -50,7 +52,7 @@ export default function WishlistPage() {
                 "0px 1px 2px 0px rgba(0, 0, 0, 0.04), 0px -1px 2px 0px rgba(0, 0, 0, 0.10) inset",
             }}
             prefix={<SearchIcon size={22} />}
-            placeholder="Search by product , store name"
+            placeholder="Search by product or brand"
             className="search__textbox"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
