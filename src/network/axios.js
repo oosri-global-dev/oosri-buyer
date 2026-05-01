@@ -65,7 +65,7 @@ export const getRefreshToken = async (originalConfig) => {
       _error?.response?.status === 401 &&
       window.location.pathname !== "/login"
     ) {
-      window.location.pathname = "/login";
+      window.location.replace("/login");
     }
 
     return Promise.reject(_error);

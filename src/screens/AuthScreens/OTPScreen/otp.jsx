@@ -9,13 +9,13 @@ import Button from "@/components/lib/Button";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { confirmOTP, resendOTP } from "@/network/auth";
-import { TOAST_BOX } from "@/context/types";
+import { CURRENT_USER, TOAST_BOX } from "@/context/types";
 import { useMainContext } from "@/context";
 import { storeAuthTokens } from "@/data-helpers/auth-session";
 
 export default function OTP() {
   const [form] = Form.useForm();
-  const { push, query } = useRouter();
+  const { push, query, replace } = useRouter();
   const [isResending, setIsResending] = useState(false);
   const { dispatch } = useMainContext();
   const [loading, setLoading] = useState(false);
@@ -99,6 +99,10 @@ export default function OTP() {
       const res = await confirmOTP(payload);
 
       storeAuthTokens(true, true);
+      dispatch({
+        type: CURRENT_USER,
+        payload: res?.body?.user || {},
+      });
 
       //message
       dispatch({
@@ -111,7 +115,7 @@ export default function OTP() {
 
       //direct inside the app
       setTimeout(() => {
-        window.open(`/`, "_self");
+        replace(`/`);
       }, 3000);
     } catch (err) {
       dispatch({
