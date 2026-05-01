@@ -10,7 +10,7 @@ import { useState, useCallback } from "react";
 import { loginUser, googleLogin as googleLoginUser } from "@/network/auth";
 import toast, { Toaster } from "react-hot-toast";
 import { useMainContext } from "@/context";
-import { TOAST_BOX } from "@/context/types";
+import { CURRENT_USER, TOAST_BOX } from "@/context/types";
 import { useRouter } from "next/router";
 import { storeAuthTokens } from "@/data-helpers/auth-session";
 import { loginActions } from "@/utils/user-actions";
@@ -26,12 +26,12 @@ import { getSafeRedirectPath } from "@/utils/security";
  */
 function GoogleLoginButton({ setGoogleLoading }) {
   const { dispatch } = useMainContext();
-  const { query } = useRouter();
+  const { query, replace } = useRouter();
 
   const handleRedirect = useCallback((targetPath) => {
     document.body.style.overflow = "unset";
-    window.open(getSafeRedirectPath(targetPath), "_self");
-  }, []);
+    replace(getSafeRedirectPath(targetPath));
+  }, [replace]);
 
   const handleGoogleLoginSuccess = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -42,6 +42,10 @@ function GoogleLoginButton({ setGoogleLoading }) {
         });
 
         storeAuthTokens(true, true);
+        dispatch({
+          type: CURRENT_USER,
+          payload: res?.body?.user || {},
+        });
 
         if (query?.action && loginActions[query?.action]) {
           await loginActions[query?.action]();
@@ -123,7 +127,7 @@ function LoginForm({ googleButton = null, googleLoading = false }) {
   const [form] = Form.useForm();
   const [loadingBtn, setLoadingBtn] = useState(false);
   const { dispatch } = useMainContext();
-  const { push, query } = useRouter();
+  const { push, query, replace } = useRouter();
 
   /**
    * Universal redirect handler
@@ -132,8 +136,8 @@ function LoginForm({ googleButton = null, googleLoading = false }) {
     // Restore scroll before navigating away
     document.body.style.overflow = "unset";
 
-    window.open(getSafeRedirectPath(targetPath), "_self");
-  }, []);
+    replace(getSafeRedirectPath(targetPath));
+  }, [replace]);
 
   /**
    * Regular Login Submission
@@ -157,6 +161,10 @@ function LoginForm({ googleButton = null, googleLoading = false }) {
       const res = await loginUser(values);
 
       storeAuthTokens(true, true);
+      dispatch({
+        type: CURRENT_USER,
+        payload: res?.body?.user || {},
+      });
 
       // Execute any pending actions (e.g., merging carts)
       if (query?.action && loginActions[query?.action]) {
