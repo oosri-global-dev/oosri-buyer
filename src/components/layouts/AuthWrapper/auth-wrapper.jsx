@@ -10,7 +10,7 @@ export default function AuthWrapper({ children }) {
   const [width, height] = useWindowSize();
   const [removeHeader, setRemoveHeader] = useState(false);
   const { user } = useMainContext();
-  const { push } = useRouter();
+  const { push, pathname } = useRouter();
 
   useEffect(() => {
     if (width <= 550) {
@@ -21,10 +21,11 @@ export default function AuthWrapper({ children }) {
   }, [width]);
 
   useEffect(() => {
-    if (user?.id) {
+    // Let the login page finish its own redirect flow when "from" is present.
+    if (user?.id && pathname !== "/login") {
       push("/");
     }
-  }, [user, push]);
+  }, [user, push, pathname]);
 
   const handleGoBack = () => {
     if (typeof window !== "undefined") {

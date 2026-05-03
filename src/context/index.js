@@ -185,7 +185,7 @@ export const MainProvider = ({ children }) => {
         typeof window !== "undefined" &&
         window.location.pathname !== "/login"
       ) {
-        window.location.href = "/login";
+        window.location.replace("/login");
       }
     } finally {
       dispatch({

@@ -406,7 +406,8 @@ export default function ShopPage() {
     openSelects, 
     formatCategory, 
     allSelectedSubCategories, 
-    handleRemoveSubCategory
+    handleRemoveSubCategory,
+    selectedSubCategories
   ]);
 
   return (
