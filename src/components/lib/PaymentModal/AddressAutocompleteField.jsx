@@ -3,12 +3,13 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 /**
  * AddressAutocompleteField
  *
- * Uses Google Maps AutocompleteService (predictions) + Geocoder (place details)
+ * Uses the New Google Maps Places API (AutocompleteSuggestion + Geocoder)
  * directly — no widget, no DOM manipulation, fully React-controlled.
+ * Works for both Add Address and Edit Address modes.
  *
  * Props:
- *   value           – controlled input value (string)
- *   onChange        – called with new string value on every keystroke
+ *   value           – controlled input value (string), auto-managed by Ant Design Form.Item
+ *   onChange        – called with new string value on every keystroke (injected by Form.Item)
  *   onAddressSelect – called with { address, cityName, postalCode, countryCode, countryName }
  *                     when the user picks a suggestion
  *   placeholder     – input placeholder
@@ -26,7 +27,6 @@ const AddressAutocompleteField = ({
   const [isOpen, setIsOpen] = useState(false);
 
   const containerRef = useRef(null);
-  const autocompleteServiceRef = useRef(null);
   const geocoderRef = useRef(null);
   const debounceRef = useRef(null);
 
@@ -38,8 +38,6 @@ const AddressAutocompleteField = ({
   // Initialise Google Maps services once the SDK is available
   useEffect(() => {
     if (typeof window !== "undefined" && window.google?.maps?.places) {
-      autocompleteServiceRef.current =
-        new window.google.maps.places.AutocompleteService();
       geocoderRef.current = new window.google.maps.Geocoder();
     }
   }, []);
@@ -59,28 +57,54 @@ const AddressAutocompleteField = ({
   const fetchPredictions = useCallback((input) => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
-    if (!input.trim() || !autocompleteServiceRef.current) {
+    if (!input.trim() || !window.google?.maps) {
       setPredictions([]);
       setIsOpen(false);
       return;
     }
 
-    debounceRef.current = setTimeout(() => {
-      autocompleteServiceRef.current.getPlacePredictions(
-        { input },
-        (results, status) => {
-          if (
-            status === window.google.maps.places.PlacesServiceStatus.OK &&
-            results?.length
-          ) {
-            setPredictions(results);
-            setIsOpen(true);
-          } else {
-            setPredictions([]);
-            setIsOpen(false);
-          }
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const { AutocompleteSuggestion } = await window.google.maps.importLibrary("places");
+        if (!AutocompleteSuggestion) {
+          setPredictions([]);
+          setIsOpen(false);
+          return;
         }
-      );
+
+        const response = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
+          input: input
+        });
+
+        console.log("Autocomplete Response:", response);
+
+        const suggestions = response.suggestions || [];
+
+        if (suggestions.length > 0) {
+          const mappedPredictions = suggestions
+            .filter(suggestion => suggestion.placePrediction)
+            .map(suggestion => {
+              const placePrediction = suggestion.placePrediction;
+              return {
+                place_id: placePrediction.placeId,
+                description: placePrediction.text?.text || '',
+                structured_formatting: {
+                  main_text: placePrediction.mainText?.text || '',
+                  secondary_text: placePrediction.secondaryText?.text || ''
+                }
+              };
+            });
+          setPredictions(mappedPredictions);
+          setIsOpen(true);
+        } else {
+          setPredictions([]);
+          setIsOpen(false);
+        }
+      } catch (err) {
+        console.error("Error fetching place predictions:", err);
+        setPredictions([]);
+        setIsOpen(false);
+      }
     }, 350);
   }, []);
 
@@ -105,6 +129,7 @@ const AddressAutocompleteField = ({
       geocoderRef.current.geocode(
         { placeId: prediction.place_id },
         (results, status) => {
+          console.log("Geocode Results:", results, "Status:", status);
           if (status !== "OK" || !results?.[0]) {
             // Fallback: at least fill the address text
             const fallback = prediction.description;
@@ -128,7 +153,9 @@ const AddressAutocompleteField = ({
             if (
               (types.includes("locality") ||
                 types.includes("postal_town") ||
-                types.includes("sublocality_level_1")) &&
+                types.includes("sublocality_level_1") ||
+                types.includes("neighborhood") ||
+                types.includes("administrative_area_level_2")) &&
               !city
             ) {
               city = comp.long_name;
