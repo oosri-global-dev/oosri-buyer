@@ -124,7 +124,18 @@ const AddressAutocompleteField = ({
       setPredictions([]);
       setIsOpen(false);
 
-      if (!geocoderRef.current) return;
+      // Lazy-init geocoder in case Maps SDK finished loading after component mounted
+      if (!geocoderRef.current && window.google?.maps) {
+        geocoderRef.current = new window.google.maps.Geocoder();
+      }
+
+      if (!geocoderRef.current) {
+        // Maps SDK still not available — at least fill the address text
+        const fallback = prediction.description;
+        setInputValue(fallback);
+        onChange?.(fallback);
+        return;
+      }
 
       geocoderRef.current.geocode(
         { placeId: prediction.place_id },
