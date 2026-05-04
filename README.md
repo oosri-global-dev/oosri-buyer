@@ -1,10 +1,10 @@
 ## Oosri - Buyer App:
 Oosri is helping sell African products to the world. 
-# Clone the repo
+# Clone the repo:
 git clone https://github.com/oosri-global-dev/oosri-buyer.git
-# Move to a new branch
+# Move to a new branch:
 cd oosri-buyer
-# To start the project
+# To start the project:
 npm run dev
 
 ## Deployment environment variables

@@ -30,6 +30,55 @@ const AddressAutocompleteField = ({
   const geocoderRef = useRef(null);
   const debounceRef = useRef(null);
 
+  const extractAddressParts = useCallback((components = [], fallbackDescription = "") => {
+    let streetNumber = "";
+    let route = "";
+    let city = "";
+    let postalCode = "";
+    let countryCode = "";
+    let countryName = "";
+
+    components.forEach((comp) => {
+      const types = comp.types || [];
+
+      if (types.includes("street_number")) streetNumber = comp.long_name || streetNumber;
+      if (types.includes("route")) route = comp.long_name || route;
+
+      if (
+        !city &&
+        (
+          types.includes("locality") ||
+          types.includes("postal_town") ||
+          types.includes("sublocality_level_1") ||
+          types.includes("neighborhood") ||
+          types.includes("administrative_area_level_2") ||
+          types.includes("administrative_area_level_1")
+        )
+      ) {
+        city = comp.long_name || city;
+      }
+
+      if (types.includes("postal_code")) postalCode = comp.long_name || postalCode;
+
+      if (types.includes("country")) {
+        countryCode = comp.short_name || countryCode;
+        countryName = comp.long_name || countryName;
+      }
+    });
+
+    const fullAddress = streetNumber
+      ? `${streetNumber} ${route}`.trim()
+      : route || fallbackDescription;
+
+    return {
+      address: fullAddress,
+      cityName: city,
+      postalCode,
+      countryCode,
+      countryName,
+    };
+  }, []);
+
   // Sync externally-supplied value (e.g. edit mode pre-fill / reset)
   useEffect(() => {
     setInputValue(value);
@@ -150,51 +199,17 @@ const AddressAutocompleteField = ({
           }
 
           const components = results[0].address_components || [];
-          let streetNumber = "";
-          let route = "";
-          let city = "";
-          let postalCode = "";
-          let countryCode = "";
-          let countryName = "";
-
-          components.forEach((comp) => {
-            const types = comp.types;
-            if (types.includes("street_number")) streetNumber = comp.long_name;
-            if (types.includes("route")) route = comp.long_name;
-            if (
-              (types.includes("locality") ||
-                types.includes("postal_town") ||
-                types.includes("sublocality_level_1") ||
-                types.includes("neighborhood") ||
-                types.includes("administrative_area_level_2")) &&
-              !city
-            ) {
-              city = comp.long_name;
-            }
-            if (types.includes("postal_code")) postalCode = comp.long_name;
-            if (types.includes("country")) {
-              countryCode = comp.short_name;
-              countryName = comp.long_name;
-            }
-          });
-
-          const fullAddress = streetNumber
-            ? `${streetNumber} ${route}`.trim()
-            : route || prediction.description;
+          const formattedAddress = results[0].formatted_address || prediction.description;
+          const normalized = extractAddressParts(components, formattedAddress);
+          const fullAddress = normalized.address || formattedAddress;
 
           setInputValue(fullAddress);
           onChange?.(fullAddress);
-          onAddressSelect?.({
-            address: fullAddress,
-            cityName: city,
-            postalCode,
-            countryCode,
-            countryName,
-          });
+          onAddressSelect?.(normalized);
         }
       );
     },
-    [onChange, onAddressSelect]
+    [extractAddressParts, onChange, onAddressSelect]
   );
 
   return (
