@@ -8,7 +8,6 @@ cd oosri-buyer
 npm run dev
 
 ## Deployment environment variables
-
 Set these in Netlify for `oosri-buyer` before deploying:
 
 - `NEXT_PUBLIC_BASE_URL`
