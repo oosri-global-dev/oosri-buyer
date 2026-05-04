@@ -262,7 +262,6 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
       postalCode: address.postalCode,
       cityName: address.cityName,
     });
-    setAddressInputValue(address.address || "");
     setSelectedCountryCode(country ? country.code : address.countryCode || undefined);
   };
 
