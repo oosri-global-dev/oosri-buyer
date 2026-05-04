@@ -88,6 +88,35 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
   const [shippingInfo, setShippingInfo] = useState(null);
   const [selectedServiceType, setSelectedServiceType] = useState(null);
   const [isLoadingShippingFee, setIsLoadingShippingFee] = useState(false);
+  const [selectedCountryName, setSelectedCountryName] = useState(undefined);
+  const watchedCountryCode = Form.useWatch("countryCode", form);
+
+  useEffect(() => {
+    setSelectedCountryCode(watchedCountryCode);
+    if (!watchedCountryCode) {
+      setSelectedCountryName(undefined);
+      return;
+    }
+
+    const matchedCountry = COUNTRIES.find((country) => country.code === watchedCountryCode);
+    if (matchedCountry) {
+      setSelectedCountryName(matchedCountry.name);
+    }
+  }, [watchedCountryCode]);
+
+  const countrySelectOptions = useMemo(() => {
+    const options = [...countryOptions];
+    if (
+      selectedCountryCode &&
+      !options.some((option) => option.value === selectedCountryCode)
+    ) {
+      options.unshift({
+        label: selectedCountryName || selectedCountryCode,
+        value: selectedCountryCode,
+      });
+    }
+    return options;
+  }, [selectedCountryCode, selectedCountryName]);
 
   // Stripe state
   const [clientSecret, setClientSecret] = useState(null);
@@ -125,17 +154,32 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
   const total = subtotal + shippingFee;
   const maxAddresses = 3;
 
-  // Called by AddressAutocompleteField when a suggestion geocode result comes back
-  const onAddressAutocompleteSelect = useCallback(
-    ({ address, cityName, postalCode, countryCode, countryName }) => {
-      form.setFieldsValue({ address, cityName, postalCode });
-      // Match against known list; fall back to raw Google code for unlisted countries
-      const matched = COUNTRIES.find(
+  const syncAddressFormValues = useCallback(
+    ({ address = "", cityName = "", postalCode = "", countryCode, countryName }) => {
+      const matchedCountry = COUNTRIES.find(
         (c) => c.code === countryCode || c.name === countryName
       );
-      setSelectedCountryCode(matched?.code || countryCode || undefined);
+      const nextCountryCode = matchedCountry?.code || countryCode || undefined;
+
+      form.setFieldsValue({
+        address,
+        cityName,
+        postalCode,
+        countryCode: nextCountryCode,
+      });
+
+      setSelectedCountryCode(nextCountryCode);
+      setSelectedCountryName(matchedCountry?.name || countryName || nextCountryCode);
     },
     [form]
+  );
+
+  // Called by AddressAutocompleteField when a suggestion geocode result comes back
+  const onAddressAutocompleteSelect = useCallback(
+    (selectedAddress) => {
+      syncAddressFormValues(selectedAddress || {});
+    },
+    [syncAddressFormValues]
   );
 
   // Function to fetch shipping fee when address is selected
@@ -202,6 +246,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
       document.body.style.overflow = "unset";
       form.resetFields();
       setSelectedCountryCode(undefined);
+      setSelectedCountryName(undefined);
       setIsEditing(false);
       setEditingAddressId(null);
       setSelectedAddressId(null);
@@ -218,6 +263,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     document.body.style.overflow = "unset";
     form.resetFields();
     setSelectedCountryCode(undefined);
+    setSelectedCountryName(undefined);
     setIsEditing(false);
     setEditingAddressId(null);
     setShowAddForm(false);
@@ -242,31 +288,33 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     setShowAddForm(true);
     form.resetFields();
     setSelectedCountryCode(undefined);
+    setSelectedCountryName(undefined);
   };
 
   const handleCancelAddForm = () => {
     setShowAddForm(false);
     form.resetFields();
     setSelectedCountryCode(undefined);
+    setSelectedCountryName(undefined);
   };
 
   const handleEditAddress = (address) => {
     setIsEditing(true);
     setEditingAddressId(address._id || address.id);
     setShowAddForm(false);
-    const country = COUNTRIES.find(
-      (c) => c.code === address.countryCode || c.name === address.countryName
-    );
-    form.setFieldsValue({
+    syncAddressFormValues({
       address: address.address,
       postalCode: address.postalCode,
       cityName: address.cityName,
+      countryCode: address.countryCode,
+      countryName: address.countryName,
     });
-    setSelectedCountryCode(country ? country.code : address.countryCode || undefined);
   };
 
   const handleCountryChange = (code) => {
     setSelectedCountryCode(code);
+    const matchedCountry = COUNTRIES.find((country) => country.code === code);
+    setSelectedCountryName(matchedCountry?.name || code);
   };
 
   const handleDeleteAddress = async (addressId) => {
@@ -304,7 +352,8 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
 
   const handleSubmitAddress = async (values) => {
     try {
-      if (!selectedCountryCode) {
+      const resolvedCountryCode = values.countryCode || selectedCountryCode;
+      if (!resolvedCountryCode) {
         dispatch({
           type: TOAST_BOX,
           payload: {
@@ -314,14 +363,16 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
         });
         return;
       }
-      const selectedCountry = COUNTRIES.find((c) => c.code === selectedCountryCode);
+      const selectedCountry = COUNTRIES.find((c) => c.code === resolvedCountryCode);
+      const countryCode = selectedCountry?.code || resolvedCountryCode;
+      const countryName = selectedCountry?.name || selectedCountryName || resolvedCountryCode;
 
       const addressData = {
         address: values.address,
         postalCode: values.postalCode,
         cityName: values.cityName,
-        countryCode: selectedCountry.code,
-        countryName: selectedCountry.name,
+        countryCode,
+        countryName,
       };
 
       if (isEditing && editingAddressId) {
@@ -348,6 +399,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
       }
       form.resetFields();
       setSelectedCountryCode(undefined);
+      setSelectedCountryName(undefined);
       setIsEditing(false);
       setEditingAddressId(null);
       setShowAddForm(false);
@@ -637,6 +689,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                         }
                         form.resetFields();
                         setSelectedCountryCode(undefined);
+                        setSelectedCountryName(undefined);
                       }}
                       type="button"
                     >
@@ -710,22 +763,28 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                         </div>
                       </FlexibleDiv>
 
-                      <div className="form__field__wrapper">
-                        <label className="input__label">Country</label>
-                        <Select
-                          placeholder="Auto-filled from address"
-                          className="country__select"
-                          value={selectedCountryCode}
-                          onChange={handleCountryChange}
-                          options={countryOptions}
-                          showSearch
-                          filterOption={(input, option) =>
-                            (option?.label ?? "")
-                              .toLowerCase()
-                              .includes(input.toLowerCase())
-                          }
-                        />
-                      </div>
+                        <div className="form__field__wrapper">
+                          <label className="input__label">Country</label>
+                          <Form.Item
+                            name="countryCode"
+                            rules={[
+                              { required: true, message: "Please select a country" },
+                            ]}
+                          >
+                            <Select
+                              placeholder="Auto-filled from address"
+                              className="country__select"
+                              onChange={handleCountryChange}
+                              options={countrySelectOptions}
+                              showSearch
+                              filterOption={(input, option) =>
+                                (option?.label ?? "")
+                                  .toLowerCase()
+                                  .includes(input.toLowerCase())
+                              }
+                            />
+                          </Form.Item>
+                        </div>
 
                       <Button
                         type="submit"
