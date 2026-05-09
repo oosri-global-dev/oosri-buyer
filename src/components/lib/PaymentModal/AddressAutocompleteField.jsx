@@ -125,8 +125,6 @@ const AddressAutocompleteField = ({
           input: input
         });
 
-        console.log("Autocomplete Response:", response);
-
         const suggestions = response.suggestions || [];
 
         if (suggestions.length > 0) {
@@ -189,7 +187,6 @@ const AddressAutocompleteField = ({
       geocoderRef.current.geocode(
         { placeId: prediction.place_id },
         (results, status) => {
-          console.log("Geocode Results:", results, "Status:", status);
           if (status !== "OK" || !results?.[0]) {
             // Fallback: at least fill the address text
             const fallback = prediction.description;
