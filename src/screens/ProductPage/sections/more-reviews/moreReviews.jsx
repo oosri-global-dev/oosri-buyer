@@ -39,7 +39,6 @@ export const MoreReviews = ({id,reviewData,starData,setMoreReviewsActive}) => {
         let weightedSum = 0;
         for (let i = 1; i <= 5; i++) {
           weightedSum += (i+1) * Number(values[i] || 0);
-          console.log("val:",weightedSum);
         }
         const average = weightedSum / (totalResponses *100);
         const formattedAverage = Number.isInteger(average)
