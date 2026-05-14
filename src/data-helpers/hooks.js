@@ -105,9 +105,11 @@ export const calculateProductPrice = (product) => {
   const {
     productPrice,
     salesPrice,
+    discountPrice,       // PDP endpoint uses discountPrice; treat as alias for salesPrice
     regularPrice,
     regularPriceUSD,
     salesPriceUSD,
+    discountPriceUSD,    // USD version of discountPrice
     previousPriceUSD,
     fxRate, // NGN-to-USD rate stored on the product by the backend
   } = product;
@@ -125,7 +127,15 @@ export const calculateProductPrice = (product) => {
     productPrice ||
     0;
 
-  const sales = salesPriceUSD || toUSD(salesPrice) || null;
+  // salesPrice and discountPrice are the same concept — reduced selling price.
+  // salesPriceUSD / discountPriceUSD are their USD-converted equivalents.
+  const sales =
+    salesPriceUSD ||
+    discountPriceUSD ||
+    toUSD(salesPrice) ||
+    toUSD(discountPrice) ||
+    null;
+
   const previous = previousPriceUSD || toUSD(product.previousPrice) || null;
 
   // Only treat as discounted when the sale price is genuinely lower than regular.
