@@ -343,7 +343,6 @@ export default function ProductCard({ card, keyProp, isLoading = false }) {
           </>
         )}
       </div>
-      )}
     </ProductCardWrapper>
   );
 }
