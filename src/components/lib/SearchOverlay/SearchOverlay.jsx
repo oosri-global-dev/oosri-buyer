@@ -7,7 +7,7 @@ import { MdOutlineCategory as CategoryIcon } from "react-icons/md";
 import SafeImage from "@/components/lib/SafeImage/SafeImage";
 import { useSearchQuery } from "@/network/search";
 import { useProductCategoriesQuery } from "@/network/product";
-import { useFormatPrice } from "@/data-helpers/hooks";
+import { useFormatPrice, calculateProductPrice } from "@/data-helpers/hooks";
 import { SearchOverlayWrapper, SearchBackdrop } from "./searchOverlay.styles";
 
 const RECENT_KEY = "recent_searches";
@@ -195,7 +195,7 @@ export default function SearchOverlay({ open, onClose }) {
                   <div className="so__section__header"><span>Products</span></div>
                   {products.map((p) => {
                     const id = p._id || p.objectID;
-                    const price = p.discountPriceUSD || p.regularPriceUSD || p.salesPriceUSD || p.discountPrice || p.regularPrice || 0;
+                    const { price } = calculateProductPrice(p);
                     return (
                       <button key={id} className="so__product__row" onClick={() => goToProduct(id)}>
                         <div className="so__product__img">
