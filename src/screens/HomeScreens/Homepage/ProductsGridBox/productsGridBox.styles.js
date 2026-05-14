@@ -49,9 +49,31 @@ export const SDWrapper = styled.section`
   .card__slot {
     flex: 0 0 auto;
     width: 200px;
+  }
 
-    @media (max-width: 480px) {
-      width: 170px;
+  @media (max-width: 600px) {
+    .scroll__arrow {
+      display: none;
+    }
+
+    .cards__scroller {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      overflow-x: visible;
+      overflow: visible;
+      padding-bottom: 0;
+      gap: 12px;
+    }
+
+    .card__slot {
+      width: 100%;
+      flex: none;
+    }
+  }
+
+  @media (max-width: 390px) {
+    .cards__scroller {
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     }
   }
 

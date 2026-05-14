@@ -13,6 +13,6 @@ const Faq = () => {
   );
 };
 
-Faq.getLayout = (page) => <GeneralLayout>{page}</GeneralLayout>;
+Faq.getLayout = (page) => <GeneralLayout fullBleed>{page}</GeneralLayout>;
 
 export default Faq;

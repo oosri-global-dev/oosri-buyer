@@ -6,8 +6,10 @@ export const FooterWrapper = styled(FlexibleDiv)`
   flex-direction: column;
   flex-wrap: nowrap;
   background: #fbfbfb;
+  overflow-x: hidden;
 
   .footer__content {
+    width: 100%;
     max-width: 1200px;
     margin-left: auto;
     margin-right: auto;
@@ -76,22 +78,42 @@ export const TopSectionWrapper = styled(FlexibleDiv)`
   }
 
   
-  @media (max-width: 650px) {
+  @media (max-width: 820px) {
     flex-wrap: wrap;
+    padding: 24px 20px;
+
     .box__1 {
       flex-grow: 4;
-      margin-bottom: 30px;
+      margin-bottom: 24px;
     }
 
     .box__2,
     .box__3 {
       flex-grow: 2;
       width: fit-content;
-      margin-bottom: 30px;
+      margin-bottom: 24px;
 
       h3,
       a {
         width: fit-content;
+      }
+    }
+
+    .box__4 {
+      width: 100%;
+      margin-bottom: 24px;
+
+      .newsletter__wrapper {
+        flex-wrap: wrap;
+        gap: 8px;
+
+        > * {
+          width: 100% !important;
+        }
+      }
+
+      img {
+        width: 160px;
       }
     }
   }

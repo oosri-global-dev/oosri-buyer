@@ -15,6 +15,7 @@ export default function GeneralLayout({
   title = false,
   contextTitle = false,
   isAuth = false,
+  fullBleed = false,
 }) {
   const { dispatch, pageTitle, user, isLoadingUser } = useMainContext();
   const router = useRouter();
@@ -46,19 +47,20 @@ export default function GeneralLayout({
 
   return (
     <>
-      <GeneralLayoutWrapper>
+      <GeneralLayoutWrapper style={fullBleed ? { minHeight: "auto" } : undefined}>
         {!noHeader && <Header />}
         {contextTitle && <h1 className="page__title">{pageTitle}</h1>}
         <> {title && <h1 className="page__title">{title}</h1>}</>
 
-        {showOverlay ? (
+        {!fullBleed && (showOverlay ? (
           <AuthOverlay>
             <OorsiLoader />
           </AuthOverlay>
         ) : (
           children
-        )}
+        ))}
       </GeneralLayoutWrapper>
+      {fullBleed && children}
       {!noFooter && <Footer />}
     </>
   );

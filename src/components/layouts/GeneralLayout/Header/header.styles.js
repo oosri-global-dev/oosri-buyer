@@ -27,6 +27,7 @@ export const HeaderWrapper = styled(FlexibleDiv)`
     }
   }
 
+
   .middle__section {
     gap: 40px;
     text-shadow: 1px 2px 2px rgba(0, 0, 0, 0.3);
@@ -304,19 +305,50 @@ export const HeaderWrapper = styled(FlexibleDiv)`
 
   /* Header menu shrinks here */
   @media (max-width: 820px) {
-    max-height: 40px;
+    max-height: 56px;
+    width: calc(100% + 40px);
+    margin-left: -20px;
+    padding: 10px 20px;
 
-    .logo__section .nav__menu__wrapper {
-      display: flex;
+    .logo__section {
+      gap: 10px;
+      align-items: center;
+
+      .nav__menu__wrapper {
+        display: flex;
+      }
+
+      /* show logo on mobile at compact size */
+      .logo__wrapper {
+        width: 90px !important;
+        height: auto !important;
+      }
     }
 
-    .logo__section .logo__wrapper,
     .middle__section {
       display: none;
     }
 
     .right__section {
-      gap: 18px;
+      gap: 16px;
+      padding-left: 0;
+
+      /* compact: flag only, hide code + chevron */
+      .currency__selector .currency__trigger {
+        border: none;
+        padding: 2px 4px;
+        background: transparent;
+
+        .currency__code,
+        .currency__chevron {
+          display: none;
+        }
+
+        .currency__flag {
+          font-size: 1.3rem;
+          line-height: 1;
+        }
+      }
     }
 
     .right__section .wishlist__icon {
@@ -325,6 +357,10 @@ export const HeaderWrapper = styled(FlexibleDiv)`
   }
 
   @media (max-width: 550px) {
+    width: calc(100% + 20px);
+    margin-left: -10px;
+    padding: 10px 16px;
+
     .right__section {
       .account__dropdown {
         min-width: 200px;
