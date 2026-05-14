@@ -2,11 +2,11 @@ import React from "react";
 import { BeatLoader } from "react-spinners";
 import ButtonStyle from "./styles";
 
-const Button = ({ children, loading, disabled, loaderColor, ...props }) => {
+const Button = ({ children, loading, disabled, loaderColor, color, ...props }) => {
   return (
-    <ButtonStyle disabled={disabled || loading} {...props}>
+    <ButtonStyle disabled={disabled || loading} color={color} {...props}>
       {loading ? (
-        <BeatLoader color={loaderColor || "#fff"} size={10} />
+        <BeatLoader color={loaderColor || color || "#fff"} size={10} />
       ) : (
         <span>{children}</span>
       )}
