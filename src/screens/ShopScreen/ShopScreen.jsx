@@ -7,14 +7,15 @@ import {
   Checkbox,
   Select,
   Tag,
-  Spin,
   Alert,
   Modal,
   Button,
   Pagination,
   Slider,
 } from "antd";
-import ProductCard from "@/components/lib/ProductCard/productCard";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
+import ProductCard, { LoadingCard } from "@/components/lib/ProductCard/productCard";
 import { useProductsQuery, useProductCategoriesQuery } from "@/network/product";
 import { FaFilter } from "react-icons/fa";
 
@@ -308,9 +309,13 @@ export default function ShopPage() {
   const filterContentNode = useMemo(() => (
     <div className="category__filters">
       {isLoadingCategories ? (
-        <div className="loader_wrapper">
-          <Spin />
-        </div>
+        <SkeletonTheme baseColor="rgba(148,148,148,0.1)" highlightColor="rgba(202,202,202,0.4)">
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, padding: "8px 0" }}>
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={i} style={{ width: `${60 + (i % 3) * 15}%`, height: 16, borderRadius: 4 }} />
+            ))}
+          </div>
+        </SkeletonTheme>
       ) : isErrorCategories ? (
         <Alert message="Error loading categories" type="error" />
       ) : (
@@ -491,24 +496,13 @@ export default function ShopPage() {
 
             <FlexibleDiv
               width="100%"
-              justifyContent={
-                isLoadingProducts || isErrorProducts ? "center" : "flex-start"
-              }
-              alignItems={
-                isLoadingProducts || isErrorProducts ? "center" : "flex-start"
-              }
-              className={
-                !isLoadingProducts && !isErrorProducts ? "products__grid" : ""
-              }
-              style={{
-                flex: 1,
-                display: isLoadingProducts || isErrorProducts ? "block" : "",
-              }}
+              justifyContent="flex-start"
+              alignItems="flex-start"
+              className={!isErrorProducts ? "products__grid" : ""}
+              style={{ flex: 1 }}
             >
               {isLoadingProducts ? (
-                <div className="loader_wrapper">
-                  <Spin style={{ color: "red" }} size="large" />
-                </div>
+                Array.from({ length: 12 }).map((_, idx) => <LoadingCard key={idx} />)
               ) : isErrorProducts ? (
                 <Alert
                   message="Error"
