@@ -86,9 +86,28 @@ export default function ProductCarousel({
 
   return (
     <section style={{ width: "100%", marginTop: 20 }}>
-      {/* Title row — no arrows here anymore */}
       {carouselTitle ? (
-        <h3 style={{ margin: "0 0 12px 0" }}>{carouselTitle}</h3>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+          <h3 style={{ margin: 0, fontSize: "1.25rem", fontWeight: 700, color: "#1a1a1a" }}>{carouselTitle}</h3>
+          {onViewMore && (
+            <button
+              type="button"
+              onClick={onViewMore}
+              style={{
+                border: "none",
+                background: "none",
+                cursor: "pointer",
+                fontSize: "0.88rem",
+                fontWeight: 600,
+                color: "var(--orrsiPrimary)",
+                padding: 0,
+                whiteSpace: "nowrap",
+              }}
+            >
+              View All →
+            </button>
+          )}
+        </div>
       ) : null}
 
       {/* Wrapper that positions arrows on the sides */}

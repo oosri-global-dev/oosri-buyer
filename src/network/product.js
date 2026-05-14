@@ -52,7 +52,7 @@ export const handleRemoveProductFromSavedItems = async (productId) => {
   return data;
 };
 
-export function useProductsQuery(category, limit, key = "products", skip) {
+export function useProductsQuery(category, limit, key = "products", skip, queryOptions = {}) {
   return useQuery({
     // Include category in the key so each filter combination is cached independently
     queryKey: [key, category, skip],
@@ -62,7 +62,8 @@ export function useProductsQuery(category, limit, key = "products", skip) {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
-    placeholderData: keepPreviousData, // no flash on pagination / filter change
+    placeholderData: keepPreviousData,
+    ...queryOptions,             // allows enabled:false for lazy/deferred loading
   });
 }
 
