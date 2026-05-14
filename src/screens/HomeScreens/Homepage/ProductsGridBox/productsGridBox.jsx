@@ -1,5 +1,5 @@
 import { FlexibleDiv } from "@/components/lib/Box/styles";
-import { SDWrapper, CardWrapper } from "./productsGridBox.styles";
+import { SDWrapper } from "./productsGridBox.styles";
 import ProductCard from "@/components/lib/ProductCard/productCard";
 import { useState, useEffect } from "react";
 import { useWindowSize } from "@/data-helpers/hooks";
