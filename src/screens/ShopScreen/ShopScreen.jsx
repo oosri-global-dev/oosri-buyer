@@ -2,6 +2,7 @@ import Breadcrumb from "@/components/lib/Breadcrumb/breadcrumb";
 import { ShopPageWrapper } from "./ShopScreen.styles";
 import { FlexibleDiv } from "@/components/lib/Box/styles";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/router";
 import {
   Checkbox,
   Select,
@@ -124,22 +125,42 @@ function getSubCategoryName(product) {
   );
 }
 
+const SORT_OPTIONS = [
+  { label: "Featured", value: "featured" },
+  { label: "Price: Low to High", value: "price_asc" },
+  { label: "Price: High to Low", value: "price_desc" },
+  { label: "Newest", value: "newest" },
+];
+
 export default function ShopPage() {
+  const router = useRouter();
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedSubCategories, setSelectedSubCategories] = useState({});
-  const [priceRange, setPriceRange] = useState([0, MAX_PRICE_USD]); // [min, max]
+  const [priceRange, setPriceRange] = useState([0, MAX_PRICE_USD]);
+  const [sortBy, setSortBy] = useState("featured");
   const [currentPage, setCurrentPage] = useState(1);
   const [openSelects, setOpenSelects] = useState({});
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
   const [itemOffset, setItemOffset] = useState(0);
   const [shuffleSeed, setShuffleSeed] = useState(null);
+  const [urlParamsApplied, setUrlParamsApplied] = useState(false);
 
   const itemsPerPage = 12;
 
-  // stable shuffle per visit; changes on refresh
   useEffect(() => {
     setShuffleSeed(Date.now());
   }, []);
+
+  // Apply URL query params (category / q) once categories are loaded
+  useEffect(() => {
+    if (urlParamsApplied || !router.isReady) return;
+    const { category } = router.query;
+    if (category) {
+      const decoded = decodeURIComponent(String(category));
+      setSelectedCategories([decoded]);
+    }
+    setUrlParamsApplied(true);
+  }, [router.isReady, router.query, urlParamsApplied]);
 
   const {
     data: productCategories,
@@ -253,6 +274,18 @@ export default function ShopPage() {
     if (!shuffleSeed) return filteredProducts;
     return seededShuffle(filteredProducts, shuffleSeed);
   }, [filteredProducts, shuffleSeed]);
+
+  const sortedProducts = useMemo(() => {
+    const list = [...randomizedProducts];
+    if (sortBy === "price_asc") {
+      list.sort((a, b) => (getEffectiveProductPrice(a) || 0) - (getEffectiveProductPrice(b) || 0));
+    } else if (sortBy === "price_desc") {
+      list.sort((a, b) => (getEffectiveProductPrice(b) || 0) - (getEffectiveProductPrice(a) || 0));
+    } else if (sortBy === "newest") {
+      list.sort((a, b) => new Date(b?.createdAt || 0) - new Date(a?.createdAt || 0));
+    }
+    return list;
+  }, [randomizedProducts, sortBy]);
 
   const handlePageChange = useCallback((page, pageSize) => {
     window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
@@ -432,7 +465,32 @@ export default function ShopPage() {
             {filterContentNode}
           </aside>
 
-          <FlexibleDiv width="100%" flexDir="column">
+          <FlexibleDiv width="100%" flexDir="column" gap="0">
+            {/* ── Results bar ── */}
+            {!isLoadingProducts && !isErrorProducts && (
+              <FlexibleDiv
+                width="100%"
+                justifyContent="space-between"
+                alignItems="center"
+                className="results__bar"
+              >
+                <p className="results__count">
+                  {sortedProducts.length === totalProducts
+                    ? `${totalProducts} products`
+                    : `${sortedProducts.length} of ${totalProducts} products`}
+                </p>
+                <Select
+                  value={sortBy}
+                  onChange={setSortBy}
+                  options={SORT_OPTIONS}
+                  size="small"
+                  className="sort__select"
+                  style={{ minWidth: 160 }}
+                  bordered={false}
+                />
+              </FlexibleDiv>
+            )}
+
             <FlexibleDiv
               width="100%"
               justifyContent={
@@ -462,11 +520,11 @@ export default function ShopPage() {
                 />
               ) : (
                 <>
-                  {randomizedProducts.map((p, idx) => (
+                  {sortedProducts.map((p, idx) => (
                     <ProductCard card={p} key={p?.id || p?._id || idx} />
                   ))}
 
-                  {!randomizedProducts.length && (
+                  {!sortedProducts.length && (
                     <Alert
                       message="No products match your filters"
                       description="Try widening the price range or clearing filters."

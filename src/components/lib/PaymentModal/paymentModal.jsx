@@ -130,10 +130,11 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     () => addresses.find((a) => (a._id || a.id) === selectedAddressId),
     [addresses, selectedAddressId]
   );
-  // Also detect Nigerian intent when the user has Nigeria selected in the open add/edit form
-  const effectiveCountryCode =
-    selectedAddress?.countryCode ||
-    ((showAddForm || isEditing) ? watchedCountryCode : null);
+  // When add/edit form is open, the form's live country input takes priority over the saved address
+  // so the gateway banner reacts instantly as the user types/selects their country.
+  const effectiveCountryCode = (showAddForm || isEditing)
+    ? (watchedCountryCode || selectedAddress?.countryCode || null)
+    : (selectedAddress?.countryCode || null);
   const isNigerianBuyer = effectiveCountryCode === "NG";
 
   // Shipping calculations

@@ -47,6 +47,11 @@ export const handleGetSavedItems = async (productId = null) => {
   return data;
 };
 
+export const handleRemoveProductFromSavedItems = async (productId) => {
+  const { data } = await instance.delete(`/buyer/saved-items/${productId}`);
+  return data;
+};
+
 export function useProductsQuery(category, limit, key = "products", skip) {
   return useQuery({
     queryKey: [key, skip],

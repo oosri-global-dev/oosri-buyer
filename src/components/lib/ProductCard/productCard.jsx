@@ -1,7 +1,6 @@
 import { ProductCardWrapper } from "./productCard.styles";
 import { FlexibleDiv } from "../Box/styles";
-import { AiFillStar as LikeIcon } from "react-icons/ai";
-import { AiFillHeart as HeartIcon } from "react-icons/ai";
+import { AiFillStar as LikeIcon, AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { useProductPrice, useFormatPrice } from "@/data-helpers/hooks";
@@ -11,7 +10,8 @@ import SafeImage from "../SafeImage/SafeImage";
 import Button from "../Button";
 import { useMainContext } from "@/context";
 import { useState } from "react";
-import { handleAddProductToSavedItems } from "@/network/product";
+import { useQueryClient } from "@tanstack/react-query";
+import { handleAddProductToSavedItems, handleRemoveProductFromSavedItems } from "@/network/product";
 import { TOAST_BOX } from "@/context/types";
 
 export function LoadingCard({ keyProp }) {
@@ -58,6 +58,7 @@ export default function ProductCard({ card, keyProp, isLoading = false }) {
 
   // ✅ ALL hooks declared unconditionally at the top — Rules of Hooks
   const { cart, addToCart, removeFromCart, dispatch, user, setBuyNowItem } = useMainContext();
+  const queryClient = useQueryClient();
   const [isLoadingBtn, setIsLoadingBtn] = useState(false);
   const [isFavorite, setIsFavorite] = useState(card?.isFavorite || false);
   const [isSavingFavorite, setIsSavingFavorite] = useState(false);
@@ -163,23 +164,22 @@ export default function ProductCard({ card, keyProp, isLoading = false }) {
 
     setIsSavingFavorite(true);
     try {
-      const res = await handleAddProductToSavedItems(card._id);
-      setIsFavorite(true);
-      dispatch({
-        type: TOAST_BOX,
-        payload: {
-          type: "success",
-          message: res?.message || "Product added to favorites successfully",
-        },
-      });
+      if (isFavorite) {
+        await handleRemoveProductFromSavedItems(card._id);
+        setIsFavorite(false);
+        dispatch({ type: TOAST_BOX, payload: { type: "success", message: "Removed from saved items" } });
+      } else {
+        const res = await handleAddProductToSavedItems(card._id);
+        setIsFavorite(true);
+        dispatch({ type: TOAST_BOX, payload: { type: "success", message: res?.message || "Added to saved items" } });
+      }
+      queryClient.invalidateQueries(["saved-items"]);
     } catch (error) {
       dispatch({
         type: TOAST_BOX,
         payload: {
           type: "error",
-          message:
-            error?.response?.data?.message ||
-            "Failed to add product to favorites",
+          message: error?.response?.data?.message || "Failed to update saved items",
         },
       });
     } finally {
@@ -261,15 +261,21 @@ export default function ProductCard({ card, keyProp, isLoading = false }) {
         </FlexibleDiv>
 
         <FlexibleDiv className="favorite__wrapper">
-          <HeartIcon
-            size={18}
-            fill={isFavorite ? "var(--orrsiPrimary)" : "transparent"}
-            onClick={handleFavoriteClick}
-            style={{
-              cursor: isSavingFavorite ? "not-allowed" : "pointer",
-              opacity: isSavingFavorite ? 0.6 : 1,
-            }}
-          />
+          {isFavorite ? (
+            <AiFillHeart
+              size={18}
+              color="var(--orrsiPrimary)"
+              onClick={handleFavoriteClick}
+              style={{ cursor: isSavingFavorite ? "not-allowed" : "pointer", opacity: isSavingFavorite ? 0.5 : 1 }}
+            />
+          ) : (
+            <AiOutlineHeart
+              size={18}
+              color="var(--orrsiPrimary)"
+              onClick={handleFavoriteClick}
+              style={{ cursor: isSavingFavorite ? "not-allowed" : "pointer", opacity: isSavingFavorite ? 0.5 : 1 }}
+            />
+          )}
         </FlexibleDiv>
 
         <FlexibleDiv className="seller__info" justifyContent="flex-start">

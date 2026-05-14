@@ -188,6 +188,29 @@ export const ShopPageWrapper = styled(FlexibleDiv)`
       }
     }
 
+    .results__bar {
+      padding: 0 0 14px 0;
+      flex-shrink: 0;
+
+      .results__count {
+        font-size: 0.82rem;
+        color: #888;
+        margin: 0;
+      }
+
+      .sort__select {
+        .ant-select-selector {
+          background: transparent !important;
+          border: none !important;
+          box-shadow: none !important;
+          padding-right: 0 !important;
+          font-size: 0.82rem;
+          color: #444;
+        }
+        .ant-select-arrow { color: #aaa; }
+      }
+    }
+
     .products__grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
