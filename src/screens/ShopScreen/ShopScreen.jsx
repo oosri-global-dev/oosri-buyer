@@ -17,6 +17,7 @@ import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import ProductCard, { LoadingCard } from "@/components/lib/ProductCard/productCard";
 import { useProductsQuery, useProductCategoriesQuery } from "@/network/product";
+import { useSearchQuery } from "@/network/search";
 import { FaFilter } from "react-icons/fa";
 
 const MAX_PRICE_USD = 7000;
@@ -152,16 +153,25 @@ export default function ShopPage() {
     setShuffleSeed(Date.now());
   }, []);
 
-  // Apply URL query params (category / q) once categories are loaded
+  // Read search query from URL (?q=) — drives Algolia search mode
+  const searchTerm = useMemo(() => {
+    if (!router.isReady) return "";
+    const q = router.query.q;
+    return typeof q === "string" ? q.trim() : "";
+  }, [router.isReady, router.query.q]);
+
+  const isSearchMode = searchTerm.length >= 2;
+
+  // Apply URL query params (category) once ready — skip when in search mode
   useEffect(() => {
     if (urlParamsApplied || !router.isReady) return;
     const { category } = router.query;
-    if (category) {
+    if (category && !isSearchMode) {
       const decoded = decodeURIComponent(String(category));
       setSelectedCategories([decoded]);
     }
     setUrlParamsApplied(true);
-  }, [router.isReady, router.query, urlParamsApplied]);
+  }, [router.isReady, router.query, urlParamsApplied, isSearchMode]);
 
   const {
     data: productCategories,
@@ -176,7 +186,14 @@ export default function ShopPage() {
     setCurrentPage(1);
   }, [selectedCategories]);
 
-  // Pass selected categories to API — server does the filtering, not the client
+  // Algolia search (only when ?q= is present)
+  const {
+    data: searchData,
+    isLoading: isLoadingSearch,
+    isError: isErrorSearch,
+  } = useSearchQuery(isSearchMode ? searchTerm : "");
+
+  // Regular product fetch (disabled when in search mode)
   const apiCategory = selectedCategories.length > 0 ? selectedCategories : "";
   const productQueryKey = `shop-${selectedCategories.sort().join(",")}`;
 
@@ -184,10 +201,17 @@ export default function ShopPage() {
     data: products,
     isLoading: isLoadingProducts,
     isError: isErrorProducts,
-  } = useProductsQuery(apiCategory, itemsPerPage, productQueryKey, itemOffset);
+  } = useProductsQuery(apiCategory, itemsPerPage, productQueryKey, itemOffset, {
+    enabled: !isSearchMode,
+  });
 
-  const productsList = useMemo(() => products?.body?.products || [], [products]);
-  const totalProducts = products?.body?.total || 0;
+  const searchResults = useMemo(() => searchData?.data || [], [searchData]);
+  const productsList = useMemo(
+    () => (isSearchMode ? searchResults : products?.body?.products || []),
+    [isSearchMode, searchResults, products]
+  );
+  const totalProducts = isSearchMode ? searchResults.length : (products?.body?.total || 0);
+  const isLoadingProductsAny = isSearchMode ? isLoadingSearch : isLoadingProducts;
 
   const formatCategory = useCallback((cat = []) => {
     return cat.map((ct) => ({ label: ct.name, value: ct.name }));
@@ -469,8 +493,25 @@ export default function ShopPage() {
           </aside>
 
           <FlexibleDiv width="100%" flexDir="column" gap="0">
+            {/* ── Search mode banner ── */}
+            {isSearchMode && (
+              <div className="search__banner">
+                <span>
+                  {isLoadingProductsAny
+                    ? `Searching for "${searchTerm}"…`
+                    : `${totalProducts} result${totalProducts !== 1 ? "s" : ""} for "${searchTerm}"`}
+                </span>
+                <button
+                  className="search__banner__clear"
+                  onClick={() => router.push("/shop")}
+                >
+                  Clear search ×
+                </button>
+              </div>
+            )}
+
             {/* ── Results bar ── */}
-            {!isLoadingProducts && !isErrorProducts && (
+            {!isLoadingProductsAny && !isErrorProducts && !isErrorSearch && !isSearchMode && (
               <FlexibleDiv
                 width="100%"
                 justifyContent="space-between"
@@ -498,12 +539,12 @@ export default function ShopPage() {
               width="100%"
               justifyContent="flex-start"
               alignItems="flex-start"
-              className={!isErrorProducts ? "products__grid" : ""}
+              className={!(isErrorProducts || isErrorSearch) ? "products__grid" : ""}
               style={{ flex: 1 }}
             >
-              {isLoadingProducts ? (
+              {isLoadingProductsAny ? (
                 Array.from({ length: 12 }).map((_, idx) => <LoadingCard key={idx} />)
-              ) : isErrorProducts ? (
+              ) : (isErrorProducts || isErrorSearch) ? (
                 <Alert
                   message="Error"
                   description="Failed to fetch products. Please try again later."
@@ -518,8 +559,8 @@ export default function ShopPage() {
 
                   {!sortedProducts.length && (
                     <Alert
-                      message="No products match your filters"
-                      description="Try widening the price range or clearing filters."
+                      message={isSearchMode ? `No results for "${searchTerm}"` : "No products match your filters"}
+                      description={isSearchMode ? "Try a different search term." : "Try widening the price range or clearing filters."}
                       type="info"
                       showIcon
                       style={{ width: "100%" }}

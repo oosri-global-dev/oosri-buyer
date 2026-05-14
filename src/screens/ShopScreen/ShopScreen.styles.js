@@ -188,6 +188,31 @@ export const ShopPageWrapper = styled(FlexibleDiv)`
       }
     }
 
+    .search__banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: #fdf5f5;
+      border: 1px solid rgba(252, 83, 83, 0.15);
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      font-size: 0.875rem;
+      color: #444;
+
+      .search__banner__clear {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 0.8rem;
+        color: var(--orrsiPrimary);
+        white-space: nowrap;
+        padding: 0;
+        &:hover { text-decoration: underline; }
+      }
+    }
+
     .results__bar {
       padding: 0 0 14px 0;
       flex-shrink: 0;
