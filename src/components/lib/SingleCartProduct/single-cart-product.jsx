@@ -1,8 +1,7 @@
-import { useState } from "react";
-import { FlexibleDiv } from "../Box/styles";
+import { useState, useEffect } from "react";
 import { SCProductWrapper } from "./single-cart-product.styles";
 import { BsTrash as TrashIcon } from "react-icons/bs";
-import { formatCurrency, useProductPrice } from "@/data-helpers/hooks";
+import { useProductPrice, useFormatPrice } from "@/data-helpers/hooks";
 import SafeImage from "@/components/lib/SafeImage/SafeImage";
 import { useMainContext } from "@/context";
 import { useRouter } from "next/router";
@@ -10,101 +9,103 @@ import { Spin } from "antd";
 
 export default function SingleCartProduct({
   item,
-  isModalOpen,
   setIsModalOpen,
   setSelectedItem,
 }) {
-  const { updateQuantity, removeFromCart } = useMainContext();
+  const { updateQuantity } = useMainContext();
   const [numOfProduct, setNumOfProduct] = useState(item.quantity);
   const [isLoadingIncrease, setIsLoadingIncrease] = useState(false);
   const [isLoadingDecrease, setIsLoadingDecrease] = useState(false);
   const { push } = useRouter();
   const priceData = useProductPrice(item);
+  const formatPrice = useFormatPrice();
+
+  // Keep local qty in sync with the authoritative cart value from context.
+  useEffect(() => {
+    setNumOfProduct(item.quantity);
+  }, [item.quantity]);
+
+  const isLoading = isLoadingIncrease || isLoadingDecrease;
+
+  const handleDecrement = async () => {
+    if (numOfProduct <= 1 || isLoading) return;
+    const next = numOfProduct - 1;
+    setNumOfProduct(next);
+    await updateQuantity(item, next, setIsLoadingDecrease);
+  };
+
+  const handleIncrement = async () => {
+    if (isLoading) return;
+    const next = numOfProduct + 1;
+    setNumOfProduct(next);
+    await updateQuantity(item, next, setIsLoadingIncrease);
+  };
+
+  const lineTotal = (priceData?.price || 0) * numOfProduct;
 
   return (
     <SCProductWrapper>
-      <FlexibleDiv
-        className="box__left__section"
-        flexDir="row"
-        flexWrap="nowrap"
-        gap="20px"
+      {/* Image */}
+      <div
+        className="product__image__wrapper"
+        onClick={() => push(`/product/${item?._id}`)}
       >
-        <div className="product__image__wrapper">
-          <SafeImage
-            src={item?.productImages?.[0]}
-            alt={`${item?._id} product image`}
-            layout="fill"
-            objectFit="cover"
-            onClick={() => push(`/product/${item?._id}`)}
-          />
-        </div>
-        <FlexibleDiv
-          className="text__section"
-          flexDir="column"
-          justifyContent="space-evenly"
-          alignItems="flex-start"
+        <SafeImage
+          src={item?.productImages?.[0]}
+          alt={item?.productName || "product"}
+          fill
+          style={{ objectFit: "cover" }}
+        />
+      </div>
+
+      {/* Name + Remove */}
+      <div className="product__info">
+        <p
+          className="product__name"
+          onClick={() => push(`/product/${item?._id}`)}
+          style={{ cursor: "pointer" }}
         >
-          <p className="product__name">{item.productName}</p>
-          {priceData?.hasDiscount && priceData?.originalPrice && (
-            <p className="product__discounted__price">
-              {formatCurrency(priceData?.originalPrice || 0)}
-            </p>
-          )}
-          <div
-            className="remove__box"
-            onClick={() => {
-              setIsModalOpen(true);
-              setSelectedItem(item);
-            }}
-          >
-            <TrashIcon color="var(--orrsiPrimary)" size={20} />
-            <p>REMOVE</p>
-          </div>
-        </FlexibleDiv>
-      </FlexibleDiv>
-      <FlexibleDiv
-        className="box__right__section"
-        flexDir="column"
-        height="100%"
-        justifyContent="space-evenly"
-      >
-        <p className="product__price">
-          {formatCurrency(priceData?.price || 0)}
+          {item.productName}
         </p>
-        <FlexibleDiv className="right__box__controls">
-          <p
-            onClick={async () => {
-              if (numOfProduct > 1 && !isLoadingDecrease) {
-                await updateQuantity(
-                  item,
-                  numOfProduct - 1,
-                  setIsLoadingDecrease
-                );
-                setNumOfProduct(numOfProduct - 1);
-              }
-            }}
-            className="count__trigger"
-          >
-            {isLoadingDecrease ? <Spin size="small" /> : "-"}
-          </p>
-          <p className="number__of__product">{numOfProduct}</p>
-          <p
-            onClick={async () => {
-              if (!isLoadingIncrease) {
-                await updateQuantity(
-                  item,
-                  numOfProduct + 1,
-                  setIsLoadingIncrease
-                );
-                setNumOfProduct(numOfProduct + 1);
-              }
-            }}
-            className="count__trigger"
-          >
-            {isLoadingIncrease ? <Spin size="small" /> : "+"}
-          </p>
-        </FlexibleDiv>
-      </FlexibleDiv>
+        <div
+          className="remove__box"
+          onClick={() => {
+            setIsModalOpen(true);
+            setSelectedItem(item);
+          }}
+        >
+          <TrashIcon color="var(--orrsiPrimary)" size={13} />
+          <p>Remove</p>
+        </div>
+      </div>
+
+      {/* Quantity stepper */}
+      <div className="qty__controls">
+        <div
+          className={`qty__btn${numOfProduct <= 1 || isLoading ? " disabled" : ""}`}
+          onClick={handleDecrement}
+        >
+          {isLoadingDecrease ? <Spin size="small" /> : "−"}
+        </div>
+        <p className="qty__count">{numOfProduct}</p>
+        <div
+          className={`qty__btn${isLoading ? " disabled" : ""}`}
+          onClick={handleIncrement}
+        >
+          {isLoadingIncrease ? <Spin size="small" /> : "+"}
+        </div>
+      </div>
+
+      {/* Price block */}
+      <div className="price__block">
+        <p className="line__total">{formatPrice(lineTotal)}</p>
+        {numOfProduct > 1 && (
+          <p className="unit__price">{formatPrice(priceData?.price || 0)} each</p>
+        )}
+        {priceData?.hasDiscount && priceData?.originalPrice && (
+          <p className="unit__original">{formatPrice(priceData.originalPrice)}</p>
+        )}
+      </div>
     </SCProductWrapper>
   );
 }

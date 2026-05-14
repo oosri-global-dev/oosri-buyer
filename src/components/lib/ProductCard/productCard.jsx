@@ -4,7 +4,7 @@ import { AiFillStar as LikeIcon } from "react-icons/ai";
 import { AiFillHeart as HeartIcon } from "react-icons/ai";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-import { formatCurrency, useProductPrice } from "@/data-helpers/hooks";
+import { useProductPrice, useFormatPrice } from "@/data-helpers/hooks";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import SafeImage from "../SafeImage/SafeImage";
@@ -62,6 +62,7 @@ export default function ProductCard({ card, keyProp, isLoading = false }) {
   const [isFavorite, setIsFavorite] = useState(card?.isFavorite || false);
   const [isSavingFavorite, setIsSavingFavorite] = useState(false);
   const priceData = useProductPrice(card);
+  const formatPrice = useFormatPrice();
 
   // ✅ 0) If card is empty, don't render anything
   if (!card) return null;
@@ -255,7 +256,7 @@ export default function ProductCard({ card, keyProp, isLoading = false }) {
 
         <FlexibleDiv className="product__price__section" justifyContent="start">
           <p className="product__price">
-            {formatCurrency(priceData?.originalPrice || priceData?.price || 0)}
+            {formatPrice(priceData?.originalPrice || priceData?.price || 0)}
           </p>
         </FlexibleDiv>
 

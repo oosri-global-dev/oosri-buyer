@@ -96,6 +96,90 @@ export const HeaderWrapper = styled(FlexibleDiv)`
       justify-content: center;
     }
 
+    .currency__selector {
+      position: relative;
+      display: flex;
+      align-items: center;
+
+      .currency__trigger {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        background: none;
+        border: 1px solid #e0ded3;
+        border-radius: 4px;
+        padding: 4px 8px;
+        cursor: pointer;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--orrsiBlack);
+        white-space: nowrap;
+        transition: border-color 0.2s ease;
+
+        &:hover {
+          border-color: var(--orrsiPrimary);
+        }
+
+        .currency__flag {
+          font-size: 1rem;
+          line-height: 1;
+        }
+
+        .currency__chevron {
+          font-size: 0.5rem;
+          opacity: 0.6;
+        }
+      }
+
+      .currency__dropdown {
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 0;
+        background: white;
+        border: 1px solid #e0ded3;
+        border-radius: 6px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        min-width: 140px;
+        z-index: 10;
+        overflow: hidden;
+
+        .currency__option {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          width: 100%;
+          padding: 8px 12px;
+          background: none;
+          border: none;
+          cursor: pointer;
+          font-size: 0.85rem;
+          color: var(--orrsiBlack);
+          text-align: left;
+          transition: background 0.15s ease;
+
+          &:hover {
+            background: #f5f4f0;
+          }
+
+          &.active {
+            background: #f0ede4;
+            font-weight: 600;
+          }
+
+          .currency__flag {
+            font-size: 1rem;
+            line-height: 1;
+          }
+
+          .currency__symbol {
+            margin-left: auto;
+            opacity: 0.5;
+            font-size: 0.8rem;
+          }
+        }
+      }
+    }
+
     .selected__icon {
       background: var(--orrsiPrimary);
       width: 30px;

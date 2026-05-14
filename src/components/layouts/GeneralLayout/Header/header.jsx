@@ -7,6 +7,7 @@ import { FiSearch as SearchIcon } from "react-icons/fi";
 import { AiOutlineShoppingCart as CartIcon } from "react-icons/ai";
 import { BsHeart as WishlistIcon } from "react-icons/bs";
 import ProfileNav from "./ProfileNav/profileNav";
+import CurrencySelector from "./CurrencySelector";
 import NavMenu from "./navMenu/navMenu";
 import { menuItems } from "@/data-helpers/header-helper";
 import Logo from "@/assets/images/homepage/logo.png";
@@ -78,6 +79,7 @@ export default function Header() {
       </FlexibleDiv>
 
       <FlexibleDiv className="right__section" flexDir="row" flexWrap="nowrap">
+        <CurrencySelector />
         <div
           onClick={() => push("/search")}
           className={`single__menu ${

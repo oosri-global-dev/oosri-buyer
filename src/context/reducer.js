@@ -7,6 +7,8 @@ import {
   CART,
   LOADING_MODAL,
   LOADING_USER,
+  SET_CURRENCY,
+  SET_FX_RATES,
 } from "./types";
 
 export const Reducer = (state, { type, payload }) => {
@@ -54,6 +56,16 @@ export const Reducer = (state, { type, payload }) => {
             ? { ...item, quantity: payload.quantity }
             : item
         ),
+      };
+    case SET_CURRENCY:
+      return {
+        ...state,
+        currency: payload,
+      };
+    case SET_FX_RATES:
+      return {
+        ...state,
+        fxRates: { ...state.fxRates, ...payload },
       };
     default:
       return state;

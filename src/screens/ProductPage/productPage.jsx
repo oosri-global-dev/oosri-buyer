@@ -19,7 +19,7 @@ import Link from "next/link";
 import ProductsGridBox from "../HomeScreens/Homepage/ProductsGridBox/productsGridBox";
 import { useRouter } from "next/router";
 import OorsiLoader from "@/components/lib/Loader/loader";
-import { formatCurrency, useProductPrice } from "@/data-helpers/hooks";
+import { useProductPrice, useFormatPrice } from "@/data-helpers/hooks";
 import SafeImage from "@/components/lib/SafeImage/SafeImage";
 import { MoreReviews } from "./sections/more-reviews/moreReviews";
 import { getAllReviews } from "@/network/reviews";
@@ -48,6 +48,7 @@ export default function ProductPage({ product, loading, relatedProducts }) {
   const [starData, setStarData] = useState([])
   const [activeTab, setActiveTab] = useState("1");
   const priceData = useProductPrice(product);
+  const formatPrice = useFormatPrice();
 
 
   const productInCart = useMemo(
@@ -237,7 +238,7 @@ export default function ProductPage({ product, loading, relatedProducts }) {
               >
                 <p className="item__name">{product?.productName}</p>
                 <h1 className="item__price">
-                  {formatCurrency(priceData?.originalPrice || priceData?.price || 0)}
+                  {formatPrice(priceData?.originalPrice || priceData?.price || 0)}
                 </h1>
                   <FlexibleDiv
                     className="like__wrapper__box"
@@ -259,7 +260,7 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                     {product?.numOfPurchase} purchases
                   </p>
                   <p className="other__details__text">
-                    Shipping Fee: {formatCurrency(product?.shippingFee || 0)}
+                    Shipping Fee: {formatPrice(product?.shippingFee || 0)}
                   </p>
                 {/* The carting options */}
                 <FlexibleDiv className="cart__options" gap="15px">

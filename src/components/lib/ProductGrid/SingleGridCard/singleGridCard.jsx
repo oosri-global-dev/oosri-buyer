@@ -1,4 +1,4 @@
-import { formatCurrency, useProductPrice } from "@/data-helpers/hooks";
+import { useProductPrice, useFormatPrice } from "@/data-helpers/hooks";
 import { FlexibleDiv } from "../../Box/styles";
 import { SingleCardWrapper } from "./singleCard.styles";
 import { AiFillStar as LikeIcon } from "react-icons/ai";
@@ -43,6 +43,7 @@ export default function SingleGridCard({ key, product, isLoading = false }) {
   const maxLikes = ["", "", "", "", ""];
   const { push } = useRouter();
   const priceData = useProductPrice(product);
+  const formatPrice = useFormatPrice();
 
   if (isLoading) {
     return <LoadingSingleGridCard key={key} />;
@@ -69,7 +70,7 @@ export default function SingleGridCard({ key, product, isLoading = false }) {
               className="price__wrapper"
             >
               <p className="product__price__grid">
-                {formatCurrency(priceData?.originalPrice || priceData?.price || 0)}
+                {formatPrice(priceData?.originalPrice || priceData?.price || 0)}
               </p>
             </FlexibleDiv>
 
