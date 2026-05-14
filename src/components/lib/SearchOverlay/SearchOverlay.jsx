@@ -195,7 +195,7 @@ export default function SearchOverlay({ open, onClose }) {
                   <div className="so__section__header"><span>Products</span></div>
                   {products.map((p) => {
                     const id = p._id || p.objectID;
-                    const price = p.discountPrice || p.regularPrice || p.productPrice || p.salesPrice || 0;
+                    const price = p.discountPriceUSD || p.regularPriceUSD || p.salesPriceUSD || p.discountPrice || p.regularPrice || 0;
                     return (
                       <button key={id} className="so__product__row" onClick={() => goToProduct(id)}>
                         <div className="so__product__img">
