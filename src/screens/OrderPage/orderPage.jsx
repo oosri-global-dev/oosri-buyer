@@ -4,7 +4,7 @@ import { useGetUserOrders } from "@/network/orders";
 import OrderCard from "./components/OrderCard";
 import OrderCardSkeleton from "./components/OrderCardSkeleton";
 import { useRouter } from "next/router";
-import { AiOutlineShoppingCart as CartIcon } from "react-icons/ai";
+import { AiOutlineShoppingCart as ShopCartIcon } from "react-icons/ai";
 
 const TABS = [
   { key: "inprogress", label: "In Progress" },
@@ -87,7 +87,7 @@ export default function OrderPage() {
         ) : filteredOrders.length === 0 ? (
           <div className="empty__state">
             <div className="empty__icon__ring">
-              <CartIcon size={40} color="#ccc" />
+              <ShopCartIcon size={40} color="#ccc" />
             </div>
             <p className="empty__title">
               {activeTab === "inprogress" && "No active orders"}

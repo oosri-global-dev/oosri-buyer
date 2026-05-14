@@ -4,7 +4,7 @@ import {
   ProductBreadcrumbsWrapper,
 } from "./productPage.styles";
 import { FlexibleDiv, FlexibleSection } from "@/components/lib/Box/styles";
-import { AiFillStar as LikeIcon } from "react-icons/ai";
+import { AiFillStar as StarIcon } from "react-icons/ai";
 import { useState } from "react";
 import { useMainContext } from "@/context";
 import _ from "lodash";
@@ -200,7 +200,7 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                           }`}
                         alt={`phone__${idx}`}
                         fill
-                        objectFit="cover"
+                        style={{ objectFit: "cover" }}
                       />
                     </div>
                   ))}
@@ -247,7 +247,7 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                   >
                     {convertIntToArray(product?.productRating || 0).map(
                       (sgn, idx) => (
-                        <LikeIcon color="#FCCB1B" key={idx} />
+                        <StarIcon color="#FCCB1B" key={idx} />
                       )
                     )}
                     <p>{product?.productRating || 0}.0</p>

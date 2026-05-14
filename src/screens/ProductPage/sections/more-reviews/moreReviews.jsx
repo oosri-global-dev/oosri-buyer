@@ -1,6 +1,6 @@
 import { FlexibleDiv } from '@/components/lib/Box/styles'
 import React, { useEffect, useState } from 'react'
-import { AiFillStar as LikeIcon } from "react-icons/ai";
+import { AiFillStar as StarIcon } from "react-icons/ai";
 import ProductReviewBox from '../product-reviews/productReview';
 import { MoreReviewsWrapper } from './moreReviews.styles';
 import { ConfigProvider, Pagination, Slider } from 'antd';
@@ -60,7 +60,7 @@ export const MoreReviews = ({id,reviewData,starData,setMoreReviewsActive}) => {
       return (
           <FlexibleDiv justifyContent={justifyContent} gap={gap} style={{fontSize:fontSize?fontSize:"35px"}}>
           {Array.from({ length: totalStars }, (_, index) => (
-              <LikeIcon key={index} color={index < filledStars ? "#FCCB1B":"#BBBBBB"} />
+              <StarIcon key={index} color={index < filledStars ? "#FCCB1B":"#BBBBBB"} />
           ))}
           </FlexibleDiv>
       );
@@ -72,7 +72,7 @@ export const MoreReviews = ({id,reviewData,starData,setMoreReviewsActive}) => {
         <FlexibleDiv flexWrap={"noWrap"} justifyContent={"start"} gap={"12px"} className='slider_percent'>
           <FlexibleDiv width={"fit-content"} flexWrap={"noWrap"}>
             <p>{number}</p>
-            <LikeIcon color="#FCCB1B"/>
+            <StarIcon color="#FCCB1B"/>
           </FlexibleDiv>
           <ConfigProvider
             theme={{
