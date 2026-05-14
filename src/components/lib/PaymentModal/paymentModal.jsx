@@ -16,6 +16,7 @@ import {
   useCreateBuyerAddress,
   useUpdateBuyerAddress,
   useDeleteBuyerAddress,
+  useSetDefaultAddress,
   useGetShippingFee,
   useCreatePaymentIntent,
   useCreatePaystackCheckout,
@@ -23,7 +24,7 @@ import {
 import { useFormatPrice } from "@/data-helpers/hooks";
 import { TOAST_BOX } from "@/context/types";
 import { useMainContext } from "@/context";
-import { MdEdit as EditIcon, MdDelete as DeleteIcon } from "react-icons/md";
+import { MdEdit as EditIcon, MdDelete as DeleteIcon, MdStar as StarFilledIcon, MdStarOutline as StarOutlineIcon } from "react-icons/md";
 import { Spin } from "antd";
 import { useRouter } from "next/router";
 import { useLoadScript } from "@react-google-maps/api";
@@ -121,6 +122,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
   const createAddress = useCreateBuyerAddress();
   const updateAddress = useUpdateBuyerAddress();
   const deleteAddress = useDeleteBuyerAddress();
+  const setDefault = useSetDefaultAddress();
   const getShippingFee = useGetShippingFee();
   const createPaymentIntent = useCreatePaymentIntent();
   const createPaystackCheckout = useCreatePaystackCheckout();
@@ -160,7 +162,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
   const totalNGN = subtotalNGN + (isNigerianBuyer ? NIGERIAN_FLAT_RATE_NGN : 0);
   const totalUSD = subtotalUSD + shippingFeeUSD;
 
-  const maxAddresses = 3;
+  const maxAddresses = 5;
 
   // Load Paystack script when a Nigerian address is selected
   useEffect(() => {
@@ -250,9 +252,10 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     if (isOpen) {
       document.body.style.overflow = "hidden";
       if (addresses.length > 0 && !selectedAddressId) {
-        const firstId = addresses[0]._id || addresses[0].id;
-        setSelectedAddressId(firstId);
-        fetchShippingFee(firstId);
+        const defaultAddr = addresses.find((a) => a.isDefault) || addresses[0];
+        const id = defaultAddr._id || defaultAddr.id;
+        setSelectedAddressId(id);
+        fetchShippingFee(id);
       }
     } else {
       document.body.style.overflow = "unset";
@@ -321,6 +324,17 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     setSelectedCountryCode(code);
     const match = COUNTRIES.find((c) => c.code === code);
     setSelectedCountryName(match?.name || code);
+  };
+
+  const handleSetDefault = async (e, addressId) => {
+    e.stopPropagation();
+    try {
+      await setDefault.mutateAsync(addressId);
+      setSelectedAddressId(addressId);
+      fetchShippingFee(addressId);
+    } catch {
+      dispatch({ type: TOAST_BOX, payload: { type: "error", message: "Failed to set default address" } });
+    }
   };
 
   const handleDeleteAddress = async (addressId) => {
@@ -534,6 +548,17 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                             )}
                           </FlexibleDiv>
                           <FlexibleDiv gap="8px" flexWrap="nowrap" justifyContent="flex-start" alignItems="center">
+                            <button
+                              className={`icon__button star__btn${addr.isDefault ? " active" : ""}`}
+                              onClick={(e) => handleSetDefault(e, addressId)}
+                              type="button"
+                              title={addr.isDefault ? "Default address" : "Set as default"}
+                              disabled={setDefault.isPending}
+                            >
+                              {addr.isDefault
+                                ? <StarFilledIcon size={16} color="#f5a623" />
+                                : <StarOutlineIcon size={16} />}
+                            </button>
                             <button className="icon__button" onClick={(e) => { e.stopPropagation(); handleEditAddress(addr); }} type="button">
                               <EditIcon size={16} />
                             </button>

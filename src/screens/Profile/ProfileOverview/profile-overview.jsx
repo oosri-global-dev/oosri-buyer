@@ -4,6 +4,7 @@ import ProfilePic from "@/assets/images/profile/profile-1.svg";
 import Image from "next/image";
 import { RiLock2Line as LockIcon } from "react-icons/ri";
 import { IoIosArrowRoundForward as ForwardArrowIcon } from "react-icons/io";
+import { MdLocationOn as AddressIcon } from "react-icons/md";
 
 export default function ProfileOverview({ setCurrentPage, user }) {
   return (
@@ -32,6 +33,31 @@ export default function ProfileOverview({ setCurrentPage, user }) {
         <p className="num__of__product__order">{user?.productOrdered || 0}</p>
         <p className="product__order__text">Product Order</p>
       </FlexibleDiv>
+      <FlexibleDiv
+        flexDir="row"
+        flexWrap="nowrap"
+        justifyContent="flex-start"
+        className="change__pass__btn"
+        onClick={() => setCurrentPage("Addresses")}
+        style={{ marginBottom: 10 }}
+      >
+        <FlexibleDiv
+          flexDir="row"
+          flexWrap="nowrap"
+          justifyContent="flex-start"
+          gap="10px"
+        >
+          <div className="icon__wrapper">
+            <AddressIcon size={18} />
+          </div>
+          <FlexibleDiv flexDir="column" alignItems="flex-start">
+            <p className="pass__text">Delivery Addresses</p>
+            <p className="small__span">Manage saved addresses</p>
+          </FlexibleDiv>
+        </FlexibleDiv>
+        <ForwardArrowIcon size={25} />
+      </FlexibleDiv>
+
       <FlexibleDiv
         flexDir="row"
         flexWrap="nowrap"
