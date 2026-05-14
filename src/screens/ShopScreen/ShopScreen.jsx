@@ -205,7 +205,7 @@ export default function ShopPage() {
     enabled: !isSearchMode,
   });
 
-  const searchResults = useMemo(() => searchData?.data || [], [searchData]);
+  const searchResults = useMemo(() => searchData?.body?.products || [], [searchData]);
   const productsList = useMemo(
     () => (isSearchMode ? searchResults : products?.body?.products || []),
     [isSearchMode, searchResults, products]

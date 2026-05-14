@@ -68,7 +68,7 @@ export default function SearchOverlay({ open, onClose }) {
   }, [open, onClose]);
 
   const { data: searchData, isLoading } = useSearchQuery(debounced);
-  const products = useMemo(() => (searchData?.data || []).slice(0, 6), [searchData]);
+  const products = useMemo(() => (searchData?.body?.products || []).slice(0, 6), [searchData]);
 
   const { data: catData } = useProductCategoriesQuery();
   const categories = useMemo(() => {
