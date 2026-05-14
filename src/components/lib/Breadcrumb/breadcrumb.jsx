@@ -14,8 +14,8 @@ export default function Breadcrumb({ numOfProducts }) {
         <Image
           alt="banner"
           src={"/images/shop/shop-banner.gif"}
-          layout="fill"
-          objectFit="cover"
+          fill
+          style={{ objectFit: "cover" }}
         />
       </FlexibleDiv>
       {numOfProducts && (

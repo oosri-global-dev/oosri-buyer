@@ -169,11 +169,21 @@ export default function ShopPage() {
     isError: isErrorCategories,
   } = useProductCategoriesQuery();
 
+  // Reset to page 1 whenever category selection changes
+  useEffect(() => {
+    setItemOffset(0);
+    setCurrentPage(1);
+  }, [selectedCategories]);
+
+  // Pass selected categories to API — server does the filtering, not the client
+  const apiCategory = selectedCategories.length > 0 ? selectedCategories : "";
+  const productQueryKey = `shop-${selectedCategories.sort().join(",")}`;
+
   const {
     data: products,
     isLoading: isLoadingProducts,
     isError: isErrorProducts,
-  } = useProductsQuery("", itemsPerPage, "products", itemOffset);
+  } = useProductsQuery(apiCategory, itemsPerPage, productQueryKey, itemOffset);
 
   const productsList = useMemo(() => products?.body?.products || [], [products]);
   const totalProducts = products?.body?.total || 0;
@@ -239,21 +249,14 @@ export default function ShopPage() {
     return [min, max];
   }, [priceRange]);
 
+  // Categories are filtered server-side — client-side pass only does price + subcategory
   const filteredProducts = useMemo(() => {
     const [minPrice, maxPrice] = effectivePriceRange;
 
     return productsList.filter((product) => {
       const price = getEffectiveProductPrice(product);
-
-      // If price can't be parsed, keep it visible (forgiving UX).
       if (Number.isFinite(price)) {
-        if (price < minPrice) return false;
-        if (price > maxPrice) return false;
-      }
-
-      if (selectedCategories.length > 0) {
-        const pCat = getCategoryName(product);
-        if (!selectedCategories.includes(pCat)) return false;
+        if (price < minPrice || price > maxPrice) return false;
       }
 
       if (allSelectedSubCategories.length > 0) {
@@ -263,12 +266,7 @@ export default function ShopPage() {
 
       return true;
     });
-  }, [
-    productsList,
-    effectivePriceRange,
-    selectedCategories,
-    allSelectedSubCategories,
-  ]);
+  }, [productsList, effectivePriceRange, allSelectedSubCategories]);
 
   const randomizedProducts = useMemo(() => {
     if (!shuffleSeed) return filteredProducts;

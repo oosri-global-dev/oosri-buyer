@@ -1,7 +1,7 @@
 import { WishListWrapper } from "./WishlistScreen.styles";
 import { useState, useMemo } from "react";
 import { CiSearch as SearchIcon } from "react-icons/ci";
-import { AiOutlineHeart as EmptyHeartIcon } from "react-icons/ai";
+import { AiOutlineHeart as HeartOutlineIcon } from "react-icons/ai";
 import ProductCard, { LoadingCard } from "@/components/lib/ProductCard/productCard";
 import { useSavedItemsQuery } from "@/network/product";
 import { useRouter } from "next/router";
@@ -69,7 +69,7 @@ export default function WishlistPage() {
         ) : isWishlistEmpty ? (
           <div className="empty__state">
             <div className="empty__icon__ring">
-              <EmptyHeartIcon size={44} color="#ccc" />
+              <HeartOutlineIcon size={44} color="#ccc" />
             </div>
             <p className="empty__title">Nothing saved yet</p>
             <p className="empty__subtitle">

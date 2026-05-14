@@ -4,7 +4,7 @@ import { HeaderWrapper } from "./header.styles";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import { FiSearch as SearchIcon } from "react-icons/fi";
-import { AiOutlineShoppingCart as CartIcon } from "react-icons/ai";
+import { AiOutlineShoppingCart as ShopCartIcon } from "react-icons/ai";
 import { BsHeart as WishlistIcon } from "react-icons/bs";
 import ProfileNav from "./ProfileNav/profileNav";
 import CurrencySelector from "./CurrencySelector";
@@ -94,7 +94,7 @@ export default function Header() {
             asPath === "/cart" ? "selected__icon" : ""
           }`}
         >
-          <CartIcon />
+          <ShopCartIcon />
           {cart?.length > 0 && (
             <span className="cart-badge">
               {cart.length > 99 ? "99+" : cart.length}

@@ -8,16 +8,17 @@ export default function SingleCategoryBox({ data }) {
     <SingleCategoryBoxWrapper
       onClick={() => push(`/shop?category=${encodeURIComponent(data.name)}`)}
     >
-      <div className="category__image__fill">
+      {/* position:relative container required for Next.js fill */}
+      <div className="img__area">
         <Image
           src={data.image || "/images/homepage/default.png"}
           alt={data.name || "category"}
           fill
-          style={{ objectFit: "contain" }}
-          sizes="(max-width: 430px) 30vw, (max-width: 720px) 20vw, 180px"
+          style={{ objectFit: "contain", padding: "14px" }}
+          sizes="(max-width: 430px) 110px, (max-width: 720px) 130px, 160px"
         />
       </div>
-      <div className="category__overlay">
+      <div className="name__area">
         <p className="category__name">{data.name}</p>
       </div>
     </SingleCategoryBoxWrapper>

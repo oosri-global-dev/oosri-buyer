@@ -1,45 +1,37 @@
 import styled from "styled-components";
 
 export const SingleCategoryBoxWrapper = styled.div`
-  position: relative;
   flex-shrink: 0;
-  width: 160px;
-  height: 190px;
+  width: 155px;
   border-radius: 14px;
   overflow: hidden;
   cursor: pointer;
-  background: #f5f5f5;
+  background: #f8f8f8;
+  border: 1px solid #efefef;
+  display: flex;
+  flex-direction: column;
   transition: transform 0.22s ease, box-shadow 0.22s ease;
 
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+    border-color: var(--orrsiPrimary);
   }
 
-  /* ── Image area ── */
-  .category__image__fill {
-    position: absolute;
-    inset: 0;
-    padding: 20px 16px 48px;
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    img {
-      object-fit: contain;
-    }
+  /* Image fill area — must be position:relative for Next.js fill */
+  .img__area {
+    position: relative;
+    width: 100%;
+    height: 120px;
+    flex-shrink: 0;
+    background: #f5f5f5;
   }
 
-  /* ── Name overlay at bottom ── */
-  .category__overlay {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
+  /* Name label */
+  .name__area {
     background: #fff;
-    padding: 10px 12px;
     border-top: 1px solid #f0f0f0;
+    padding: 9px 10px;
 
     .category__name {
       margin: 0;
@@ -53,31 +45,22 @@ export const SingleCategoryBoxWrapper = styled.div`
     }
   }
 
-  /* ── Mobile ── */
   @media (max-width: 720px) {
-    width: 130px;
-    height: 160px;
+    width: 128px;
 
-    .category__image__fill {
-      padding: 16px 12px 44px;
-    }
+    .img__area { height: 100px; }
   }
 
   @media (max-width: 430px) {
-    width: 110px;
-    height: 140px;
+    width: 108px;
     border-radius: 10px;
 
-    .category__image__fill {
-      padding: 12px 10px 40px;
-    }
+    .img__area { height: 85px; }
 
-    .category__overlay {
-      padding: 8px 8px;
+    .name__area {
+      padding: 7px 8px;
 
-      .category__name {
-        font-size: 0.72rem;
-      }
+      .category__name { font-size: 0.72rem; }
     }
   }
 `;
