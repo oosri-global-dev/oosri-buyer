@@ -2,17 +2,21 @@ import styled from "styled-components";
 import { FlexibleDiv } from "@/components/lib/Box/styles";
 
 export const SDWrapper = styled(FlexibleDiv)`
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
   width: 100%;
-  justify-content: flex-start;
-  align-items: flex-start;
-  gap: 1.8%;
-  flex-wrap: wrap;
   margin-top: 20px;
+  align-items: start;
 
   .top__section__container {
-    margin-bottom: 20px;
+    grid-column: 1 / -1;
+    margin-bottom: 4px;
     height: fit-content;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
   }
 
   .view__all__style {
@@ -24,7 +28,7 @@ export const SDWrapper = styled(FlexibleDiv)`
   }
 
   @media (max-width: 440px) {
-    justify-content: space-between;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
 
     h2 {
       font-size: 1.2rem;

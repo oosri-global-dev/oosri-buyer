@@ -214,20 +214,10 @@ export const ShopPageWrapper = styled(FlexibleDiv)`
     .products__grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      justify-items: start;
-      justify-content: start;
       flex: 1;
       gap: 16px;
-      grid-row-gap: 35px;
       max-width: initial;
-      align-items: flex-start;
-      grid-auto-rows: 350px;
-
-      @media (max-width: 1300px) {
-        .card__image {
-          height: 180px;
-        }
-      }
+      align-items: start;
     }
   }
 
