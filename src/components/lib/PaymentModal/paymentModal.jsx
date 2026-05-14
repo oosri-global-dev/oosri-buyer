@@ -16,6 +16,7 @@ import {
   useDeleteBuyerAddress,
   useGetShippingFee,
   useCreatePaymentIntent,
+  useCreatePaystackCheckout,
 } from "@/network/checkout";
 import { formatCurrency } from "@/data-helpers/hooks";
 import { TOAST_BOX } from "@/context/types";
@@ -60,7 +61,27 @@ const countryOptions = COUNTRIES.map((country) => ({
 }));
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
-console.log("PUBLISHABLE KEY loaded");
+
+const NIGERIAN_FLAT_RATE_NGN = 2000;
+const NIGERIAN_FLAT_SHIPPING_INFO = {
+  totalPriceNGN: NIGERIAN_FLAT_RATE_NGN,
+  provider: 'FLAT_RATE',
+  providerDisplayName: 'Standard Delivery',
+  selectedServiceType: 'NG_FLAT_RATE',
+  selectedServiceName: 'Standard Delivery',
+  totalTransitDays: 3,
+  description: 'Standard flat-rate delivery within Nigeria (3–5 business days)',
+  features: ['Door-to-door delivery', 'SMS tracking updates'],
+  estimates: []
+};
+
+function loadPaystackScript() {
+  if (typeof window === 'undefined' || window.PaystackPop) return;
+  const script = document.createElement('script');
+  script.src = 'https://js.paystack.co/v1/inline.js';
+  script.async = true;
+  document.head.appendChild(script);
+}
 
 export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItems = [] }) {
   const router = useRouter();
@@ -128,15 +149,44 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
   const updateAddress = useUpdateBuyerAddress();
   const deleteAddress = useDeleteBuyerAddress();
   const getShippingFee = useGetShippingFee();
+  const createPaystackCheckout = useCreatePaystackCheckout();
 
   const addresses = useMemo(() => addressesData?.body || [], [addressesData?.body]);
+
+  // Detect Nigerian buyer from selected address
+  const selectedAddress = useMemo(
+    () => addresses.find((addr) => (addr._id || addr.id) === selectedAddressId),
+    [addresses, selectedAddressId]
+  );
+  const isNigerianBuyer = selectedAddress?.countryCode === 'NG';
+
+  // NGN subtotal from cart items (for Paystack / local display)
+  const subtotalNGN = useMemo(
+    () =>
+      cartItems.reduce((acc, item) => {
+        if (!item) return acc;
+        const price = (item.salesPrice > 0 ? item.salesPrice : item.regularPrice) || 0;
+        return acc + price * (item.quantity || 1);
+      }, 0),
+    [cartItems]
+  );
+
   const shippingEstimates = Array.isArray(shippingInfo?.estimates)
     ? shippingInfo.estimates
     : [];
   const selectedShippingOption = shippingEstimates.find(
     (estimate) => estimate?.serviceType === selectedServiceType
   ) || shippingEstimates[0] || null;
-  const shippingFee = selectedShippingOption?.estimateUSD || shippingInfo?.totalPriceUSD || 0;
+
+  // For Nigerian buyers shipping is always the flat NGN rate; international uses USD
+  const shippingFeeNGN = isNigerianBuyer ? NIGERIAN_FLAT_RATE_NGN : 0;
+  const shippingFee = isNigerianBuyer
+    ? 0  // not used for display in NG flow
+    : selectedShippingOption?.estimateUSD || shippingInfo?.totalPriceUSD || 0;
+
+  const totalNGN = subtotalNGN + shippingFeeNGN;
+  const total = subtotal + shippingFee;
+
   const selectedShippingServiceName =
     selectedShippingOption?.serviceName || shippingInfo?.selectedServiceName || shippingInfo?.product;
   const selectedShippingEta =
@@ -151,7 +201,6 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     : Array.isArray(shippingInfo?.features)
     ? shippingInfo.features
     : [];
-  const total = subtotal + shippingFee;
   const maxAddresses = 3;
 
   const syncAddressFormValues = useCallback(
@@ -182,11 +231,24 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     [syncAddressFormValues]
   );
 
+  // Load Paystack inline script when a Nigerian address is selected
+  useEffect(() => {
+    if (isNigerianBuyer) loadPaystackScript();
+  }, [isNigerianBuyer]);
+
   // Function to fetch shipping fee when address is selected
   const fetchShippingFee = useCallback(async (addressId, preferredServiceType = null) => {
     if (!addressId || cartItems.length === 0) {
       setShippingInfo(null);
       setSelectedServiceType(null);
+      return;
+    }
+
+    // Nigerian addresses use a flat rate — no external API call needed
+    const addr = addresses.find((a) => (a._id || a.id) === addressId);
+    if (addr?.countryCode === 'NG') {
+      setShippingInfo(NIGERIAN_FLAT_SHIPPING_INFO);
+      setSelectedServiceType('NG_FLAT_RATE');
       return;
     }
 
@@ -224,7 +286,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     } finally {
       setIsLoadingShippingFee(false);
     }
-  }, [cartItems, dispatch, getShippingFee]);
+  }, [cartItems, dispatch, getShippingFee, addresses]);
 
   // Handle address selection
   const handleAddressSelect = (addressId) => {
@@ -415,6 +477,55 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
   };
 
   const createPaymentIntent = useCreatePaymentIntent();
+
+  const handlePaystackPayment = async () => {
+    if (!selectedAddressId) {
+      dispatch({ type: TOAST_BOX, payload: { type: "error", message: "Please select a delivery address" } });
+      return;
+    }
+    if (!user?._id && !user?.id) {
+      dispatch({ type: TOAST_BOX, payload: { type: "error", message: "Please log in to continue" } });
+      return;
+    }
+
+    try {
+      const response = await createPaystackCheckout.mutateAsync({
+        buyerId: user._id || user.id,
+        addressId: selectedAddressId,
+        items: cartItems.map((item) => ({ productId: item._id, quantity: item.quantity })),
+      });
+
+      const { authorizationUrl, reference, summary } = response;
+
+      if (!window.PaystackPop) {
+        // Fallback: redirect to Paystack hosted page if inline script didn't load
+        window.location.href = authorizationUrl;
+        return;
+      }
+
+      const handler = window.PaystackPop.setup({
+        key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
+        email: user.email,
+        amount: summary.total.kobo,
+        ref: reference,
+        currency: 'NGN',
+        onSuccess: () => {
+          dispatch({ type: TOAST_BOX, payload: { type: "success", message: "Payment successful! Your order is being processed." } });
+          if (setBuyNowItem) setBuyNowItem(null);
+          handleCancel();
+          router.push(`/order-confirmation?paystack_reference=${reference}`);
+        },
+        onCancel: () => {
+          dispatch({ type: TOAST_BOX, payload: { type: "info", message: "Payment was cancelled." } });
+        },
+      });
+
+      handler.openIframe();
+    } catch (error) {
+      const message = error?.response?.data?.message || error?.response?.data?.error || "Failed to initialize payment";
+      dispatch({ type: TOAST_BOX, payload: { type: "error", message } });
+    }
+  };
 
   const handleCompletePayment = async () => {
     if (!selectedAddressId) {
@@ -913,12 +1024,18 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
               >
                 <FlexibleDiv justifyContent="space-between" alignItems="center">
                   <p className="summary__label">Subtotal:</p>
-                  <p className="summary__value">{formatCurrency(subtotal)}</p>
+                  <p className="summary__value">
+                    {isNigerianBuyer
+                      ? `₦${subtotalNGN.toLocaleString('en-NG')}`
+                      : formatCurrency(subtotal)}
+                  </p>
                 </FlexibleDiv>
                 <FlexibleDiv justifyContent="space-between" alignItems="center">
-                  <p className="summary__label">Shipping Fee:</p>
+                  <p className="summary__label">Delivery Fee:</p>
                   <p className="summary__value">
-                    {isLoadingShippingFee ? (
+                    {isNigerianBuyer ? (
+                      `₦${NIGERIAN_FLAT_RATE_NGN.toLocaleString('en-NG')}`
+                    ) : isLoadingShippingFee ? (
                       <span className="calculating__loader">
                         Calculating<span className="dots"></span>
                       </span>
@@ -934,38 +1051,72 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                 >
                   <p className="summary__label total__label">Total:</p>
                   <p className="summary__value total__value">
-                    {formatCurrency(total)}
+                    {isNigerianBuyer
+                      ? `₦${totalNGN.toLocaleString('en-NG')}`
+                      : formatCurrency(total)}
                   </p>
                 </FlexibleDiv>
               </FlexibleDiv>
+
+              {isNigerianBuyer && (
+                <p style={{ fontSize: '0.78rem', color: '#888', marginTop: '6px' }}>
+                  You will be charged in Nigerian Naira (NGN) via Paystack.
+                </p>
+              )}
             </div>
 
             {/* Complete Payment Button */}
-            <Button
-              onClick={handleCompletePayment}
-              backgroundColor={
-                !selectedAddressId || !shippingFee || isLoadingShippingFee
-                  ? "#ccc"
-                  : "linear-gradient(135deg, var(--orrsiPrimary) 0%, #ff6b6b 100%)"
-              }
-              color="var(--orrsiWhite)"
-              radius="10px"
-              height="48px"
-              width="100%"
-              fontSize="0.95rem"
-              fontWeight="600"
-              loading={createPaymentIntent.isPending || createPaymentIntent.isLoading}
-              disabled={!selectedAddressId || !shippingFee || isLoadingShippingFee || createPaymentIntent.isPending || createPaymentIntent.isLoading}
-              style={{
-                boxShadow: !selectedAddressId || !shippingFee || isLoadingShippingFee || createPaymentIntent.isPending || createPaymentIntent.isLoading
-                  ? "none"
-                  : "0 4px 20px rgba(252, 83, 83, 0.3)",
-                transition: "all 0.3s ease",
-              }}
-              className="complete__payment__btn"
-            >
-              Complete Payment ({formatCurrency(total)})
-            </Button>
+            {isNigerianBuyer ? (
+              <Button
+                onClick={handlePaystackPayment}
+                backgroundColor={
+                  !selectedAddressId
+                    ? "#ccc"
+                    : "linear-gradient(135deg, #00c06f 0%, #00a05e 100%)"
+                }
+                color="var(--orrsiWhite)"
+                radius="10px"
+                height="48px"
+                width="100%"
+                fontSize="0.95rem"
+                fontWeight="600"
+                loading={createPaystackCheckout.isPending || createPaystackCheckout.isLoading}
+                disabled={!selectedAddressId || createPaystackCheckout.isPending || createPaystackCheckout.isLoading}
+                style={{
+                  boxShadow: !selectedAddressId ? "none" : "0 4px 20px rgba(0, 192, 111, 0.35)",
+                  transition: "all 0.3s ease",
+                }}
+                className="complete__payment__btn"
+              >
+                Pay ₦{totalNGN.toLocaleString('en-NG')} with Paystack
+              </Button>
+            ) : (
+              <Button
+                onClick={handleCompletePayment}
+                backgroundColor={
+                  !selectedAddressId || !shippingFee || isLoadingShippingFee
+                    ? "#ccc"
+                    : "linear-gradient(135deg, var(--orrsiPrimary) 0%, #ff6b6b 100%)"
+                }
+                color="var(--orrsiWhite)"
+                radius="10px"
+                height="48px"
+                width="100%"
+                fontSize="0.95rem"
+                fontWeight="600"
+                loading={createPaymentIntent.isPending || createPaymentIntent.isLoading}
+                disabled={!selectedAddressId || !shippingFee || isLoadingShippingFee || createPaymentIntent.isPending || createPaymentIntent.isLoading}
+                style={{
+                  boxShadow: !selectedAddressId || !shippingFee || isLoadingShippingFee || createPaymentIntent.isPending || createPaymentIntent.isLoading
+                    ? "none"
+                    : "0 4px 20px rgba(252, 83, 83, 0.3)",
+                  transition: "all 0.3s ease",
+                }}
+                className="complete__payment__btn"
+              >
+                Pay {formatCurrency(total)} with Stripe
+              </Button>
+            )}
           </FlexibleDiv>
         )}
       </PaymentModalContent>
