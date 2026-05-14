@@ -8,6 +8,8 @@ import { FlexibleDiv } from "../Box/styles";
 import Button from "../Button";
 import TextField from "../TextField";
 import { Form } from "antd";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 import { MdAdd as AddIcon, MdLocationOn as LocationIcon } from "react-icons/md";
 import {
   useBuyerAddresses,
@@ -495,7 +497,17 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                 Delivery Address
               </h3>
               {isLoadingAddresses ? (
-                <FlexibleDiv justifyContent="center" padding="20px"><Spin size="large" /></FlexibleDiv>
+                <SkeletonTheme baseColor="rgba(148,148,148,0.1)" highlightColor="rgba(202,202,202,0.4)">
+                  <FlexibleDiv flexDir="column" gap="10px" alignItems="stretch">
+                    {[1, 2].map((i) => (
+                      <div key={i} style={{ padding: "14px 16px", borderRadius: 12, border: "1px solid #f0f0f0" }}>
+                        <Skeleton style={{ width: "70%", height: 13, marginBottom: 6 }} />
+                        <Skeleton style={{ width: "45%", height: 11, marginBottom: 4 }} />
+                        <Skeleton style={{ width: "30%", height: 11 }} />
+                      </div>
+                    ))}
+                  </FlexibleDiv>
+                </SkeletonTheme>
               ) : addresses.length === 0 ? (
                 <p className="no__address__text">No addresses found. Add one below.</p>
               ) : (
@@ -765,19 +777,20 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
             {/* ── 5. Pay Button ──────────────────────────────────────── */}
             {isNigerianBuyer ? (
               <Button
-                onClick={handlePaystackPayment}
-                backgroundColor={!isPaymentReady ? "#ccc" : "#00b14f"}
+                onClick={isPaymentReady ? handlePaystackPayment : undefined}
+                backgroundColor={isPaymentReady ? "#00b14f" : "#b0bec5"}
+                hoverBg={isPaymentReady ? "#00c95a" : "#b0bec5"}
                 color="#fff"
                 radius="10px"
                 height="52px"
                 width="100%"
                 fontSize="1rem"
-                fontWeight="600"
+                opacity={isPaymentReady ? "1" : "0.65"}
                 loading={createPaystackCheckout.isPending || createPaystackCheckout.isLoading}
-                disabled={!isPaymentReady || createPaystackCheckout.isPending || createPaystackCheckout.isLoading}
+                disabled={createPaystackCheckout.isPending || createPaystackCheckout.isLoading}
                 style={{
-                  boxShadow: !isPaymentReady ? "none" : "0 4px 20px rgba(0, 177, 79, 0.35)",
-                  transition: "all 0.3s ease",
+                  boxShadow: isPaymentReady ? "0 4px 20px rgba(0, 177, 79, 0.35)" : "none",
+                  cursor: !isPaymentReady ? "not-allowed" : "pointer",
                 }}
                 className="complete__payment__btn"
               >
@@ -785,19 +798,20 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
               </Button>
             ) : (
               <Button
-                onClick={handleCompletePayment}
-                backgroundColor={!isPaymentReady ? "#ccc" : "linear-gradient(135deg, var(--orrsiPrimary) 0%, #ff6b6b 100%)"}
+                onClick={isPaymentReady ? handleCompletePayment : undefined}
+                backgroundColor={isPaymentReady ? "var(--orrsiPrimary)" : "#b0bec5"}
+                hoverBg={isPaymentReady ? "#e04040" : "#b0bec5"}
                 color="#fff"
                 radius="10px"
                 height="52px"
                 width="100%"
                 fontSize="1rem"
-                fontWeight="600"
+                opacity={isPaymentReady ? "1" : "0.65"}
                 loading={createPaymentIntent.isPending || createPaymentIntent.isLoading}
-                disabled={!isPaymentReady || createPaymentIntent.isPending || createPaymentIntent.isLoading}
+                disabled={createPaymentIntent.isPending || createPaymentIntent.isLoading}
                 style={{
-                  boxShadow: !isPaymentReady ? "none" : "0 4px 20px rgba(252, 83, 83, 0.3)",
-                  transition: "all 0.3s ease",
+                  boxShadow: isPaymentReady ? "0 4px 20px rgba(252, 83, 83, 0.3)" : "none",
+                  cursor: !isPaymentReady ? "not-allowed" : "pointer",
                 }}
                 className="complete__payment__btn"
               >
