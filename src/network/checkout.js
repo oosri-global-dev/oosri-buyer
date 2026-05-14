@@ -42,6 +42,14 @@ export const handleDeleteBuyerAddress = async (addressId) => {
   return data;
 };
 
+// Set a delivery address as default
+export const handleSetDefaultAddress = async (addressId) => {
+  const { data } = await instance.patch(
+    `/profile/buyer/delivery-addresses/${addressId}/set-default`
+  );
+  return data;
+};
+
 // Get shipping fee
 export const handleGetShippingFee = async (payload) => {
   const { data } = await instance.post(
@@ -93,6 +101,17 @@ export function useDeleteBuyerAddress() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: handleDeleteBuyerAddress,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["buyer-addresses"] });
+    },
+  });
+}
+
+// React Query hook for setting default address
+export function useSetDefaultAddress() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: handleSetDefaultAddress,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["buyer-addresses"] });
     },
