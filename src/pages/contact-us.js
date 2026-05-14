@@ -13,6 +13,6 @@ const ContactUs = () => {
   );
 };
 
-ContactUs.getLayout = (page) => <GeneralLayout>{page}</GeneralLayout>;
+ContactUs.getLayout = (page) => <GeneralLayout fullBleed>{page}</GeneralLayout>;
 
 export default ContactUs;

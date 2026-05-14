@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { FlexibleDiv } from "@/components/lib/Box/styles";
 
-export const TermsWrapper = styled(FlexibleDiv)`
+export const PrivacyWrapper = styled(FlexibleDiv)`
   display: block;
   width: 100%;
   max-width: none;
@@ -54,29 +54,6 @@ export const TermsWrapper = styled(FlexibleDiv)`
       color: rgba(255, 255, 255, 0.4);
       margin: 0;
     }
-
-    .hero__download {
-      margin-top: 4px;
-      height: 44px;
-      padding: 0 24px;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.12);
-      border: 1.5px solid rgba(255, 255, 255, 0.25);
-      color: #fff;
-      font-size: 0.88rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: background 0.2s, border-color 0.2s;
-      font-family: inherit;
-
-      &:hover {
-        background: rgba(255, 255, 255, 0.2);
-        border-color: rgba(255, 255, 255, 0.5);
-      }
-    }
   }
 
   /* ── Body ──────────────────────────────────────────────────── */
@@ -87,6 +64,17 @@ export const TermsWrapper = styled(FlexibleDiv)`
     display: flex;
     flex-direction: column;
     gap: 16px;
+  }
+
+  /* ── Highlight intro box ───────────────────────────────────── */
+  .intro__box {
+    background: #fff8f8;
+    border-left: 4px solid var(--orrsiPrimary);
+    border-radius: 0 12px 12px 0;
+    padding: 18px 22px;
+    font-size: 0.9rem;
+    color: #444;
+    line-height: 1.8;
   }
 
   /* ── TOC card ──────────────────────────────────────────────── */
@@ -135,6 +123,94 @@ export const TermsWrapper = styled(FlexibleDiv)`
     border-radius: 16px;
     padding: 40px 36px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+
+    h2 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin: 36px 0 12px;
+      padding: 14px 0 14px 14px;
+      border-top: 1.5px solid #f2f2f2;
+      border-left: 3px solid var(--orrsiPrimary);
+      line-height: 1.4;
+      scroll-margin-top: 80px;
+
+      &:first-child { margin-top: 0; border-top: none; }
+    }
+
+    h3 {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #333;
+      margin: 20px 0 8px;
+      line-height: 1.4;
+    }
+
+    p {
+      font-size: 0.9rem;
+      color: #444;
+      margin: 0 0 12px;
+      line-height: 1.85;
+    }
+
+    ul {
+      margin: 0 0 14px;
+      padding-left: 22px;
+      list-style-type: disc;
+
+      li {
+        font-size: 0.9rem;
+        color: #444;
+        margin: 7px 0;
+        line-height: 1.8;
+        padding-left: 4px;
+      }
+    }
+
+    a {
+      color: var(--orrsiPrimary);
+      text-decoration: underline;
+    }
+
+    /* Retention / cookie tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0 20px;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      display: block;
+
+      thead tr { background: #f7f7f7; }
+
+      th {
+        text-align: left;
+        padding: 10px 12px;
+        font-weight: 700;
+        border: 1px solid #e8e8e8;
+        color: #333;
+        white-space: nowrap;
+      }
+
+      td {
+        padding: 10px 12px;
+        border: 1px solid #e8e8e8;
+        vertical-align: top;
+        color: #444;
+      }
+
+      tr:nth-child(even) td { background: #fafafa; }
+    }
+
+    /* Contact info box */
+    .contact-box {
+      background: #f7f7f7;
+      border-radius: 12px;
+      padding: 22px 24px;
+      margin-top: 8px;
+
+      p { margin: 0 0 8px; &:last-child { margin: 0; } }
+    }
   }
 
   /* ── Contact CTA ───────────────────────────────────────────── */
@@ -206,79 +282,5 @@ export const TermsWrapper = styled(FlexibleDiv)`
     .doc__content { padding: 24px 20px; }
 
     .contact__cta .cta__btn { width: 100%; }
-  }
-`;
-
-export const Section = styled.h2`
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin: 36px 0 12px;
-  padding: 14px 0 14px 14px;
-  border-top: 1.5px solid #f2f2f2;
-  border-left: 3px solid var(--orrsiPrimary);
-  line-height: 1.4;
-  scroll-margin-top: 80px;
-
-  &:first-of-type {
-    margin-top: 0;
-    border-top: none;
-  }
-
-  @media (max-width: 560px) {
-    font-size: 0.98rem;
-    margin: 28px 0 10px;
-  }
-`;
-
-export const SubSection = styled.h3`
-  font-size: 0.92rem;
-  font-weight: 700;
-  color: #333;
-  margin: 20px 0 8px;
-  line-height: 1.4;
-
-  @media (max-width: 560px) {
-    font-size: 0.88rem;
-    margin: 16px 0 6px;
-  }
-`;
-
-export const SubSubSection = styled.h4`
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: #555;
-  margin: 14px 0 6px;
-  line-height: 1.4;
-`;
-
-export const Paragraph = styled.p`
-  font-size: 0.9rem;
-  color: #444;
-  margin: 0 0 12px;
-  line-height: 1.85;
-
-  @media (max-width: 560px) {
-    font-size: 0.86rem;
-    line-height: 1.75;
-  }
-`;
-
-export const List = styled.ul`
-  margin: 0 0 14px;
-  padding-left: 22px;
-  list-style-type: disc;
-`;
-
-export const ListItem = styled.li`
-  font-size: 0.9rem;
-  color: #444;
-  margin: 7px 0;
-  line-height: 1.8;
-  padding-left: 4px;
-
-  @media (max-width: 560px) {
-    font-size: 0.86rem;
-    margin: 5px 0;
   }
 `;

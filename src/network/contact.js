@@ -1,10 +1,6 @@
-import axios from "axios";
+import { publicInstance } from "./axios";
 
 export const contactUs = async (payload) => {
-    const { data } = await axios.post(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/buyer/contact-us`,
-        payload
-    );
-
-    return data;
+  const { data } = await publicInstance.post(`/buyer/contact-us`, payload);
+  return data;
 };

@@ -1,14 +1,6 @@
-import React, { useMemo, useRef } from "react";
+import React, { useMemo, useRef, useState, useEffect } from "react";
 import ProductCard, { LoadingCard } from "@/components/lib/ProductCard/productCard";
 
-/**
- * Props expected:
- * - content: array
- * - carouselTitle: string
- * - loading: boolean
- * - hideIfEmpty: boolean
- * - onViewMore: function (optional)
- */
 export default function ProductCarousel({
   content = [],
   carouselTitle = "",
@@ -17,6 +9,16 @@ export default function ProductCarousel({
   onViewMore,
 }) {
   const scrollerRef = useRef(null);
+  const [windowWidth, setWindowWidth] = useState(null);
+
+  useEffect(() => {
+    const update = () => setWindowWidth(window.innerWidth);
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
+  const isMobile = windowWidth !== null && windowWidth <= 600;
 
   const normalizedContent = useMemo(() => {
     const list = Array.isArray(content) ? content : [];
@@ -46,7 +48,6 @@ export default function ProductCarousel({
   const scrollByCards = (direction) => {
     const el = scrollerRef.current;
     if (!el) return;
-
     const amount = Math.max(280, el.clientWidth * 0.8);
     el.scrollBy({ left: direction === "next" ? amount : -amount, behavior: "smooth" });
   };
@@ -54,13 +55,11 @@ export default function ProductCarousel({
   const handleNext = () => {
     const el = scrollerRef.current;
     if (!el) return;
-
     const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 10;
     if (atEnd) {
       if (typeof onViewMore === "function") onViewMore();
       return;
     }
-
     scrollByCards("next");
   };
 
@@ -83,6 +82,29 @@ export default function ProductCarousel({
     boxShadow: "0 2px 6px rgba(0,0,0,0.12)",
     fontSize: 16,
   };
+
+  const gridCols =
+    windowWidth !== null && windowWidth <= 390
+      ? "repeat(auto-fill, minmax(120px, 1fr))"
+      : "repeat(auto-fill, minmax(140px, 1fr))";
+
+  const scrollerStyle = isMobile
+    ? {
+        display: "grid",
+        gridTemplateColumns: gridCols,
+        gap: 12,
+      }
+    : {
+        display: "flex",
+        gap: 14,
+        overflowX: "auto",
+        paddingBottom: 8,
+        scrollBehavior: "smooth",
+        scrollbarWidth: "none",
+        msOverflowStyle: "none",
+      };
+
+  const cardStyle = isMobile ? {} : { minWidth: 220, flex: "0 0 auto" };
 
   return (
     <section style={{ width: "100%", marginTop: 20 }}>
@@ -110,56 +132,42 @@ export default function ProductCarousel({
         </div>
       ) : null}
 
-      {/* Wrapper that positions arrows on the sides */}
       <div style={{ position: "relative" }}>
+        {!isMobile && (
+          <button
+            type="button"
+            onClick={handlePrev}
+            style={{ ...arrowStyle, left: -18 }}
+            aria-label="Previous"
+          >
+            ←
+          </button>
+        )}
 
-        {/* Left arrow */}
-        <button
-          type="button"
-          onClick={handlePrev}
-          style={{ ...arrowStyle, left: -18 }}
-          aria-label="Previous"
-        >
-          ←
-        </button>
-
-        {/* Scrollable cards */}
-        <div
-          ref={scrollerRef}
-          style={{
-            display: "flex",
-            gap: 14,
-            overflowX: "auto",
-            paddingBottom: 8,
-            scrollBehavior: "smooth",
-            // Hide scrollbar visually
-            scrollbarWidth: "none",
-            msOverflowStyle: "none",
-          }}
-        >
+        <div ref={scrollerRef} style={scrollerStyle}>
           {loading
             ? Array.from({ length: 8 }).map((_, idx) => (
-                <div key={idx} style={{ minWidth: 220, flex: "0 0 auto" }}>
+                <div key={idx} style={cardStyle}>
                   <LoadingCard />
                 </div>
               ))
             : normalizedContent.map((card, idx) => (
-                <div key={card?._id || `carousel-card-${idx}`} style={{ minWidth: 220, flex: "0 0 auto" }}>
+                <div key={card?._id || `carousel-card-${idx}`} style={cardStyle}>
                   <ProductCard card={card} />
                 </div>
               ))}
         </div>
 
-        {/* Right arrow */}
-        <button
-          type="button"
-          onClick={handleNext}
-          style={{ ...arrowStyle, right: -18 }}
-          aria-label="Next"
-        >
-          →
-        </button>
-
+        {!isMobile && (
+          <button
+            type="button"
+            onClick={handleNext}
+            style={{ ...arrowStyle, right: -18 }}
+            aria-label="Next"
+          >
+            →
+          </button>
+        )}
       </div>
     </section>
   );

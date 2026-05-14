@@ -163,6 +163,38 @@ export const ProductCardWrapper = styled.div`
     .remove-from-cart-btn {
       transition: all 0.2s ease;
     }
+
+    @media (max-width: 600px) {
+      flex-direction: column;
+      gap: 5px;
+      padding: 6px 8px 10px;
+
+      button {
+        height: 34px !important;
+        min-height: 34px !important;
+        font-size: 0.76rem !important;
+        padding: 0 8px !important;
+      }
+
+      button span {
+        font-size: 0.76rem !important;
+      }
+    }
+  }
+
+  @media (max-width: 600px) {
+    .card__body {
+      padding: 8px 8px 6px;
+      gap: 3px;
+
+      .card__name {
+        font-size: 0.82rem;
+      }
+
+      .card__price__row .card__price {
+        font-size: 0.88rem;
+      }
+    }
   }
 
   /* Loading card (skeleton) keeps consistent sizing */

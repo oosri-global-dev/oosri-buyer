@@ -4,6 +4,7 @@ html {
   box-sizing: border-box;
   font-size: 14px;
   -ms-overflow-style: -ms-autohiding-scrollbar;
+  overflow-x: hidden;
 }
 
 body {

@@ -50,7 +50,7 @@ export default function ProductsGridBox({
       </div>
 
       <div style={{ position: "relative" }}>
-        <button type="button" onClick={() => scroll("prev")} style={{ ...arrowStyle, left: -17 }} aria-label="Previous">
+        <button type="button" className="scroll__arrow scroll__arrow--prev" onClick={() => scroll("prev")} style={{ ...arrowStyle, left: -17 }} aria-label="Previous">
           ←
         </button>
 
@@ -68,7 +68,7 @@ export default function ProductsGridBox({
               ))}
         </div>
 
-        <button type="button" onClick={() => scroll("next")} style={{ ...arrowStyle, right: -17 }} aria-label="Next">
+        <button type="button" className="scroll__arrow scroll__arrow--next" onClick={() => scroll("next")} style={{ ...arrowStyle, right: -17 }} aria-label="Next">
           →
         </button>
       </div>

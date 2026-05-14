@@ -60,14 +60,14 @@ export default function Header() {
   return (
     <HeaderWrapper>
       <FlexibleDiv className="logo__section">
-        <Link href={"/"}>
-          <Image src={Logo} className="logo__wrapper" alt="logo" width={120} height={40} style={{ objectFit: 'contain' }} />
-        </Link>
-
         <div className="nav__menu__wrapper">
           <NavMenu menuItems={menuItems} />
         </div>
+        <Link href={"/"}>
+          <Image src={Logo} className="logo__wrapper" alt="logo" width={120} height={40} style={{ objectFit: "contain" }} />
+        </Link>
       </FlexibleDiv>
+
       <FlexibleDiv className="middle__section" flexWrap="nowrap">
         {menuItems.map((sgn, idx) => (
           <button
