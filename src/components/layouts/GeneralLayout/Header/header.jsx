@@ -7,6 +7,7 @@ import { FiSearch as SearchIcon } from "react-icons/fi";
 import SearchOverlay from "@/components/lib/SearchOverlay/SearchOverlay";
 import { AiOutlineShoppingCart as ShopCartIcon } from "react-icons/ai";
 import { BsHeart as WishlistIcon } from "react-icons/bs";
+import { HiOutlineBellAlert as NotificationIcon } from "react-icons/hi2";
 import ProfileNav from "./ProfileNav/profileNav";
 import CurrencySelector from "./CurrencySelector";
 import NavMenu from "./navMenu/navMenu";
@@ -22,6 +23,9 @@ import { TbLogout2 as LogoutIcon } from "react-icons/tb";
 import ProfileImage from "@/assets/images/profile/profile-1.svg";
 import { deleteAllCookie } from "@/data-helpers/auth-session";
 import { logoutUser } from "@/network/auth";
+import { Popover, Badge } from "antd";
+import { useBuyerNotifications } from "@/hooks/useBuyerNotifications";
+import NotificationPanel from "@/components/lib/NotificationPanel";
 
 export default function Header() {
   const { asPath, push } = useRouter();
@@ -53,6 +57,8 @@ export default function Header() {
     },
   ];
   const { user, cart } = useMainContext();
+  const [notifOpen, setNotifOpen] = useState(false);
+  const { notifications, unreadCount, isLoading, markRead, markAllRead, remove } = useBuyerNotifications(!!user?.id);
 
   //This hook helps hide the filter if an outside click is noticed
   useOutsideAlerter(dropdownRef, showDropdown, setShowDropdown);
@@ -112,6 +118,32 @@ export default function Header() {
         >
           <WishlistIcon />
         </div>
+
+        {user?.id && (
+          <Popover
+            open={notifOpen}
+            onOpenChange={setNotifOpen}
+            trigger="click"
+            placement="bottomRight"
+            arrow={false}
+            content={
+              <NotificationPanel
+                notifications={notifications}
+                unreadCount={unreadCount}
+                isLoading={isLoading}
+                onRead={(id) => markRead(id)}
+                onMarkAllRead={() => markAllRead()}
+                onDelete={(id) => remove(id)}
+              />
+            }
+          >
+            <div className="single__menu notif__icon__wrap">
+              <Badge count={unreadCount} size="small" color="#ef4444">
+                <NotificationIcon size={20} />
+              </Badge>
+            </div>
+          </Popover>
+        )}
 
         <div ref={dropdownRef}>
           <ProfileNav
