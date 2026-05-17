@@ -19,7 +19,10 @@ import {
   LOADING_USER,
   TOAST_BOX,
   UPDATE_QUANTITY,
+  SET_CURRENCY,
+  SET_FX_RATES,
 } from "./types";
+import { CURRENCIES } from "@/data-helpers/currency";
 import {
   clearAuthSession,
   hasBuyerSession,
@@ -29,6 +32,8 @@ import {
 import _ from "lodash";
 import { fetchUser } from "@/network/auth";
 
+const DEFAULT_FX_RATES = { USD: 1, NGN: 1550, GBP: 0.79, EUR: 0.92 };
+
 export const MainContext = createContext({
   user: {},
   toastbox: { type: "", message: "", duration: 5000 },
@@ -37,6 +42,9 @@ export const MainContext = createContext({
   isLoadingUser: false,
   buyNowItem: null,
   setBuyNowItem: () => { },
+  currency: "USD",
+  setCurrency: () => { },
+  fxRates: DEFAULT_FX_RATES,
 });
 
 export const MainProvider = ({ children }) => {
@@ -44,6 +52,14 @@ export const MainProvider = ({ children }) => {
   const [state, dispatch] = useReducer(Reducer, initialState);
   const [buyNowItem, setBuyNowItem] = useState(null);
   const hasBootstrapped = useRef(false);
+
+  const setCurrency = (code) => {
+    if (!CURRENCIES[code]) return;
+    dispatch({ type: SET_CURRENCY, payload: code });
+    if (typeof window !== "undefined") {
+      localStorage.setItem("oosri__currency", code);
+    }
+  };
 
   const addToCart = async (item, setIsLoadingBtn) => {
     const cartKey = getDataInCookie("public__cart__key");
@@ -101,17 +117,30 @@ export const MainProvider = ({ children }) => {
 
   const updateQuantity = async (
     item,
-    quantity,
+    targetQuantity,
     setIsUpdatingQuantity = null
   ) => {
     const cartKey = getDataInCookie("public__cart__key");
     setIsUpdatingQuantity?.(true);
 
-    //api to update prouct quantity before dispatching
+    // The cart API accumulates quantities (adds the sent value to the existing qty).
+    // We need to send the DELTA (difference), not the target absolute quantity.
+    const itemId = item?._id || item?.id;
+    const currentCartItem = state.cart.find(
+      (c) => (c._id || c.id)?.toString() === itemId?.toString()
+    );
+    const currentQty = currentCartItem?.quantity ?? item?.quantity ?? 1;
+    const delta = targetQuantity - currentQty;
+
+    if (delta === 0) {
+      setIsUpdatingQuantity?.(false);
+      return;
+    }
+
     try {
       await handleAddToCart({
-        items: [{ productId: item?._id, quantity }],
-        ...(_.isEmpty(state.user) && { cartKey }), //add cartkey is user is empty
+        items: [{ productId: itemId, quantity: delta }],
+        ...(_.isEmpty(state.user) && { cartKey }),
       });
       await handleUpdateCartItemsInContext(cartKey, { silent: true });
     } catch (err) {
@@ -119,7 +148,7 @@ export const MainProvider = ({ children }) => {
         type: TOAST_BOX,
         payload: {
           type: "error",
-          message: err?.response?.data?.message || "Sorry, an error occured",
+          message: err?.response?.data?.message || "Sorry, an error occurred",
         },
       });
     } finally {
@@ -216,6 +245,14 @@ export const MainProvider = ({ children }) => {
   };
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const saved = localStorage.getItem("oosri__currency");
+    if (saved && CURRENCIES[saved]) {
+      dispatch({ type: SET_CURRENCY, payload: saved });
+    }
+  }, []);
+
+  useEffect(() => {
     if (hasBootstrapped.current) {
       return;
     }
@@ -250,6 +287,9 @@ export const MainProvider = ({ children }) => {
     dispatch,
     loadingModal: state.loadingModal,
     isLoadingUser: state.isLoadingUser,
+    currency: state.currency || "USD",
+    setCurrency,
+    fxRates: state.fxRates || DEFAULT_FX_RATES,
   };
 
   return <MainContext.Provider value={value}>{children}</MainContext.Provider>;
@@ -261,4 +301,9 @@ export const useMainContext = () => {
     throw new Error("useMainContext must be used within a MainProvider");
   }
   return context;
+};
+
+export const useCurrency = () => {
+  const { currency, setCurrency, fxRates } = useMainContext();
+  return { currency, setCurrency, fxRates, currencyData: CURRENCIES[currency] || CURRENCIES.USD };
 };

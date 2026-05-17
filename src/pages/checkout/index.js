@@ -9,12 +9,11 @@ import { FlexibleDiv } from "@/components/lib/Box/styles";
 import { Spin } from "antd";
 
 const CheckoutPage = () => {
-    const { buyNowItem } = useMainContext();
+    const { buyNowItem, fxRates } = useMainContext();
     const { push } = useRouter();
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
-        // If there is no buyNowItem, redirect back to shop
         if (!buyNowItem) {
             push("/shop");
         } else {
@@ -35,7 +34,14 @@ const CheckoutPage = () => {
     }
 
     const priceData = calculateProductPrice(buyNowItem);
-    const subtotal = (priceData?.price || 0) * (buyNowItem.quantity || 1);
+    let priceUSD = priceData?.price || 0;
+    // Guard: if the product has no fxRate or regularPriceUSD and the raw price looks like
+    // an NGN value, convert it to USD using the live rate from context.
+    const liveNGNRate = fxRates?.NGN || 1550;
+    if (!buyNowItem.regularPriceUSD && !buyNowItem.fxRate && priceUSD > 10000) {
+        priceUSD = Number((priceUSD / liveNGNRate).toFixed(2));
+    }
+    const subtotal = priceUSD * (buyNowItem.quantity || 1);
 
     return (
         <>

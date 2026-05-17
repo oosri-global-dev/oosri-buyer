@@ -1,37 +1,85 @@
 import styled from "styled-components";
-import { FlexibleDiv } from "@/components/lib/Box/styles";
 
-export const SDWrapper = styled(FlexibleDiv)`
-  flex-direction: row;
+export const SDWrapper = styled.section`
   width: 100%;
-  justify-content: flex-start;
-  align-items: flex-start;
-  gap: 1.8%;
-  flex-wrap: wrap;
-  margin-top: 20px;
+  margin-top: 28px;
 
-  .top__section__container {
-    margin-bottom: 20px;
-    height: fit-content;
+  .section__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+
+    h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
   }
 
   .view__all__style {
-    font-size: 1.1rem;
-    color: #757575;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--orrsiPrimary);
     cursor: pointer;
     margin: 0;
     text-decoration: none;
+    white-space: nowrap;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .cards__scroller {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding-bottom: 10px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .card__slot {
+    flex: 0 0 auto;
+    width: 200px;
+  }
+
+  @media (max-width: 600px) {
+    .scroll__arrow {
+      display: none;
+    }
+
+    .cards__scroller {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      overflow-x: visible;
+      overflow: visible;
+      padding-bottom: 0;
+      gap: 12px;
+    }
+
+    .card__slot {
+      width: 100%;
+      flex: none;
+    }
+  }
+
+  @media (max-width: 390px) {
+    .cards__scroller {
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
   }
 
   @media (max-width: 440px) {
-    justify-content: space-between;
-
-    h2 {
-      font-size: 1.2rem;
-    }
-
-    .view__all__style {
-      font-size: 1rem;
+    .section__header h2 {
+      font-size: 1.1rem;
     }
   }
 `;

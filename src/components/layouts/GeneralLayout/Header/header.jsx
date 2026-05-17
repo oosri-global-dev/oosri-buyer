@@ -4,10 +4,12 @@ import { HeaderWrapper } from "./header.styles";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import { FiSearch as SearchIcon } from "react-icons/fi";
-import { AiOutlineShoppingCart as CartIcon } from "react-icons/ai";
+import SearchOverlay from "@/components/lib/SearchOverlay/SearchOverlay";
+import { AiOutlineShoppingCart as ShopCartIcon } from "react-icons/ai";
 import { BsHeart as WishlistIcon } from "react-icons/bs";
 import { HiOutlineBellAlert as NotificationIcon } from "react-icons/hi2";
 import ProfileNav from "./ProfileNav/profileNav";
+import CurrencySelector from "./CurrencySelector";
 import NavMenu from "./navMenu/navMenu";
 import { menuItems } from "@/data-helpers/header-helper";
 import Logo from "@/assets/images/homepage/logo.png";
@@ -28,6 +30,7 @@ import NotificationPanel from "@/components/lib/NotificationPanel";
 export default function Header() {
   const { asPath, push } = useRouter();
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
   const dropdownRef = useRef(null);
   const unauthorizedLinks = [
     {
@@ -63,14 +66,14 @@ export default function Header() {
   return (
     <HeaderWrapper>
       <FlexibleDiv className="logo__section">
-        <Link href={"/"}>
-          <Image src={Logo} className="logo__wrapper" alt="logo" width={120} height={40} style={{ objectFit: 'contain' }} />
-        </Link>
-
         <div className="nav__menu__wrapper">
           <NavMenu menuItems={menuItems} />
         </div>
+        <Link href={"/"}>
+          <Image src={Logo} className="logo__wrapper" alt="logo" width={120} height={40} style={{ objectFit: "contain" }} />
+        </Link>
       </FlexibleDiv>
+
       <FlexibleDiv className="middle__section" flexWrap="nowrap">
         {menuItems.map((sgn, idx) => (
           <button
@@ -84,21 +87,23 @@ export default function Header() {
       </FlexibleDiv>
 
       <FlexibleDiv className="right__section" flexDir="row" flexWrap="nowrap">
+        <CurrencySelector />
         <div
-          onClick={() => push("/search")}
-          className={`single__menu ${
-            asPath === "/search" ? "selected__icon" : ""
-          }`}
+          onClick={() => setShowSearch(true)}
+          className={`single__menu ${showSearch ? "selected__icon" : ""}`}
+          role="button"
+          aria-label="Open search"
         >
           <SearchIcon />
         </div>
+        <SearchOverlay open={showSearch} onClose={() => setShowSearch(false)} />
         <div
           onClick={() => push("/cart")}
           className={`single__menu cart-icon-container ${
             asPath === "/cart" ? "selected__icon" : ""
           }`}
         >
-          <CartIcon />
+          <ShopCartIcon />
           {cart?.length > 0 && (
             <span className="cart-badge">
               {cart.length > 99 ? "99+" : cart.length}

@@ -6,3 +6,5 @@ export const UPDATE_QUANTITY = "UPDATE_QUANTITY";
 export const CART = "CART";
 export const LOADING_MODAL = "LOADING_MODAL";
 export const LOADING_USER = "LOADING_USER";
+export const SET_CURRENCY = "SET_CURRENCY";
+export const SET_FX_RATES = "SET_FX_RATES";

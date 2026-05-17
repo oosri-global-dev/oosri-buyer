@@ -3,6 +3,7 @@ import ProfileOverview from "./ProfileOverview/profile-overview";
 import { useState } from "react";
 import EditProfile from "./EditProfile/edit-profile";
 import ChangePassword from "./ChangePassword/change-password";
+import AddressBook from "./AddressBook/address-book";
 import { useMainContext } from "@/context";
 
 export default function ProfileScreen() {
@@ -31,6 +32,9 @@ export default function ProfileScreen() {
           user={user}
           dispatch={dispatch}
         />
+      )}
+      {currentPage === "Addresses" && (
+        <AddressBook setCurrentPage={setCurrentPage} />
       )}
     </AccountLayout>
   );

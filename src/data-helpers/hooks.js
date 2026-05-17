@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useMainContext } from "@/context";
+import { formatInCurrency } from "@/data-helpers/currency";
 
 export const useWindowSize = () => {
   const [windowSize, setWindowSize] = useState([0, 0]);
@@ -90,7 +92,12 @@ export function truncateString(str, num) {
  */
 /**
  * Helper function to calculate product price logic.
- * Can be used in loops or outside components.
+ * Always returns prices in USD.
+ *
+ * Priority for resolving USD price:
+ *   1. regularPriceUSD   — explicit USD field from backend
+ *   2. regularPrice * fxRate — NGN price converted via the rate the backend stored
+ *   3. productPrice — raw fallback (may be NGN; only used if no conversion is possible)
  */
 export const calculateProductPrice = (product) => {
   if (!product) return { price: 0, originalPrice: null, hasDiscount: false };
@@ -98,43 +105,57 @@ export const calculateProductPrice = (product) => {
   const {
     productPrice,
     salesPrice,
+    discountPrice,       // PDP endpoint uses discountPrice; treat as alias for salesPrice
+    regularPrice,
     regularPriceUSD,
     salesPriceUSD,
+    discountPriceUSD,    // USD version of discountPrice
     previousPriceUSD,
+    fxRate, // NGN-to-USD rate stored on the product by the backend
   } = product;
 
-  // Use USD values if available, falling back to older fields if not
-  const regular = regularPriceUSD || productPrice || 0;
-  const sales = salesPriceUSD || salesPrice;
-  const previous = previousPriceUSD;
-
-  // Logic based on user's simple explanation:
-
-  // 1. When the item is on Sale (Sales Price exists, and no specific previous price overriding it logic-wise)
-  if (sales && !previous) {
-    return {
-      price: sales,
-      originalPrice: regular,
-      hasDiscount: true,
-    };
-  }
-
-  // If we have a previous price, that's the crossed out one.
-  // The current selling price is the sales price if it exists, otherwise the regular price.
-  if (previous) {
-    return {
-      price: sales || regular,
-      originalPrice: previous,
-      hasDiscount: true
-    }
-  }
-
-  // Default / Standard Case
-  return {
-    price: regular,
-    originalPrice: null,
-    hasDiscount: false,
+  // Convert an NGN amount to USD using the per-product fxRate the backend attached.
+  const toUSD = (ngnAmount) => {
+    if (!ngnAmount || !fxRate) return null;
+    return Number((ngnAmount * fxRate).toFixed(2));
   };
+
+  // Resolve each price tier to USD
+  const regular =
+    regularPriceUSD ||
+    toUSD(regularPrice) ||
+    productPrice ||
+    0;
+
+  // salesPrice and discountPrice are the same concept — reduced selling price.
+  // salesPriceUSD / discountPriceUSD are their USD-converted equivalents.
+  const sales =
+    salesPriceUSD ||
+    discountPriceUSD ||
+    toUSD(salesPrice) ||
+    toUSD(discountPrice) ||
+    null;
+
+  const previous = previousPriceUSD || toUSD(product.previousPrice) || null;
+
+  // Only treat as discounted when the sale price is genuinely lower than regular.
+  // The backend sometimes sets salesPrice = regularPrice as a fallback — ignore those.
+  if (sales && !previous) {
+    if (Number(sales) < Number(regular)) {
+      return { price: sales, originalPrice: regular, hasDiscount: true };
+    }
+    return { price: regular, originalPrice: null, hasDiscount: false };
+  }
+
+  if (previous) {
+    const currentPrice = sales && Number(sales) < Number(regular) ? sales : regular;
+    if (Number(previous) > Number(currentPrice)) {
+      return { price: currentPrice, originalPrice: previous, hasDiscount: true };
+    }
+    return { price: regular, originalPrice: null, hasDiscount: false };
+  }
+
+  return { price: regular, originalPrice: null, hasDiscount: false };
 };
 
 /**
@@ -142,4 +163,16 @@ export const calculateProductPrice = (product) => {
  */
 export const useProductPrice = (product) => {
   return calculateProductPrice(product);
+};
+
+/**
+ * Returns a price formatting function bound to the buyer's selected currency.
+ * Uses the live admin-controlled FX rate for NGN; static rates for GBP/EUR.
+ *
+ * Usage: const formatPrice = useFormatPrice();
+ *        formatPrice(product.regularPriceUSD)
+ */
+export const useFormatPrice = () => {
+  const { currency, fxRates } = useMainContext();
+  return (amountUSD) => formatInCurrency(amountUSD, currency, fxRates);
 };

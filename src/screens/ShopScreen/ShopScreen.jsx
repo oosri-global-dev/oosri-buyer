@@ -2,19 +2,22 @@ import Breadcrumb from "@/components/lib/Breadcrumb/breadcrumb";
 import { ShopPageWrapper } from "./ShopScreen.styles";
 import { FlexibleDiv } from "@/components/lib/Box/styles";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/router";
 import {
   Checkbox,
   Select,
   Tag,
-  Spin,
   Alert,
   Modal,
   Button,
   Pagination,
   Slider,
 } from "antd";
-import ProductCard from "@/components/lib/ProductCard/productCard";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
+import ProductCard, { LoadingCard } from "@/components/lib/ProductCard/productCard";
 import { useProductsQuery, useProductCategoriesQuery } from "@/network/product";
+import { useSearchQuery } from "@/network/search";
 import { FaFilter } from "react-icons/fa";
 
 const MAX_PRICE_USD = 7000;
@@ -124,22 +127,51 @@ function getSubCategoryName(product) {
   );
 }
 
+const SORT_OPTIONS = [
+  { label: "Featured", value: "featured" },
+  { label: "Price: Low to High", value: "price_asc" },
+  { label: "Price: High to Low", value: "price_desc" },
+  { label: "Newest", value: "newest" },
+];
+
 export default function ShopPage() {
+  const router = useRouter();
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedSubCategories, setSelectedSubCategories] = useState({});
-  const [priceRange, setPriceRange] = useState([0, MAX_PRICE_USD]); // [min, max]
+  const [priceRange, setPriceRange] = useState([0, MAX_PRICE_USD]);
+  const [sortBy, setSortBy] = useState("featured");
   const [currentPage, setCurrentPage] = useState(1);
   const [openSelects, setOpenSelects] = useState({});
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
   const [itemOffset, setItemOffset] = useState(0);
   const [shuffleSeed, setShuffleSeed] = useState(null);
+  const [urlParamsApplied, setUrlParamsApplied] = useState(false);
 
   const itemsPerPage = 12;
 
-  // stable shuffle per visit; changes on refresh
   useEffect(() => {
     setShuffleSeed(Date.now());
   }, []);
+
+  // Read search query from URL (?q=) — drives Algolia search mode
+  const searchTerm = useMemo(() => {
+    if (!router.isReady) return "";
+    const q = router.query.q;
+    return typeof q === "string" ? q.trim() : "";
+  }, [router.isReady, router.query.q]);
+
+  const isSearchMode = searchTerm.length >= 2;
+
+  // Apply URL query params (category) once ready — skip when in search mode
+  useEffect(() => {
+    if (urlParamsApplied || !router.isReady) return;
+    const { category } = router.query;
+    if (category && !isSearchMode) {
+      const decoded = decodeURIComponent(String(category));
+      setSelectedCategories([decoded]);
+    }
+    setUrlParamsApplied(true);
+  }, [router.isReady, router.query, urlParamsApplied, isSearchMode]);
 
   const {
     data: productCategories,
@@ -148,14 +180,38 @@ export default function ShopPage() {
     isError: isErrorCategories,
   } = useProductCategoriesQuery();
 
+  // Reset to page 1 whenever category selection changes
+  useEffect(() => {
+    setItemOffset(0);
+    setCurrentPage(1);
+  }, [selectedCategories]);
+
+  // Algolia search (only when ?q= is present)
+  const {
+    data: searchData,
+    isLoading: isLoadingSearch,
+    isError: isErrorSearch,
+  } = useSearchQuery(isSearchMode ? searchTerm : "");
+
+  // Regular product fetch (disabled when in search mode)
+  const apiCategory = selectedCategories.length > 0 ? selectedCategories : "";
+  const productQueryKey = `shop-${selectedCategories.sort().join(",")}`;
+
   const {
     data: products,
     isLoading: isLoadingProducts,
     isError: isErrorProducts,
-  } = useProductsQuery("", itemsPerPage, "products", itemOffset);
+  } = useProductsQuery(apiCategory, itemsPerPage, productQueryKey, itemOffset, {
+    enabled: !isSearchMode,
+  });
 
-  const productsList = useMemo(() => products?.body?.products || [], [products]);
-  const totalProducts = products?.body?.total || 0;
+  const searchResults = useMemo(() => searchData?.body?.products || [], [searchData]);
+  const productsList = useMemo(
+    () => (isSearchMode ? searchResults : products?.body?.products || []),
+    [isSearchMode, searchResults, products]
+  );
+  const totalProducts = isSearchMode ? searchResults.length : (products?.body?.total || 0);
+  const isLoadingProductsAny = isSearchMode ? isLoadingSearch : isLoadingProducts;
 
   const formatCategory = useCallback((cat = []) => {
     return cat.map((ct) => ({ label: ct.name, value: ct.name }));
@@ -218,21 +274,14 @@ export default function ShopPage() {
     return [min, max];
   }, [priceRange]);
 
+  // Categories are filtered server-side — client-side pass only does price + subcategory
   const filteredProducts = useMemo(() => {
     const [minPrice, maxPrice] = effectivePriceRange;
 
     return productsList.filter((product) => {
       const price = getEffectiveProductPrice(product);
-
-      // If price can't be parsed, keep it visible (forgiving UX).
       if (Number.isFinite(price)) {
-        if (price < minPrice) return false;
-        if (price > maxPrice) return false;
-      }
-
-      if (selectedCategories.length > 0) {
-        const pCat = getCategoryName(product);
-        if (!selectedCategories.includes(pCat)) return false;
+        if (price < minPrice || price > maxPrice) return false;
       }
 
       if (allSelectedSubCategories.length > 0) {
@@ -242,17 +291,24 @@ export default function ShopPage() {
 
       return true;
     });
-  }, [
-    productsList,
-    effectivePriceRange,
-    selectedCategories,
-    allSelectedSubCategories,
-  ]);
+  }, [productsList, effectivePriceRange, allSelectedSubCategories]);
 
   const randomizedProducts = useMemo(() => {
     if (!shuffleSeed) return filteredProducts;
     return seededShuffle(filteredProducts, shuffleSeed);
   }, [filteredProducts, shuffleSeed]);
+
+  const sortedProducts = useMemo(() => {
+    const list = [...randomizedProducts];
+    if (sortBy === "price_asc") {
+      list.sort((a, b) => (getEffectiveProductPrice(a) || 0) - (getEffectiveProductPrice(b) || 0));
+    } else if (sortBy === "price_desc") {
+      list.sort((a, b) => (getEffectiveProductPrice(b) || 0) - (getEffectiveProductPrice(a) || 0));
+    } else if (sortBy === "newest") {
+      list.sort((a, b) => new Date(b?.createdAt || 0) - new Date(a?.createdAt || 0));
+    }
+    return list;
+  }, [randomizedProducts, sortBy]);
 
   const handlePageChange = useCallback((page, pageSize) => {
     window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
@@ -277,9 +333,13 @@ export default function ShopPage() {
   const filterContentNode = useMemo(() => (
     <div className="category__filters">
       {isLoadingCategories ? (
-        <div className="loader_wrapper">
-          <Spin />
-        </div>
+        <SkeletonTheme baseColor="rgba(148,148,148,0.1)" highlightColor="rgba(202,202,202,0.4)">
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, padding: "8px 0" }}>
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={i} style={{ width: `${60 + (i % 3) * 15}%`, height: 16, borderRadius: 4 }} />
+            ))}
+          </div>
+        </SkeletonTheme>
       ) : isErrorCategories ? (
         <Alert message="Error loading categories" type="error" />
       ) : (
@@ -432,28 +492,59 @@ export default function ShopPage() {
             {filterContentNode}
           </aside>
 
-          <FlexibleDiv width="100%" flexDir="column">
+          <FlexibleDiv width="100%" flexDir="column" gap="0">
+            {/* ── Search mode banner ── */}
+            {isSearchMode && (
+              <div className="search__banner">
+                <span>
+                  {isLoadingProductsAny
+                    ? `Searching for "${searchTerm}"…`
+                    : `${totalProducts} result${totalProducts !== 1 ? "s" : ""} for "${searchTerm}"`}
+                </span>
+                <button
+                  className="search__banner__clear"
+                  onClick={() => router.push("/shop")}
+                >
+                  Clear search ×
+                </button>
+              </div>
+            )}
+
+            {/* ── Results bar ── */}
+            {!isLoadingProductsAny && !isErrorProducts && !isErrorSearch && !isSearchMode && (
+              <FlexibleDiv
+                width="100%"
+                justifyContent="space-between"
+                alignItems="center"
+                className="results__bar"
+              >
+                <p className="results__count">
+                  {sortedProducts.length === totalProducts
+                    ? `${totalProducts} products`
+                    : `${sortedProducts.length} of ${totalProducts} products`}
+                </p>
+                <Select
+                  value={sortBy}
+                  onChange={setSortBy}
+                  options={SORT_OPTIONS}
+                  size="small"
+                  className="sort__select"
+                  style={{ minWidth: 160 }}
+                  bordered={false}
+                />
+              </FlexibleDiv>
+            )}
+
             <FlexibleDiv
               width="100%"
-              justifyContent={
-                isLoadingProducts || isErrorProducts ? "center" : "flex-start"
-              }
-              alignItems={
-                isLoadingProducts || isErrorProducts ? "center" : "flex-start"
-              }
-              className={
-                !isLoadingProducts && !isErrorProducts ? "products__grid" : ""
-              }
-              style={{
-                flex: 1,
-                display: isLoadingProducts || isErrorProducts ? "block" : "",
-              }}
+              justifyContent="flex-start"
+              alignItems="flex-start"
+              className={!(isErrorProducts || isErrorSearch) ? "products__grid" : ""}
+              style={{ flex: 1 }}
             >
-              {isLoadingProducts ? (
-                <div className="loader_wrapper">
-                  <Spin style={{ color: "red" }} size="large" />
-                </div>
-              ) : isErrorProducts ? (
+              {isLoadingProductsAny ? (
+                Array.from({ length: 12 }).map((_, idx) => <LoadingCard key={idx} />)
+              ) : (isErrorProducts || isErrorSearch) ? (
                 <Alert
                   message="Error"
                   description="Failed to fetch products. Please try again later."
@@ -462,14 +553,14 @@ export default function ShopPage() {
                 />
               ) : (
                 <>
-                  {randomizedProducts.map((p, idx) => (
+                  {sortedProducts.map((p, idx) => (
                     <ProductCard card={p} key={p?.id || p?._id || idx} />
                   ))}
 
-                  {!randomizedProducts.length && (
+                  {!sortedProducts.length && (
                     <Alert
-                      message="No products match your filters"
-                      description="Try widening the price range or clearing filters."
+                      message={isSearchMode ? `No results for "${searchTerm}"` : "No products match your filters"}
+                      description={isSearchMode ? "Try a different search term." : "Try widening the price range or clearing filters."}
                       type="info"
                       showIcon
                       style={{ width: "100%" }}
