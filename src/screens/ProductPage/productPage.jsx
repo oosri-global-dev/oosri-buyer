@@ -23,6 +23,10 @@ import { formatCurrency, useProductPrice } from "@/data-helpers/hooks";
 import SafeImage from "@/components/lib/SafeImage/SafeImage";
 import { MoreReviews } from "./sections/more-reviews/moreReviews";
 import { getAllReviews } from "@/network/reviews";
+import SellerEngagementCard from "./sections/community/SellerEngagementCard";
+import CommunityDiscussions from "./sections/community/CommunityDiscussions";
+import NegotiationModal from "./sections/community/NegotiationModal";
+import { useNegotiation } from "@/hooks/useNegotiation";
 
 function NoOfProductReviews({ numOfReviews }) {
   return (
@@ -47,7 +51,9 @@ export default function ProductPage({ product, loading, relatedProducts }) {
   const [reviewData, setReviewData] = useState([])
   const [starData, setStarData] = useState([])
   const [activeTab, setActiveTab] = useState("1");
+  const [negotiationOpen, setNegotiationOpen] = useState(false);
   const priceData = useProductPrice(product);
+  const { submitOffer } = useNegotiation();
 
 
   const productInCart = useMemo(
@@ -403,6 +409,20 @@ export default function ProductPage({ product, loading, relatedProducts }) {
                   </FlexibleDiv>
                 ))}
             </FlexibleDiv>
+            {/* Seller Engagement + Negotiations */}
+            <SellerEngagementCard
+              seller={product?.seller}
+              user={user}
+              onNegotiate={() => setNegotiationOpen(true)}
+            />
+
+            {/* Community Discussions */}
+            <CommunityDiscussions
+              productId={product?._id}
+              sellerId={product?.seller?._id || product?.seller}
+              user={user}
+            />
+
             {/* Related Products Section */}
             <FlexibleDiv
               justifyContent="flex-start"
@@ -427,6 +447,24 @@ export default function ProductPage({ product, loading, relatedProducts }) {
           </FlexibleDiv>
         )}
       </ProductPageWrapper>
+
+      {negotiationOpen && product && (
+        <NegotiationModal
+          product={{ ...product, price: priceData?.originalPrice || priceData?.price || 0 }}
+          seller={product.seller}
+          onClose={() => setNegotiationOpen(false)}
+          isSubmitting={submitOffer.isPending}
+          onSubmit={async (payload) => {
+            try {
+              await submitOffer.mutateAsync(payload);
+              setNegotiationOpen(false);
+              dispatch({ type: "TOAST_BOX", payload: { type: "success", message: "Offer sent! The seller will respond within 48 hours." } });
+            } catch (err) {
+              dispatch({ type: "TOAST_BOX", payload: { type: "error", message: err?.response?.data?.message || "Failed to send offer." } });
+            }
+          }}
+        />
+      )}
     </>
   );
 }
