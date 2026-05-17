@@ -5,6 +5,7 @@ import { FiPlus as PlusIcon } from "react-icons/fi";
 import { HiOutlineMinusSmall as MinusIcon } from "react-icons/hi2";
 import { MdOutlineLocalShipping as ShipIcon, MdOutlineSecurity as SecureIcon } from "react-icons/md";
 import { TbArrowBackUp as ReturnIcon } from "react-icons/tb";
+import { IoCopyOutline as CopyIcon, IoShareSocialOutline as ShareIcon, IoCheckmarkOutline as CheckIcon } from "react-icons/io5";
 import Button from "@/components/lib/Button";
 import { Spin } from "antd";
 import SafeImage from "@/components/lib/SafeImage/SafeImage";
@@ -21,12 +22,7 @@ import { useProductPrice, useFormatPrice } from "@/data-helpers/hooks";
 import { useReviewsQuery } from "@/network/reviews";
 import { handleAddProductToSavedItems, handleRemoveProductFromSavedItems } from "@/network/product";
 import { TOAST_BOX } from "@/context/types";
-import SellerEngagementCard from "./sections/community/SellerEngagementCard";
-import CommunityDiscussions from "./sections/community/CommunityDiscussions";
-import NegotiationModal from "./sections/community/NegotiationModal";
-import { useNegotiation } from "@/hooks/useNegotiation";
 
-// 5-star row (always renders 5, fills proportionally)
 function StarRow({ rating = 0, size = 15 }) {
   const filled = Math.round(rating);
   return (
@@ -38,13 +34,64 @@ function StarRow({ rating = 0, size = 15 }) {
   );
 }
 
+function copyToClipboard(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text);
+  }
+  const el = document.createElement("textarea");
+  el.value = text;
+  el.style.cssText = "position:fixed;top:-9999px;left:-9999px;opacity:0";
+  document.body.appendChild(el);
+  el.focus();
+  el.select();
+  const ok = document.execCommand("copy");
+  document.body.removeChild(el);
+  return ok ? Promise.resolve() : Promise.reject(new Error("copy failed"));
+}
+
+function ShareButtons({ product }) {
+  const [copied, setCopied] = useState(false);
+  const canNativeShare = typeof navigator !== "undefined" && !!navigator.share;
+
+  const handleCopy = async () => {
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    try {
+      await copyToClipboard(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch (_) {}
+  };
+
+  const handleNativeShare = async () => {
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    const title = product?.productName || "Check this out on Oosri";
+    try {
+      await navigator.share({ title, text: `${title} — shop on Oosri`, url });
+    } catch (err) {
+      if (err.name !== "AbortError") handleCopy();
+    }
+  };
+
+  return (
+    <div className="pdp__share__group">
+      <button type="button" className="pdp__share__btn" onClick={handleCopy} title="Copy link">
+        {copied ? <><CheckIcon size={14} /> Copied!</> : <><CopyIcon size={14} /> Copy Link</>}
+      </button>
+      {canNativeShare && (
+        <button type="button" className="pdp__share__btn pdp__share__icon" onClick={handleNativeShare} title="Share">
+          <ShareIcon size={15} />
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function ProductPage({ product, loading, relatedProducts }) {
   const { push, asPath } = useRouter();
   const { cart, addToCart, removeFromCart, updateQuantity, dispatch, setBuyNowItem, user } =
     useMainContext();
   const queryClient = useQueryClient();
 
-  // ── State ──────────────────────────────────────────────────────────────────
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [numOfProduct, setNumOfProduct] = useState(1);
   const [isLoadingBtn, setIsLoadingBtn] = useState(false);
@@ -54,12 +101,9 @@ export default function ProductPage({ product, loading, relatedProducts }) {
   const [isSavingFavorite, setIsSavingFavorite] = useState(false);
   const [activeTab, setActiveTab] = useState("description");
   const [moreReviewsActive, setMoreReviewsActive] = useState(false);
-  const [negotiationOpen, setNegotiationOpen] = useState(false);
 
-  // ── Data ───────────────────────────────────────────────────────────────────
   const priceData = useProductPrice(product);
   const formatPrice = useFormatPrice();
-  const { submitOffer } = useNegotiation();
   const { data: reviewsData, isLoading: isLoadingReviews } = useReviewsQuery(product?._id);
   const reviews = useMemo(() => reviewsData?.body?.reviews || [], [reviewsData]);
   const starData = reviewsData?.body?.ratingSummary;
@@ -69,7 +113,6 @@ export default function ProductPage({ product, loading, relatedProducts }) {
     [cart, product]
   );
 
-  // ── Sync state ─────────────────────────────────────────────────────────────
   useEffect(() => {
     setNumOfProduct(productInCart ? productInCart.quantity : 1);
   }, [productInCart]);
@@ -78,7 +121,6 @@ export default function ProductPage({ product, loading, relatedProducts }) {
     setSelectedIdx(0);
   }, [product?._id]);
 
-  // ── Derived ────────────────────────────────────────────────────────────────
   const images = product?.productImages || [];
   const selectedImage = images[selectedIdx] || images[0] || null;
   const discountPct =
@@ -86,7 +128,13 @@ export default function ProductPage({ product, loading, relatedProducts }) {
       ? Math.round(((priceData.originalPrice - priceData.price) / priceData.originalPrice) * 100)
       : 0;
 
-  // ── Handlers ───────────────────────────────────────────────────────────────
+  const sellerStoreName = product?.seller?.storeProfile?.storeName || product?.seller?._id || product?.seller;
+  const sellerDisplayName =
+    product?.sellerName ||
+    (product?.seller?.firstName
+      ? `${product.seller.firstName} ${product.seller.lastName || ""}`.trim()
+      : null);
+
   const handleDecrement = async () => {
     if (numOfProduct <= 1 || isLoadingDecrease) return;
     if (productInCart) {
@@ -150,10 +198,8 @@ export default function ProductPage({ product, loading, relatedProducts }) {
     }
   };
 
-  // ── Loading / error states ─────────────────────────────────────────────────
   if (loading) return <OorsiLoader />;
 
-  // ── More reviews full view ─────────────────────────────────────────────────
   if (moreReviewsActive) {
     return (
       <ProductPageWrapper>
@@ -167,7 +213,6 @@ export default function ProductPage({ product, loading, relatedProducts }) {
     );
   }
 
-  // ── Breadcrumb ─────────────────────────────────────────────────────────────
   const breadcrumbs = [
     { label: "Home", href: "/" },
     { label: product?.category || "Shop", href: `/shop?category=${encodeURIComponent(product?.category || "")}` },
@@ -192,7 +237,6 @@ export default function ProductPage({ product, loading, relatedProducts }) {
       </ProductBreadcrumbsWrapper>
 
       <ProductPageWrapper>
-        {/* ── TOP: Gallery + Info grid ── */}
         <div className="pdp__layout">
 
           {/* LEFT: Image gallery */}
@@ -237,15 +281,20 @@ export default function ProductPage({ product, loading, relatedProducts }) {
           {/* RIGHT: Product info */}
           <div className="pdp__info">
 
-            {/* Brand */}
-            {(product?.brandName || product?.sellerName) && (
-              <p className="pdp__brand">{product.brandName || product.sellerName}</p>
-            )}
+            {/* Seller + share row */}
+            <div className="pdp__seller__row">
+              {sellerDisplayName && sellerStoreName ? (
+                <Link href={`/store/${sellerStoreName}`} className="pdp__seller__link">
+                  {sellerDisplayName}
+                </Link>
+              ) : sellerDisplayName ? (
+                <span className="pdp__brand">{sellerDisplayName}</span>
+              ) : null}
+              <ShareButtons product={product} />
+            </div>
 
-            {/* Name */}
             <h1 className="pdp__name">{product?.productName}</h1>
 
-            {/* Rating + review count */}
             <div className="pdp__rating__row">
               <StarRow rating={product?.productRating || 0} size={15} />
               <span className="pdp__rating__score">{product?.productRating || 0}.0</span>
@@ -263,7 +312,6 @@ export default function ProductPage({ product, loading, relatedProducts }) {
 
             <div className="pdp__divider" />
 
-            {/* Price block */}
             <div className="pdp__price__block">
               <span className="pdp__price">{formatPrice(priceData?.price || 0)}</span>
               {priceData?.hasDiscount && priceData?.originalPrice && (
@@ -276,7 +324,6 @@ export default function ProductPage({ product, loading, relatedProducts }) {
 
             <div className="pdp__divider" />
 
-            {/* Delivery info */}
             <div className="pdp__delivery__row">
               <ShipIcon size={17} color="var(--orrsiPrimary)" />
               <span>
@@ -287,7 +334,6 @@ export default function ProductPage({ product, loading, relatedProducts }) {
 
             <div className="pdp__divider" />
 
-            {/* Quantity selector */}
             <div className="pdp__qty__row">
               <span className="pdp__qty__label">Quantity</span>
               <div className="pdp__qty__control">
@@ -315,7 +361,6 @@ export default function ProductPage({ product, loading, relatedProducts }) {
               </div>
             </div>
 
-            {/* CTA buttons */}
             <div className="pdp__ctas">
               <Button
                 width="100%"
@@ -354,7 +399,6 @@ export default function ProductPage({ product, loading, relatedProducts }) {
               </button>
             </div>
 
-            {/* Trust badges */}
             <div className="pdp__trust">
               <div className="trust__badge">
                 <SecureIcon size={15} />
@@ -369,7 +413,7 @@ export default function ProductPage({ product, loading, relatedProducts }) {
           </div>
         </div>
 
-        {/* ── TABS: Description | Reviews ── */}
+        {/* TABS */}
         <div className="pdp__tabs">
           <div className="pdp__tab__bar" role="tablist">
             <button
@@ -407,19 +451,7 @@ export default function ProductPage({ product, loading, relatedProducts }) {
           </div>
         </div>
 
-        {/* ── Seller Engagement + Community Discussions ── */}
-        <SellerEngagementCard
-          seller={product?.seller}
-          user={user}
-          onNegotiate={() => setNegotiationOpen(true)}
-        />
-        <CommunityDiscussions
-          productId={product?._id}
-          sellerId={product?.seller?._id || product?.seller}
-          user={user}
-        />
-
-        {/* ── Related products ── */}
+        {/* Related products */}
         {(relatedProducts || []).length > 0 && (
           <div className="pdp__related">
             <ProductsGridBox
@@ -431,24 +463,6 @@ export default function ProductPage({ product, loading, relatedProducts }) {
         )}
 
       </ProductPageWrapper>
-
-      {negotiationOpen && product && (
-        <NegotiationModal
-          product={{ ...product, price: priceData?.originalPrice || priceData?.price || 0 }}
-          seller={product.seller}
-          onClose={() => setNegotiationOpen(false)}
-          isSubmitting={submitOffer.isPending}
-          onSubmit={async (payload) => {
-            try {
-              await submitOffer.mutateAsync(payload);
-              setNegotiationOpen(false);
-              dispatch({ type: "TOAST_BOX", payload: { type: "success", message: "Offer sent! The seller will respond within 48 hours." } });
-            } catch (err) {
-              dispatch({ type: "TOAST_BOX", payload: { type: "error", message: err?.response?.data?.message || "Failed to send offer." } });
-            }
-          }}
-        />
-      )}
     </>
   );
 }
