@@ -384,7 +384,7 @@ export default function ProductPage({ product, loading, relatedProducts }) {
               role="tab"
               aria-selected={activeTab === "reviews"}
               className={`pdp__tab${activeTab === "reviews" ? " active" : ""}`}
-              onClick={() => setActiveTab("reviews")
+              onClick={() => setActiveTab("reviews")}
             >
               Reviews
               {reviews.length > 0 && (
