@@ -45,6 +45,20 @@ export default function SellerStorePage({ seller, identifier }) {
     isLoading: isLoadingProducts,
   } = useSellerStoreProductsQuery(identifier, 0, 500);
 
+  const allProducts = useMemo(() => productsData?.body?.products || [], [productsData?.body?.products]);
+
+  const filteredProducts = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return allProducts;
+    return allProducts.filter((p) =>
+      p.productName?.toLowerCase().includes(q) ||
+      p.category?.toLowerCase().includes(q)
+    );
+  }, [allProducts, searchQuery]);
+
+  const total = filteredProducts.length;
+  const products = filteredProducts.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+
   if (!seller) {
     return (
       <StorePageWrapper>
@@ -69,19 +83,6 @@ export default function SellerStorePage({ seller, identifier }) {
 
   const initials = `${seller.firstName?.[0] || ""}${seller.lastName?.[0] || ""}`.toUpperCase();
   const memberSince = seller.createdAt ? dayjs(seller.createdAt).format("MMM YYYY") : null;
-  const allProducts = productsData?.body?.products || [];
-
-  const filteredProducts = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return allProducts;
-    return allProducts.filter((p) =>
-      p.productName?.toLowerCase().includes(q) ||
-      p.category?.toLowerCase().includes(q)
-    );
-  }, [allProducts, searchQuery]);
-
-  const total = filteredProducts.length;
-  const products = filteredProducts.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
   const socialLinks = Object.entries(storeProfile.socialLinks || {}).filter(([, v]) => !!v);
 
