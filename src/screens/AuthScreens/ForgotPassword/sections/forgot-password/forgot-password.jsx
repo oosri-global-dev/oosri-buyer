@@ -58,7 +58,6 @@ export default function ForgotPassword({ setStep }) {
       });
       setIsLoading(false);
     }
-    console.log("values", values);
   };
 
   return (

@@ -4,10 +4,10 @@ import { formatInCurrency } from "@/data-helpers/currency";
 
 export const useWindowSize = () => {
   const [windowSize, setWindowSize] = useState([0, 0]);
-  const updateWindowSize = () => {
-    setWindowSize([window.innerWidth, window.innerHeight]);
-  };
-  useLayoutEffect(() => {
+  useEffect(() => {
+    const updateWindowSize = () => {
+      setWindowSize([window.innerWidth, window.innerHeight]);
+    };
     window.addEventListener("resize", updateWindowSize);
     updateWindowSize();
     return () => window.removeEventListener("resize", updateWindowSize);
