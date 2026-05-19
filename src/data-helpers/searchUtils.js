@@ -127,7 +127,7 @@ class ProductSearchIndex {
 
     if (filters.inStock !== undefined) {
       filtered = filtered.filter((p) =>
-        filters.inStock ? (p.stock || 0) > 0 : true
+        filters.inStock ? (p.inStock ?? 0) > 0 : true
       );
     }
 
