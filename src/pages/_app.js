@@ -5,6 +5,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MainProvider, useMainContext } from "@/context";
+import { SET_FX_RATES } from "@/context/types";
 import CustomToastBox from "@/components/lib/ToastBox";
 import { useEffect, useState } from "react";
 import NProgress from "nprogress";
@@ -12,8 +13,24 @@ import CustomModal from "@/components/lib/Modal/modal";
 import basketLottie from "@/assets/images/basket.json";
 import PrivacyConsentModal from "@/components/lib/PrivacyConsentModal/PrivacyConsentModal";
 import ErrorBoundary from "@/components/lib/ErrorBoundaries/ErrorBoundary";
+import { handleGetBuyerFxRate } from "@/network/checkout";
 
 const queryClient = new QueryClient();
+
+function FxRateInitializer() {
+  const { dispatch } = useMainContext();
+  useEffect(() => {
+    handleGetBuyerFxRate()
+      .then((res) => {
+        const usdToNgnRate = res?.body?.usdToNgnRate;
+        if (usdToNgnRate && usdToNgnRate > 0) {
+          dispatch({ type: SET_FX_RATES, payload: { NGN: usdToNgnRate } });
+        }
+      })
+      .catch(() => {});
+  }, []);
+  return null;
+}
 
 /**
  * AppContent Component
@@ -43,7 +60,8 @@ function AppContent({ Component, pageProps, getLayout }) {
 
   return (
     <>
-      {/* 
+      <FxRateInitializer />
+      {/*
         1. Render page content first.
         2. Render global overlays LAST to ensure they are on top in the DOM.
       */}

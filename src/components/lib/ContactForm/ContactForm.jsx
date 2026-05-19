@@ -1,49 +1,61 @@
-import { ContactWrapper } from './ContactForm.styles'
-import TextField from "@/components/lib/TextField";
+import { ContactWrapper } from "./ContactForm.styles";
 import { useState } from "react";
-import toast from "react-hot-toast";
 import { contactUs } from "@/network/contact";
-import { TbMessage as Message } from 'react-icons/tb'
-import { IoCallOutline as Phone } from "react-icons/io5";
-import { PiHouseLight as House } from "react-icons/pi";
-import ContactHeader from "@/assets/images/contactHeader.png";
-import { FlexibleDiv, FlexibleSection } from "@/components/lib/Box/styles";
-import Button from "@/components/lib/Button";
+import { useMainContext } from "@/context";
+import { TOAST_BOX } from "@/context/types";
+import { TbMessage as MailIcon } from "react-icons/tb";
+import { IoCallOutline as PhoneIcon } from "react-icons/io5";
+import { MdCheckCircle as CheckIcon, MdArrowForward as ArrowIcon, MdSchedule as ClockIcon } from "react-icons/md";
+import Link from "next/link";
+
+const MAX_MESSAGE = 1000;
+
+const SUBJECTS = [
+  { value: "", label: "Select a topic…" },
+  { value: "order", label: "Order issue" },
+  { value: "payment", label: "Payment problem" },
+  { value: "product", label: "Product inquiry" },
+  { value: "return", label: "Return or refund" },
+  { value: "shipping", label: "Shipping & delivery" },
+  { value: "account", label: "Account help" },
+  { value: "partnership", label: "Partnership or business" },
+  { value: "feedback", label: "General feedback" },
+  { value: "other", label: "Other" },
+];
+
+const EMPTY = { fullName: "", email: "", subject: "", message: "" };
 
 export default function ContactForm() {
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    message: "",
-  });
+  const { dispatch } = useMainContext();
+  const [formData, setFormData] = useState(EMPTY);
   const [isLoading, setIsLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const msgLen = formData.message.length;
+  const charClass = msgLen >= MAX_MESSAGE ? "at__limit" : msgLen >= MAX_MESSAGE * 0.85 ? "near__limit" : "";
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
+    if (id === "message" && value.length > MAX_MESSAGE) return;
+    setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const { fullName, email, message } = formData;
-    if (!fullName || !email || !message) {
-      toast.error("Please fill in all fields.");
+    const { fullName, email, subject, message } = formData;
+    if (!fullName || !email || !subject || !message) {
+      dispatch({ type: TOAST_BOX, payload: { type: "error", message: "Please fill in all fields." } });
       return;
     }
-
     try {
       setIsLoading(true);
       await contactUs(formData);
-      toast.success("Message sent successfully!");
-      setFormData({ fullName: "", email: "", message: "" });
+      setSubmitted(true);
     } catch (error) {
-      toast.error(
-        error?.response?.data?.message || "Something went wrong. Please try again."
-      );
+      dispatch({
+        type: TOAST_BOX,
+        payload: { type: "error", message: error?.response?.data?.message || "Something went wrong. Please try again." },
+      });
     } finally {
       setIsLoading(false);
     }
@@ -51,93 +63,151 @@ export default function ContactForm() {
 
   return (
     <ContactWrapper>
-      <FlexibleDiv
-        className="contact__header"
-        style={{ backgroundImage: `url(${ContactHeader.src})` }}
-      >
-        <h2>Contact Us</h2>
-        <p>
-          Get in touch with us; we`re here to help! Have questions, feedback,
-          or need assistance? Reach out, and our dedicated team will assist
-          you promptly.
+      {/* ── Hero ── */}
+      <div className="contact__hero">
+        <p className="hero__eyebrow">Support</p>
+        <h1>How can we help?</h1>
+        <p className="hero__sub">
+          Our team is here for you. Send us a message and we&apos;ll get back
+          to you within one business day.
         </p>
-      </FlexibleDiv>
+        <Link href="/faq" className="hero__faq__link">
+          Looking for quick answers? Browse our FAQ <ArrowIcon size={13} />
+        </Link>
+      </div>
 
-      <FlexibleSection className="form__container">
-        <form className="form" onSubmit={handleSubmit}>
-          <FlexibleDiv
-            className="form__inputs"
-            flexDir="column"
-            alignItems="start"
-          >
-            <label htmlFor="fullName">Your Name</label>
-            <TextField
-              className="input"
-              id="fullName"
-              value={formData.fullName}
-              onChange={handleChange}
-              required
-            />
-          </FlexibleDiv>
+      {/* ── Body ── */}
+      <div className="contact__body">
 
-          <FlexibleDiv
-            className="form__inputs"
-            flexDir="column"
-            alignItems="start"
-          >
-            <label htmlFor="email">Email Address</label>
-            <TextField
-              className="input"
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-          </FlexibleDiv>
+        {/* ── Form card ── */}
+        <div className="form__card">
+          {submitted ? (
+            <div className="success__state">
+              <div className="success__icon">
+                <CheckIcon size={32} color="#00b85a" />
+              </div>
+              <p className="success__title">Message received!</p>
+              <p className="success__desc">
+                Thanks for reaching out. We&apos;ll review your message and reply to{" "}
+                <strong>{formData.email}</strong> within one business day.
+              </p>
+              <button className="send__another" onClick={() => { setSubmitted(false); setFormData(EMPTY); }}>
+                Send another message
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} noValidate>
+              <p className="form__title">Send us a message</p>
+              <div className="response__badge">
+                <ClockIcon size={15} />
+                We typically reply within 1 business day
+              </div>
 
-          <FlexibleDiv
-            className="form__inputs"
-            flexDir="column"
-            alignItems="start"
-          >
-            <label htmlFor="message">Message</label>
-            <TextField
-              className="textarea"
-              id="message"
-              value={formData.message}
-              onChange={handleChange}
-              required
-            />
-          </FlexibleDiv>
+              <div className="two__col">
+                <div className="field__group">
+                  <label htmlFor="fullName">Full name</label>
+                  <input
+                    className="field__input"
+                    id="fullName"
+                    type="text"
+                    placeholder="Jane Doe"
+                    value={formData.fullName}
+                    onChange={handleChange}
+                    autoComplete="name"
+                  />
+                </div>
+                <div className="field__group">
+                  <label htmlFor="email">Email address</label>
+                  <input
+                    className="field__input"
+                    id="email"
+                    type="email"
+                    placeholder="jane@example.com"
+                    value={formData.email}
+                    onChange={handleChange}
+                    autoComplete="email"
+                  />
+                </div>
+              </div>
 
-          <Button
-            type="submit"
-            color="var(--orrsiWhite)"
-            backgroundColor="var(--orrsiPrimary)"
-            className="form__submit__btn"
-            disabled={isLoading}
-          >
-            {isLoading ? "Sending..." : "Send Message"}
-          </Button>
-        </form>
+              <div className="field__group">
+                <label htmlFor="subject">Topic</label>
+                <select
+                  className="field__select"
+                  id="subject"
+                  value={formData.subject}
+                  onChange={handleChange}
+                >
+                  {SUBJECTS.map((s) => (
+                    <option key={s.value} value={s.value} disabled={s.value === ""}>
+                      {s.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-        <div className="info">
-          <h2>Info</h2>
-          <FlexibleDiv className="admin__mail admin__details">
-            <Message className="contact__icon" />
-            <p>
-              <a href="mailto:support@oosri.com">support@oosri.com</a>
-            </p>
-          </FlexibleDiv>
-          <FlexibleDiv className="admin__contact admin__details">
-            <Phone className="contact__icon" />
-            <p>
-              <a href="tel:+2347011067109">+2347011067109</a>
-            </p>
-          </FlexibleDiv>
+              <div className="field__group">
+                <label htmlFor="message">Message</label>
+                <div className="textarea__wrapper">
+                  <textarea
+                    className="field__textarea"
+                    id="message"
+                    placeholder="Describe your issue or question in detail…"
+                    value={formData.message}
+                    onChange={handleChange}
+                  />
+                  <span className={`char__count ${charClass}`}>
+                    {msgLen}/{MAX_MESSAGE}
+                  </span>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="submit__btn"
+                disabled={isLoading}
+              >
+                {isLoading ? "Sending…" : <>Send message <ArrowIcon size={16} /></>}
+              </button>
+            </form>
+          )}
         </div>
-      </FlexibleSection>
+
+        {/* ── Info panel ── */}
+        <div className="info__panel">
+          <a href="mailto:support@oosri.com" className="info__card">
+            <div className="info__icon__wrap">
+              <MailIcon size={20} />
+            </div>
+            <div className="info__text">
+              <p className="info__label">Email</p>
+              <p className="info__value">support@oosri.com</p>
+              <p className="info__hint">Best for detailed inquiries</p>
+            </div>
+          </a>
+
+          <a href="tel:+2347011067109" className="info__card">
+            <div className="info__icon__wrap">
+              <PhoneIcon size={20} />
+            </div>
+            <div className="info__text">
+              <p className="info__label">Phone</p>
+              <p className="info__value">+234 701 106 7109</p>
+              <p className="info__hint">Mon – Fri, 9 am – 6 pm WAT</p>
+            </div>
+          </a>
+
+          <div className="faq__card">
+            <p className="faq__title">Quick answers</p>
+            <p className="faq__desc">
+              Shipping timelines, return policy, payment methods — our FAQ covers the most common questions.
+            </p>
+            <Link href="/faq">
+              Browse FAQ <ArrowIcon size={13} />
+            </Link>
+          </div>
+        </div>
+      </div>
     </ContactWrapper>
   );
 }

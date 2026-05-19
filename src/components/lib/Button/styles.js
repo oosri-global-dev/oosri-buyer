@@ -35,26 +35,53 @@ export default styled(Button).withConfig({
   opacity: ${({ opacity }) => opacity || "1"};
   outline: none;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease, opacity 0.12s ease;
   font-weight: 600;
   font-size: ${({ fontSize }) => fontSize || "13px"};
+
+  /* Kill Ant Design ripple wave animation */
+  &::after,
+  &::before {
+    display: none !important;
+    animation: none !important;
+  }
 
   span {
     color: ${({ color }) => color || "var(--orrsiBlack)"};
     font-size: ${({ fontSize }) => fontSize || "13px"};
   }
 
-  &:hover {
-    background: ${({ hoverBg }) => hoverBg || "var(--orrsiPrimary)"};
-    cursor: pointer;
+  &:hover:not(:disabled) {
+    background: ${({ hoverBg }) => hoverBg || "var(--orrsiPrimary)"} !important;
     border-color: ${({ hoverBg, borderColor }) =>
-    hoverBg ? hoverBg : borderColor || "var(--orrsiPrimary) !important"};
+    hoverBg ? hoverBg : borderColor || "var(--orrsiPrimary)"} !important;
     color: ${({ hoverColor }) => hoverColor || "var(--orrsiWhite)"} !important;
-    cursor: pointer !important;
 
     span {
-      color: ${({ hoverColor }) =>
-    hoverColor || "var(--orrsiWhite)"} !important;
+      color: ${({ hoverColor }) => hoverColor || "var(--orrsiWhite)"} !important;
+    }
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--orrsiPrimary);
+    outline-offset: 2px;
+  }
+
+  /* Disabled: keep our custom background/color, drop Ant Design's opacity override */
+  &:disabled,
+  &[disabled] {
+    cursor: not-allowed;
+    opacity: ${({ opacity }) => opacity || "1"} !important;
+    background: ${({ backgroundColor }) => backgroundColor || "transparent"} !important;
+    border-color: ${({ borderColor }) => borderColor || "transparent"} !important;
+
+    span {
+      color: ${({ color }) => color || "var(--orrsiBlack)"} !important;
     }
   }
 
@@ -66,19 +93,6 @@ export default styled(Button).withConfig({
     font-size: 11px;
     color: inherit;
     margin: 0 0 -2px 4px;
-    transition: all 0.3s ease;
     color: ${({ color }) => color || "var(--orrsiPrimary)"};
-  }
-
-  :focus,
-  :active {
-    background: ${({ hoverBg }) => hoverBg || "transparent"};
-    border-color: ${({ hoverBg, borderColor }) =>
-    hoverBg ? hoverBg : borderColor || "var(--orrsiPrimary)"};
-
-    span,
-    small {
-      color: ${({ borderColor }) => borderColor || "var(--orrsiPrimary)"};
-    }
   }
 `;

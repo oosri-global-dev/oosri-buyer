@@ -1,19 +1,15 @@
-import { FlexibleDiv } from "@/components/lib/Box/styles";
 import styled from "styled-components";
 
-export const ProductDescWrapper = styled(FlexibleDiv)`
+export const ProductDescWrapper = styled.div`
   width: 100%;
-  justify-content: flex-start;
+  font-size: 0.9rem;
+  color: #444;
+  line-height: 1.75;
 
-  p {
-    margin: 0;
-    font-size: 0.9rem;
-    width: 70%;
-  }
-
-  @media (max-width: 550px) {
-    p {
-      width: 100%;
-    }
-  }
+  p { margin: 0 0 12px; }
+  h1, h2, h3, h4 { color: #1a1a1a; margin: 16px 0 8px; }
+  ul, ol { padding-left: 20px; margin: 0 0 12px; }
+  li { margin-bottom: 4px; }
+  strong, b { color: #1a1a1a; }
+  a { color: var(--orrsiPrimary); text-decoration: underline; }
 `;

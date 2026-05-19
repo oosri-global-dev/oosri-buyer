@@ -463,6 +463,86 @@ export const PaymentModalContent = styled.div`
     }
   }
 
+  .address__tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 999px;
+    margin-top: 4px;
+
+    &.paystack__tag {
+      background: #e6f9ef;
+      color: #00703c;
+      border: 1px solid #b3e8cc;
+    }
+
+    &.stripe__tag {
+      background: #eef2ff;
+      color: #4f46e5;
+      border: 1px solid #c7d2fe;
+    }
+  }
+
+  .gateway__banner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 14px 18px;
+    border-radius: 12px;
+    border: 2px solid;
+    box-sizing: border-box;
+
+    &.paystack {
+      background: linear-gradient(135deg, #f0fff7 0%, #e6f9ef 100%);
+      border-color: #b3e8cc;
+    }
+
+    &.stripe {
+      background: linear-gradient(135deg, #f0f2ff 0%, #eef2ff 100%);
+      border-color: #c7d2fe;
+    }
+
+    .gateway__icon {
+      font-size: 1.8rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .gateway__info {
+      flex: 1;
+
+      .gateway__name {
+        font-size: 1rem;
+        font-weight: 700;
+        margin: 0 0 2px 0;
+        color: #1a1a2e;
+      }
+
+      .gateway__desc {
+        font-size: 0.8rem;
+        color: #555;
+        margin: 0;
+        line-height: 1.4;
+      }
+    }
+
+    .gateway__badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.8);
+      color: #333;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+  }
+
   .shipping__details__compact {
     padding: 12px 16px;
     margin-bottom: 16px;
@@ -627,6 +707,25 @@ export const PaymentModalContent = styled.div`
         }
       }
     }
+  }
+
+  .calculating__loader {
+    font-size: 0.85rem;
+    color: #888;
+    font-style: italic;
+
+    .dots::after {
+      content: "";
+      display: inline-block;
+      animation: dotdotdot 1.2s steps(4, end) infinite;
+    }
+  }
+
+  @keyframes dotdotdot {
+    0%   { content: ""; }
+    25%  { content: "."; }
+    50%  { content: ".."; }
+    75%  { content: "..."; }
   }
 
   .complete__payment__btn {

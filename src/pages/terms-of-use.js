@@ -13,6 +13,6 @@ const TermsOfUse = () => {
   );
 };
 
-TermsOfUse.getLayout = (page) => <GeneralLayout>{page}</GeneralLayout>;
+TermsOfUse.getLayout = (page) => <GeneralLayout fullBleed>{page}</GeneralLayout>;
 
 export default TermsOfUse;
