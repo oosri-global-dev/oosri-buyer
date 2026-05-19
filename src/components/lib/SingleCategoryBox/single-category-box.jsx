@@ -14,7 +14,8 @@ export default function SingleCategoryBox({ data, key }) {
           src={data.image || "/images/homepage/default.png"}
           alt="single-category"
           fill
-          objectFit="cover"
+          style={{ objectFit: "cover" }}
+          unoptimized
         />
       </div>
 

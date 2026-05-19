@@ -25,12 +25,15 @@ export const HeroSectionWrapper = styled(FlexibleSection)`
     flex-direction: row;
     width: 100%;
     justify-content: flex-start;
-    align-items: flex-start;
-    gap: 1.8%;
+    align-items: stretch;
+    gap: 1.2%;
     margin: 35px 0;
     overflow-x: auto;
     background: #fff;
     box-shadow: none;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
   }
 
   @media (max-width: 650px) {

@@ -4,41 +4,46 @@ import { FlexibleDiv } from "../Box/styles";
 export const SingleCategoryBoxWrapper = styled(FlexibleDiv)`
   flex-direction: column;
   flex-basis: 18.5%;
+  flex-shrink: 0;
   overflow: hidden;
   position: relative;
-  border-radius: 10px;
+  border-radius: 12px;
   background: #f5f5f5;
-  box-shadow: 0px 4px 30px 0px rgba(0, 0, 0, 0.2);
-  height: 210px;
+  border: 1px solid #ebebeb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  height: 200px;
   flex-wrap: nowrap;
-  transition: all 0.3s ease;
-  margin-bottom: 20px;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
   box-sizing: border-box;
 
   &:hover {
-    border: 0.5px solid var(--orrsiPrimary);
+    border-color: var(--orrsiPrimary);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
     cursor: pointer;
   }
 
   .category__image {
-    max-width: 80%;
-    height: 100px;
-    flex-grow: 1;
+    width: 100%;
+    flex: 1;
     position: relative;
-    width: inherit;
-
-    img {
-      padding: 20px 0;
-      box-sizing: border-box;
-    }
+    overflow: hidden;
   }
 
   .category__name {
     width: 100%;
     text-align: center;
-    background: var(--orrsiWhite);
+    background: #fff;
     margin: 0;
-    padding: 14px 0;
+    padding: 11px 8px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #222;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 0;
+    border-top: 1px solid #f0f0f0;
   }
 
   @media (max-width: 1300px) {
@@ -47,37 +52,23 @@ export const SingleCategoryBoxWrapper = styled(FlexibleDiv)`
 
   @media (max-width: 1050px) {
     flex-basis: 23.6%;
+    height: 180px;
   }
 
   @media (max-width: 720px) {
-    height: 150px;
-
-    .category__image {
-      height: 70px;
-      max-width: 60%;
-      object-fit: contain;
-    }
+    height: 155px;
+    flex-basis: 30%;
   }
 
-  /* media query for mobiles */
   @media (max-width: 430px) {
     flex-basis: auto;
-    min-width: 30%;
-    height: fit-content;
-    border: 0.5px solid rgba(0, 0, 0, 0.2);
+    min-width: 28%;
+    height: 130px;
     box-shadow: none;
 
-    .category__image {
-      height: 75px;
-
-      img {
-        padding: 5px 0;
-      }
-    }
-
     .category__name {
-      font-size: 13px;
-      padding: 10px 0;
+      font-size: 0.73rem;
+      padding: 8px 4px;
     }
   }
 `;
