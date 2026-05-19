@@ -19,6 +19,7 @@ import ProductCard, { LoadingCard } from "@/components/lib/ProductCard/productCa
 import { useProductsQuery, useProductCategoriesQuery } from "@/network/product";
 import { useSearchQuery } from "@/network/search";
 import { FaFilter } from "react-icons/fa";
+import { useCurrency } from "@/context";
 
 const MAX_PRICE_USD = 7000;
 
@@ -81,8 +82,16 @@ function parseUsdPrice(value) {
   return n;
 }
 
-/** Price getter aligned with common data shapes (direct, alternates, variants min) */
+/** Price getter — prefers pre-converted USD fields returned by the API */
 function getEffectiveProductPrice(product) {
+  // Prefer explicit USD fields set by the backend FX conversion
+  const usd =
+    product?.regularPriceUSD ??
+    product?.discountPriceUSD ??
+    product?.salesPriceUSD;
+  if (Number.isFinite(usd) && usd > 0) return usd;
+
+  // Fall back to raw price fields parsed as USD
   const direct = parseUsdPrice(product?.productPrice);
   if (Number.isFinite(direct)) return direct;
 
@@ -136,6 +145,12 @@ const SORT_OPTIONS = [
 
 export default function ShopPage() {
   const router = useRouter();
+  const { currency, fxRates, currencyData } = useCurrency();
+  const currencyRate = fxRates[currency] ?? currencyData?.rate ?? 1;
+  const currencySymbol = currencyData?.symbol ?? "$";
+  const maxPriceLocal = Math.round(MAX_PRICE_USD * currencyRate);
+  const priceStep = Math.max(1, Math.round(maxPriceLocal / 700));
+
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedSubCategories, setSelectedSubCategories] = useState({});
   const [priceRange, setPriceRange] = useState([0, MAX_PRICE_USD]);
@@ -153,6 +168,12 @@ export default function ShopPage() {
     setShuffleSeed(Date.now());
   }, []);
 
+  // Reset price range to full span whenever the user switches currency
+  useEffect(() => {
+    setPriceRange([0, maxPriceLocal]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currency]);
+
   // Read search query from URL (?q=) — drives Algolia search mode
   const searchTerm = useMemo(() => {
     if (!router.isReady) return "";
@@ -162,16 +183,19 @@ export default function ShopPage() {
 
   const isSearchMode = searchTerm.length >= 2;
 
-  // Apply URL query params (category) once ready — skip when in search mode
+  // Sync category from URL — runs whenever ?category= changes
   useEffect(() => {
-    if (urlParamsApplied || !router.isReady) return;
+    if (!router.isReady) return;
     const { category } = router.query;
     if (category && !isSearchMode) {
       const decoded = decodeURIComponent(String(category));
       setSelectedCategories([decoded]);
+    } else if (!category && !isSearchMode && !urlParamsApplied) {
+      setSelectedCategories([]);
     }
     setUrlParamsApplied(true);
-  }, [router.isReady, router.query, urlParamsApplied, isSearchMode]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router.isReady, router.query.category]);
 
   const {
     data: productCategories,
@@ -266,11 +290,9 @@ export default function ShopPage() {
     return Object.values(selectedSubCategories).flat();
   }, [selectedSubCategories]);
 
-  // max at 7000 acts as "All prices" (Infinity) so items above 7000 don't disappear.
   const effectivePriceRange = useMemo(() => {
     const min = Number(priceRange?.[0] ?? 0);
-    const maxRaw = Number(priceRange?.[1] ?? MAX_PRICE_USD);
-    const max = maxRaw >= MAX_PRICE_USD ? Infinity : maxRaw;
+    const max = Number(priceRange?.[1] ?? MAX_PRICE_USD);
     return [min, max];
   }, [priceRange]);
 
@@ -279,8 +301,9 @@ export default function ShopPage() {
     const [minPrice, maxPrice] = effectivePriceRange;
 
     return productsList.filter((product) => {
-      const price = getEffectiveProductPrice(product);
-      if (Number.isFinite(price)) {
+      const priceUSD = getEffectiveProductPrice(product);
+      if (Number.isFinite(priceUSD)) {
+        const price = Math.round(priceUSD * currencyRate);
         if (price < minPrice || price > maxPrice) return false;
       }
 
@@ -326,9 +349,9 @@ export default function ShopPage() {
   const clearFilters = useCallback(() => {
     setSelectedCategories([]);
     setSelectedSubCategories({});
-    setPriceRange([0, MAX_PRICE_USD]);
+    setPriceRange([0, maxPriceLocal]);
     setOpenSelects({});
-  }, []);
+  }, [maxPriceLocal]);
 
   const filterContentNode = useMemo(() => (
     <div className="category__filters">
@@ -360,20 +383,18 @@ export default function ShopPage() {
 
             <div className="price__filter">
               <label>
-                Price: ${Number(priceRange[0]).toLocaleString()} - $
-                {Number(priceRange[1]).toLocaleString()}
-                {Number(priceRange[1]) >= MAX_PRICE_USD ? " (All prices)" : ""}
+                Price: {currencySymbol}{Number(priceRange[0]).toLocaleString()} – {currencySymbol}{Number(priceRange[1]).toLocaleString()}
               </label>
 
               <Slider
                 range
                 min={0}
-                max={MAX_PRICE_USD}
-                step={1}
+                max={maxPriceLocal}
+                step={priceStep}
                 value={priceRange}
                 onChange={(val) => setPriceRange(val)}
                 tooltip={{
-                  formatter: (v) => `$${Number(v).toLocaleString()}`,
+                  formatter: (v) => `${currencySymbol}${Number(v).toLocaleString()}`,
                 }}
               />
 
@@ -452,22 +473,26 @@ export default function ShopPage() {
       )}
     </div>
   ), [
-    isLoadingCategories, 
-    isErrorCategories, 
-    isSuccessCategories, 
-    clearFilters, 
-    categoryOptions, 
-    handleCategoryChange, 
-    selectedCategories, 
-    priceRange, 
-    productCategories, 
-    handleSubCategoryChange, 
-    handleDropdownVisibleChange, 
-    openSelects, 
-    formatCategory, 
-    allSelectedSubCategories, 
+    isLoadingCategories,
+    isErrorCategories,
+    isSuccessCategories,
+    clearFilters,
+    categoryOptions,
+    handleCategoryChange,
+    selectedCategories,
+    priceRange,
+    productCategories,
+    handleSubCategoryChange,
+    handleDropdownVisibleChange,
+    openSelects,
+    formatCategory,
+    allSelectedSubCategories,
     handleRemoveSubCategory,
-    selectedSubCategories
+    selectedSubCategories,
+    currency,
+    currencySymbol,
+    maxPriceLocal,
+    priceStep,
   ]);
 
   return (

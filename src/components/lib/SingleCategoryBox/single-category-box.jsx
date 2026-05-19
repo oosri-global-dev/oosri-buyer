@@ -14,7 +14,7 @@ export default function SingleCategoryBox({ data }) {
           src={data.image || "/images/homepage/default.png"}
           alt={data.name || "category"}
           fill
-          style={{ objectFit: "contain", padding: "14px" }}
+          style={{ objectFit: "cover" }}
           sizes="(max-width: 430px) 110px, (max-width: 720px) 130px, 160px"
         />
       </div>

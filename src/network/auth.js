@@ -69,7 +69,6 @@ export const googleLogin = async (payload) => {
     payload,
     { withCredentials: true }
   );
-
   return data;
 };
 

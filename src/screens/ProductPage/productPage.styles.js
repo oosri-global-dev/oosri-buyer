@@ -119,6 +119,55 @@ export const ProductPageWrapper = styled.div`
     gap: 0;
   }
 
+  /* ── Seller row + share ── */
+  .pdp__seller__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 0 0 10px;
+  }
+
+  .pdp__seller__link {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--orrsiPrimary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    transition: opacity 0.12s;
+    &:hover { opacity: 0.7; }
+  }
+
+  .pdp__share__group {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .pdp__share__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 20px;
+    background: #fff;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #555;
+    cursor: pointer;
+    transition: border-color 0.12s, color 0.12s, background 0.12s;
+    white-space: nowrap;
+    flex-shrink: 0;
+    &:hover { border-color: var(--orrsiPrimary); color: var(--orrsiPrimary); }
+
+    &.pdp__share__icon {
+      padding: 5px 9px;
+    }
+  }
+
   .pdp__brand {
     font-size: 0.8rem;
     font-weight: 700;

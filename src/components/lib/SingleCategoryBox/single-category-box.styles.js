@@ -24,7 +24,7 @@ export const SingleCategoryBoxWrapper = styled.div`
     width: 100%;
     height: 120px;
     flex-shrink: 0;
-    background: #f5f5f5;
+    overflow: hidden;
   }
 
   /* Name label */

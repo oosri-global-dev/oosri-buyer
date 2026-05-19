@@ -24,7 +24,7 @@ import {
 import { useFormatPrice } from "@/data-helpers/hooks";
 import { TOAST_BOX } from "@/context/types";
 import { useMainContext } from "@/context";
-import { MdEdit as EditIcon, MdDelete as DeleteIcon, MdStar as StarFilledIcon, MdStarOutline as StarOutlineIcon } from "react-icons/md";
+import { MdEdit as EditIcon, MdDelete as DeleteIcon, MdStar as StarFilledIcon, MdStarOutline as StarOutlineIcon, MdPayments as PaystackIcon, MdCreditCard as CardIcon, MdLocalShipping as ShippingIcon, MdLock as LockIcon } from "react-icons/md";
 import { Spin } from "antd";
 import { useRouter } from "next/router";
 import { useLoadScript } from "@react-google-maps/api";
@@ -507,7 +507,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
             {/* ── 1. Address Section ─────────────────────────────────── */}
             <div className="address__section">
               <h3 className="section__title">
-                <LocationIcon size={18} color="var(--orrsiPrimary)" />
+                <LocationIcon size={14} />
                 Delivery Address
               </h3>
               {isLoadingAddresses ? (
@@ -541,10 +541,10 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                             <p className="address__details">{addr.cityName}, {addr.postalCode}</p>
                             <p className="address__details">{addr.countryName} ({addr.countryCode})</p>
                             {addr.countryCode === "NG" && (
-                              <span className="address__tag paystack__tag">🇳🇬 Paystack • ₦{NIGERIAN_FLAT_RATE_NGN.toLocaleString()} flat shipping</span>
+                              <span className="address__tag paystack__tag">Paystack · ₦{NIGERIAN_FLAT_RATE_NGN.toLocaleString()} flat shipping</span>
                             )}
                             {addr.countryCode !== "NG" && (
-                              <span className="address__tag stripe__tag">🌍 Stripe • DHL / Haulam shipping</span>
+                              <span className="address__tag stripe__tag">Stripe · DHL / Haulam shipping</span>
                             )}
                           </FlexibleDiv>
                           <FlexibleDiv gap="8px" flexWrap="nowrap" justifyContent="flex-start" alignItems="center">
@@ -679,7 +679,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
               <div className={`gateway__banner ${isNigerianBuyer ? "paystack" : "stripe"}`}>
                 {isNigerianBuyer ? (
                   <>
-                    <span className="gateway__icon">🇳🇬</span>
+                    <span className="gateway__icon"><PaystackIcon size={20} /></span>
                     <div className="gateway__info">
                       <p className="gateway__name">Paystack</p>
                       <p className="gateway__desc">Secure Nigerian payment — cards, bank transfer, USSD</p>
@@ -688,7 +688,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                   </>
                 ) : (
                   <>
-                    <span className="gateway__icon">💳</span>
+                    <span className="gateway__icon"><CardIcon size={20} /></span>
                     <div className="gateway__info">
                       <p className="gateway__name">Stripe</p>
                       <p className="gateway__desc">Secure international payment — all major cards</p>
@@ -702,25 +702,25 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
             {/* ── 3. Shipping Section ────────────────────────────────── */}
             {(selectedAddress || (isNigerianBuyer && (showAddForm || isEditing))) && (
               <div className="shipping__details__compact">
-                <h3 className="section__title" style={{ marginBottom: 12 }}>🚚 Delivery</h3>
+                <h3 className="section__title" style={{ marginBottom: 12 }}><ShippingIcon size={14} /> Delivery</h3>
                 {isLoadingShippingFee ? (
                   <FlexibleDiv gap="10px" justifyContent="flex-start" alignItems="center">
                     <Spin size="small" />
-                    <span style={{ fontSize: "0.85rem", color: "#666" }}>Calculating delivery…</span>
+                    <span style={{ fontSize: "0.85rem", color: "#888" }}>Calculating delivery…</span>
                   </FlexibleDiv>
                 ) : shippingInfo ? (
                   <>
                     <FlexibleDiv gap="8px" flexWrap="wrap" justifyContent="flex-start" alignItems="center">
                       {isNigerianBuyer ? (
                         <>
-                          <span className="shipping__badge">📦 Standard Delivery</span>
-                          <span className="shipping__badge">⏱ 3–5 business days</span>
+                          <span className="shipping__badge">Standard Delivery</span>
+                          <span className="shipping__badge">3–5 business days</span>
                           <span className="shipping__badge">₦{NIGERIAN_FLAT_RATE_NGN.toLocaleString()} flat rate</span>
                         </>
                       ) : (
                         <>
-                          {shippingInfo.providerDisplayName && <span className="shipping__badge">🚛 via {shippingInfo.providerDisplayName}</span>}
-                          {shippingInfo.totalTransitDays && <span className="shipping__badge">⏱ {shippingInfo.totalTransitDays} day{shippingInfo.totalTransitDays !== 1 ? "s" : ""}</span>}
+                          {shippingInfo.providerDisplayName && <span className="shipping__badge">via {shippingInfo.providerDisplayName}</span>}
+                          {shippingInfo.totalTransitDays && <span className="shipping__badge">{shippingInfo.totalTransitDays} day{shippingInfo.totalTransitDays !== 1 ? "s" : ""}</span>}
                           <span className="shipping__badge">{formatPrice(shippingFeeUSD)}</span>
                         </>
                       )}
@@ -729,8 +729,8 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                   </>
                 ) : isNigerianBuyer ? (
                   <FlexibleDiv gap="8px" flexWrap="wrap" justifyContent="flex-start" alignItems="center">
-                    <span className="shipping__badge">📦 Standard Delivery</span>
-                    <span className="shipping__badge">⏱ 3–5 business days</span>
+                    <span className="shipping__badge">Standard Delivery</span>
+                    <span className="shipping__badge">3–5 business days</span>
                     <span className="shipping__badge">₦{NIGERIAN_FLAT_RATE_NGN.toLocaleString()} flat rate</span>
                   </FlexibleDiv>
                 ) : null}
@@ -782,7 +782,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                   <p className="summary__label">Shipping:</p>
                   <p className="summary__value">
                     {isLoadingShippingFee ? (
-                      <span className="calculating__loader">Calculating<span className="dots"></span></span>
+                      <span className="calculating__loader">Calculating…</span>
                     ) : isNigerianBuyer ? (
                       `₦${NIGERIAN_FLAT_RATE_NGN.toLocaleString()}`
                     ) : (
@@ -801,47 +801,55 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
 
             {/* ── 5. Pay Button ──────────────────────────────────────── */}
             {isNigerianBuyer ? (
-              <Button
-                onClick={isPaymentReady ? handlePaystackPayment : undefined}
-                backgroundColor={isPaymentReady ? "#00b14f" : "#b0bec5"}
-                hoverBg={isPaymentReady ? "#00c95a" : "#b0bec5"}
-                color="#fff"
-                radius="10px"
-                height="52px"
-                width="100%"
-                fontSize="1rem"
-                opacity={isPaymentReady ? "1" : "0.65"}
-                loading={createPaystackCheckout.isPending || createPaystackCheckout.isLoading}
-                disabled={createPaystackCheckout.isPending || createPaystackCheckout.isLoading}
-                style={{
-                  boxShadow: isPaymentReady ? "0 4px 20px rgba(0, 177, 79, 0.35)" : "none",
-                  cursor: !isPaymentReady ? "not-allowed" : "pointer",
-                }}
-                className="complete__payment__btn"
-              >
-                🇳🇬 Pay ₦{totalNGN.toLocaleString()} with Paystack
-              </Button>
+              <div className="pay__button__wrap">
+                <Button
+                  onClick={isPaymentReady ? handlePaystackPayment : undefined}
+                  backgroundColor={isPaymentReady ? "#00b14f" : "#b0bec5"}
+                  hoverBg={isPaymentReady ? "#009944" : "#b0bec5"}
+                  color="#fff"
+                  radius="10px"
+                  height="56px"
+                  width="100%"
+                  fontSize="1rem"
+                  opacity={isPaymentReady ? "1" : "0.65"}
+                  loading={createPaystackCheckout.isPending || createPaystackCheckout.isLoading}
+                  disabled={createPaystackCheckout.isPending || createPaystackCheckout.isLoading}
+                  style={{ cursor: !isPaymentReady ? "not-allowed" : "pointer" }}
+                  className="complete__payment__btn"
+                >
+                  <LockIcon size={14} />
+                  Pay ₦{totalNGN.toLocaleString()} with Paystack
+                </Button>
+                <p className="payment__secure__note">
+                  <LockIcon size={11} />
+                  Secured by Paystack · 256-bit SSL encrypted
+                </p>
+              </div>
             ) : (
-              <Button
-                onClick={isPaymentReady ? handleCompletePayment : undefined}
-                backgroundColor={isPaymentReady ? "var(--orrsiPrimary)" : "#b0bec5"}
-                hoverBg={isPaymentReady ? "#e04040" : "#b0bec5"}
-                color="#fff"
-                radius="10px"
-                height="52px"
-                width="100%"
-                fontSize="1rem"
-                opacity={isPaymentReady ? "1" : "0.65"}
-                loading={createPaymentIntent.isPending || createPaymentIntent.isLoading}
-                disabled={createPaymentIntent.isPending || createPaymentIntent.isLoading}
-                style={{
-                  boxShadow: isPaymentReady ? "0 4px 20px rgba(252, 83, 83, 0.3)" : "none",
-                  cursor: !isPaymentReady ? "not-allowed" : "pointer",
-                }}
-                className="complete__payment__btn"
-              >
-                💳 Pay {formatPrice(totalUSD)} with Stripe
-              </Button>
+              <div className="pay__button__wrap">
+                <Button
+                  onClick={isPaymentReady ? handleCompletePayment : undefined}
+                  backgroundColor={isPaymentReady ? "var(--orrsiPrimary)" : "#b0bec5"}
+                  hoverBg={isPaymentReady ? "#e04040" : "#b0bec5"}
+                  color="#fff"
+                  radius="10px"
+                  height="56px"
+                  width="100%"
+                  fontSize="1rem"
+                  opacity={isPaymentReady ? "1" : "0.65"}
+                  loading={createPaymentIntent.isPending || createPaymentIntent.isLoading}
+                  disabled={createPaymentIntent.isPending || createPaymentIntent.isLoading}
+                  style={{ cursor: !isPaymentReady ? "not-allowed" : "pointer" }}
+                  className="complete__payment__btn"
+                >
+                  <LockIcon size={14} />
+                  Pay {formatPrice(totalUSD)} with Stripe
+                </Button>
+                <p className="payment__secure__note">
+                  <LockIcon size={11} />
+                  Secured by Stripe · 256-bit SSL encrypted
+                </p>
+              </div>
             )}
           </FlexibleDiv>
         )}

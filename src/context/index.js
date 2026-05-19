@@ -175,7 +175,7 @@ export const MainProvider = ({ children }) => {
         payload: remoteCart || [],
       });
     } catch (err) {
-      console.log(err);
+      // cart sync failure is non-fatal; UI shows stale cart
     } finally {
       if (!silent) {
         dispatch({
