@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import Head from "next/head";
 import Link from "next/link";
+import Image from "next/image";
 import { Pagination } from "antd";
 import { StorePageWrapper } from "./SellerStorePage.styles";
 import ProductCard, { LoadingCard } from "@/components/lib/ProductCard/productCard";
@@ -100,7 +101,7 @@ export default function SellerStorePage({ seller, identifier }) {
         {/* ── Banner ── */}
         <div className="store__banner">
           {storeProfile.bannerImage ? (
-            <img src={storeProfile.bannerImage} alt={`${storeName} banner`} className="banner__img" />
+            <Image src={storeProfile.bannerImage} alt={`${storeName} banner`} className="banner__img" fill style={{ objectFit: "cover" }} unoptimized />
           ) : null}
           <div className="banner__overlay" />
         </div>
@@ -109,7 +110,7 @@ export default function SellerStorePage({ seller, identifier }) {
         <div className="store__identity">
           <div className="store__avatar__wrap">
             {seller.profilePicture ? (
-              <img src={seller.profilePicture} alt={storeName} />
+              <Image src={seller.profilePicture} alt={storeName} fill style={{ objectFit: "cover" }} unoptimized />
             ) : (
               <span className="avatar__initials">{initials}</span>
             )}
