@@ -1,37 +1,39 @@
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import StripePaymentForm from "./StripePaymentForm";
-import { Input, Select } from "antd";
-import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
+import { Select } from "antd";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { StyledModal, PaymentModalContent } from "./paymentModal.styles";
 import { FlexibleDiv } from "../Box/styles";
 import Button from "../Button";
 import TextField from "../TextField";
 import { Form } from "antd";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 import { MdAdd as AddIcon, MdLocationOn as LocationIcon } from "react-icons/md";
 import {
   useBuyerAddresses,
   useCreateBuyerAddress,
   useUpdateBuyerAddress,
   useDeleteBuyerAddress,
+  useSetDefaultAddress,
   useGetShippingFee,
   useCreatePaymentIntent,
   useCreatePaystackCheckout,
 } from "@/network/checkout";
-import { formatCurrency } from "@/data-helpers/hooks";
+import { useFormatPrice } from "@/data-helpers/hooks";
 import { TOAST_BOX } from "@/context/types";
 import { useMainContext } from "@/context";
-import { MdEdit as EditIcon, MdDelete as DeleteIcon } from "react-icons/md";
+import { MdEdit as EditIcon, MdDelete as DeleteIcon, MdStar as StarFilledIcon, MdStarOutline as StarOutlineIcon, MdPayments as PaystackIcon, MdCreditCard as CardIcon, MdLocalShipping as ShippingIcon, MdLock as LockIcon } from "react-icons/md";
 import { Spin } from "antd";
 import { useRouter } from "next/router";
 import { useLoadScript } from "@react-google-maps/api";
 import AddressAutocompleteField from "./AddressAutocompleteField";
 
-const { TextArea } = Input;
-
 const GOOGLE_MAPS_LIBRARIES = ["places"];
 
-// Common countries list
+const NIGERIAN_FLAT_RATE_NGN = 2000;
+
 const COUNTRIES = [
   { code: "NG", name: "Nigeria" },
   { code: "GH", name: "Ghana" },
@@ -55,32 +57,16 @@ const COUNTRIES = [
   { code: "DK", name: "Denmark" },
 ];
 
-const countryOptions = COUNTRIES.map((country) => ({
-  label: country.name,
-  value: country.code,
-}));
-
+const countryOptions = COUNTRIES.map((c) => ({ label: c.name, value: c.code }));
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
-const NIGERIAN_FLAT_RATE_NGN = 2000;
-const NIGERIAN_FLAT_SHIPPING_INFO = {
-  totalPriceNGN: NIGERIAN_FLAT_RATE_NGN,
-  provider: 'FLAT_RATE',
-  providerDisplayName: 'Standard Delivery',
-  selectedServiceType: 'NG_FLAT_RATE',
-  selectedServiceName: 'Standard Delivery',
-  totalTransitDays: 3,
-  description: 'Standard flat-rate delivery within Nigeria (3–5 business days)',
-  features: ['Door-to-door delivery', 'SMS tracking updates'],
-  estimates: []
-};
-
 function loadPaystackScript() {
-  if (typeof window === 'undefined' || window.PaystackPop) return;
-  const script = document.createElement('script');
-  script.src = 'https://js.paystack.co/v1/inline.js';
+  if (typeof window === "undefined" || document.getElementById("paystack-inline-script")) return;
+  const script = document.createElement("script");
+  script.id = "paystack-inline-script";
+  script.src = "https://js.paystack.co/v1/inline.js";
   script.async = true;
-  document.head.appendChild(script);
+  document.body.appendChild(script);
 }
 
 export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItems = [] }) {
@@ -91,204 +77,170 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     libraries: GOOGLE_MAPS_LIBRARIES,
   });
 
-  const [selectedCountryCode, setSelectedCountryCode] = useState(undefined);
-
-  // Request storage access for third-party Stripe iframe (Chrome partitioning)
   useEffect(() => {
-    if (document.requestStorageAccess) {
-      document.requestStorageAccess().catch(() => { });
-    }
+    if (document.requestStorageAccess) document.requestStorageAccess().catch(() => {});
   }, []);
 
-  const { dispatch, user, setBuyNowItem } = useMainContext();
+  const { dispatch, user, setBuyNowItem, fxRates } = useMainContext();
+  const formatPrice = useFormatPrice();
   const [form] = Form.useForm();
+
+  // Address state
   const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editingAddressId, setEditingAddressId] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [shippingInfo, setShippingInfo] = useState(null);
-  const [selectedServiceType, setSelectedServiceType] = useState(null);
-  const [isLoadingShippingFee, setIsLoadingShippingFee] = useState(false);
+  const [selectedCountryCode, setSelectedCountryCode] = useState(undefined);
   const [selectedCountryName, setSelectedCountryName] = useState(undefined);
   const watchedCountryCode = Form.useWatch("countryCode", form);
 
   useEffect(() => {
     setSelectedCountryCode(watchedCountryCode);
-    if (!watchedCountryCode) {
-      setSelectedCountryName(undefined);
-      return;
-    }
-
-    const matchedCountry = COUNTRIES.find((country) => country.code === watchedCountryCode);
-    if (matchedCountry) {
-      setSelectedCountryName(matchedCountry.name);
-    }
+    if (!watchedCountryCode) { setSelectedCountryName(undefined); return; }
+    const match = COUNTRIES.find((c) => c.code === watchedCountryCode);
+    if (match) setSelectedCountryName(match.name);
   }, [watchedCountryCode]);
 
   const countrySelectOptions = useMemo(() => {
-    const options = [...countryOptions];
-    if (
-      selectedCountryCode &&
-      !options.some((option) => option.value === selectedCountryCode)
-    ) {
-      options.unshift({
-        label: selectedCountryName || selectedCountryCode,
-        value: selectedCountryCode,
-      });
+    const opts = [...countryOptions];
+    if (selectedCountryCode && !opts.some((o) => o.value === selectedCountryCode)) {
+      opts.unshift({ label: selectedCountryName || selectedCountryCode, value: selectedCountryCode });
     }
-    return options;
+    return opts;
   }, [selectedCountryCode, selectedCountryName]);
+
+  // Shipping state
+  const [shippingInfo, setShippingInfo] = useState(null);
+  const [selectedServiceType, setSelectedServiceType] = useState(null);
+  const [isLoadingShippingFee, setIsLoadingShippingFee] = useState(false);
 
   // Stripe state
   const [clientSecret, setClientSecret] = useState(null);
   const [paymentSummary, setPaymentSummary] = useState(null);
 
-  const { data: addressesData, isLoading: isLoadingAddresses } =
-    useBuyerAddresses();
+  const { data: addressesData, isLoading: isLoadingAddresses } = useBuyerAddresses();
   const createAddress = useCreateBuyerAddress();
   const updateAddress = useUpdateBuyerAddress();
   const deleteAddress = useDeleteBuyerAddress();
+  const setDefault = useSetDefaultAddress();
   const getShippingFee = useGetShippingFee();
+  const createPaymentIntent = useCreatePaymentIntent();
   const createPaystackCheckout = useCreatePaystackCheckout();
 
   const addresses = useMemo(() => addressesData?.body || [], [addressesData?.body]);
 
-  // Detect Nigerian buyer from selected address
+  // Derive selected address and Nigerian buyer flag
   const selectedAddress = useMemo(
-    () => addresses.find((addr) => (addr._id || addr.id) === selectedAddressId),
+    () => addresses.find((a) => (a._id || a.id) === selectedAddressId),
     [addresses, selectedAddressId]
   );
-  const isNigerianBuyer = selectedAddress?.countryCode === 'NG';
+  // When add/edit form is open, the form's live country input takes priority over the saved address
+  // so the gateway banner reacts instantly as the user types/selects their country.
+  const effectiveCountryCode = (showAddForm || isEditing)
+    ? (watchedCountryCode || selectedAddress?.countryCode || null)
+    : (selectedAddress?.countryCode || null);
+  const isNigerianBuyer = effectiveCountryCode === "NG";
 
-  // NGN subtotal from cart items (for Paystack / local display)
-  const subtotalNGN = useMemo(
-    () =>
-      cartItems.reduce((acc, item) => {
-        if (!item) return acc;
-        const price = (item.salesPrice > 0 ? item.salesPrice : item.regularPrice) || 0;
-        return acc + price * (item.quantity || 1);
-      }, 0),
-    [cartItems]
-  );
-
-  const shippingEstimates = Array.isArray(shippingInfo?.estimates)
-    ? shippingInfo.estimates
-    : [];
-  const selectedShippingOption = shippingEstimates.find(
-    (estimate) => estimate?.serviceType === selectedServiceType
-  ) || shippingEstimates[0] || null;
-
-  // For Nigerian buyers shipping is always the flat NGN rate; international uses USD
+  // Shipping calculations
+  const shippingEstimates = Array.isArray(shippingInfo?.estimates) ? shippingInfo.estimates : [];
+  const selectedShippingOption =
+    shippingEstimates.find((e) => e?.serviceType === selectedServiceType) ||
+    shippingEstimates[0] ||
+    null;
+  const shippingFeeUSD = selectedShippingOption?.estimateUSD || shippingInfo?.totalPriceUSD || 0;
   const shippingFeeNGN = isNigerianBuyer ? NIGERIAN_FLAT_RATE_NGN : 0;
-  const shippingFee = isNigerianBuyer
-    ? 0  // not used for display in NG flow
-    : selectedShippingOption?.estimateUSD || shippingInfo?.totalPriceUSD || 0;
 
-  const totalNGN = subtotalNGN + shippingFeeNGN;
-  const total = subtotal + shippingFee;
+  // Ensure subtotal is treated as USD. If the caller accidentally passed an NGN amount
+  // (large value with no fxRate hint), normalise it back to USD using the live rate.
+  const liveNGNRate = fxRates?.NGN || 1550;
+  const subtotalUSD = subtotal > 10000 && subtotal > liveNGNRate
+    ? Number((subtotal / liveNGNRate).toFixed(2))
+    : subtotal;
 
-  const selectedShippingServiceName =
-    selectedShippingOption?.serviceName || shippingInfo?.selectedServiceName || shippingInfo?.product;
-  const selectedShippingEta =
-    selectedShippingOption?.estimatedDeliveryDate || shippingInfo?.estimatedDeliveryDate;
-  const selectedShippingTransitDays =
-    selectedShippingOption?.totalTransitDays || shippingInfo?.totalTransitDays;
-  const selectedShippingProvider = shippingInfo?.providerDisplayName || shippingInfo?.provider || null;
-  const selectedShippingDescription =
-    selectedShippingOption?.description || shippingInfo?.description || null;
-  const selectedShippingFeatures = Array.isArray(selectedShippingOption?.features)
-    ? selectedShippingOption.features
-    : Array.isArray(shippingInfo?.features)
-    ? shippingInfo.features
-    : [];
-  const maxAddresses = 3;
+  // Derived totals
+  const subtotalNGN = Math.round(subtotalUSD * liveNGNRate);
+  const totalNGN = subtotalNGN + (isNigerianBuyer ? NIGERIAN_FLAT_RATE_NGN : 0);
+  const totalUSD = subtotalUSD + shippingFeeUSD;
 
-  const syncAddressFormValues = useCallback(
-    ({ address = "", cityName = "", postalCode = "", countryCode, countryName }) => {
-      const matchedCountry = COUNTRIES.find(
-        (c) => c.code === countryCode || c.name === countryName
-      );
-      const nextCountryCode = matchedCountry?.code || countryCode || undefined;
+  const maxAddresses = 5;
 
-      form.setFieldsValue({
-        address,
-        cityName,
-        postalCode,
-        countryCode: nextCountryCode,
-      });
-
-      setSelectedCountryCode(nextCountryCode);
-      setSelectedCountryName(matchedCountry?.name || countryName || nextCountryCode);
-    },
-    [form]
-  );
-
-  // Called by AddressAutocompleteField when a suggestion geocode result comes back
-  const onAddressAutocompleteSelect = useCallback(
-    (selectedAddress) => {
-      syncAddressFormValues(selectedAddress || {});
-    },
-    [syncAddressFormValues]
-  );
-
-  // Load Paystack inline script when a Nigerian address is selected
+  // Load Paystack script when a Nigerian address is selected
   useEffect(() => {
     if (isNigerianBuyer) loadPaystackScript();
   }, [isNigerianBuyer]);
 
-  // Function to fetch shipping fee when address is selected
-  const fetchShippingFee = useCallback(async (addressId, preferredServiceType = null) => {
-    if (!addressId || cartItems.length === 0) {
-      setShippingInfo(null);
-      setSelectedServiceType(null);
-      return;
-    }
+  const syncAddressFormValues = useCallback(
+    ({ address = "", cityName = "", postalCode = "", countryCode, countryName }) => {
+      const match = COUNTRIES.find((c) => c.code === countryCode || c.name === countryName);
+      const code = match?.code || countryCode || undefined;
+      form.setFieldsValue({ address, cityName, postalCode, countryCode: code });
+      setSelectedCountryCode(code);
+      setSelectedCountryName(match?.name || countryName || code);
+    },
+    [form]
+  );
 
-    // Nigerian addresses use a flat rate — no external API call needed
-    const addr = addresses.find((a) => (a._id || a.id) === addressId);
-    if (addr?.countryCode === 'NG') {
-      setShippingInfo(NIGERIAN_FLAT_SHIPPING_INFO);
-      setSelectedServiceType('NG_FLAT_RATE');
-      return;
-    }
+  const onAddressAutocompleteSelect = useCallback(
+    (sel) => syncAddressFormValues(sel || {}),
+    [syncAddressFormValues]
+  );
 
-    setIsLoadingShippingFee(true);
-    try {
-      const payload = {
-        addressId,
-        ...(preferredServiceType ? { serviceType: preferredServiceType } : {}),
-        items: cartItems.map((item) => ({
-          productId: item._id,
-          quantity: item.quantity,
-        })),
-      };
+  const fetchShippingFee = useCallback(
+    async (addressId, preferredServiceType = null) => {
+      if (!addressId || cartItems.length === 0) {
+        setShippingInfo(null);
+        setSelectedServiceType(null);
+        return;
+      }
 
-      const response = await getShippingFee.mutateAsync(payload);
-      const nextShippingInfo = response?.body || null;
-      setShippingInfo(nextShippingInfo);
-      const defaultSelectedServiceType =
-        nextShippingInfo?.selectedServiceType ||
-        nextShippingInfo?.productCode ||
-        nextShippingInfo?.estimates?.[0]?.serviceType ||
-        null;
-      setSelectedServiceType(defaultSelectedServiceType);
-    } catch (error) {
-      console.error("Error fetching shipping fee:", error);
-      dispatch({
-        type: TOAST_BOX,
-        payload: {
-          type: "error",
-          message: error?.response?.data?.message || "Failed to get shipping fee",
-        },
-      });
-      setShippingInfo(null);
-      setSelectedServiceType(null);
-    } finally {
-      setIsLoadingShippingFee(false);
-    }
-  }, [cartItems, dispatch, getShippingFee, addresses]);
+      // Nigerian buyers get flat rate — no API call needed
+      const addr = addresses.find((a) => (a._id || a.id) === addressId);
+      if (addr?.countryCode === "NG") {
+        const flatRateUSD = Number((NIGERIAN_FLAT_RATE_NGN / liveNGNRate).toFixed(2));
+        setShippingInfo({
+          totalPriceNGN: NIGERIAN_FLAT_RATE_NGN,
+          totalPriceUSD: flatRateUSD,
+          currency: "NGN",
+          provider: "FLAT_RATE",
+          providerDisplayName: "Standard Delivery",
+          productCode: "NG_FLAT_RATE",
+          selectedServiceType: "NG_FLAT_RATE",
+          totalTransitDays: 3,
+          description: "Standard flat-rate delivery within Nigeria (3–5 business days)",
+          features: ["Door-to-door delivery", "SMS tracking updates"],
+          estimates: [],
+        });
+        setSelectedServiceType("NG_FLAT_RATE");
+        return;
+      }
 
-  // Handle address selection
+      setIsLoadingShippingFee(true);
+      try {
+        const payload = {
+          addressId,
+          ...(preferredServiceType ? { serviceType: preferredServiceType } : {}),
+          items: cartItems.map((item) => ({ productId: item._id, quantity: item.quantity })),
+        };
+        const response = await getShippingFee.mutateAsync(payload);
+        const next = response?.body || null;
+        setShippingInfo(next);
+        setSelectedServiceType(
+          next?.selectedServiceType || next?.productCode || next?.estimates?.[0]?.serviceType || null
+        );
+      } catch (error) {
+        dispatch({
+          type: TOAST_BOX,
+          payload: { type: "error", message: error?.response?.data?.message || "Failed to get shipping fee" },
+        });
+        setShippingInfo(null);
+        setSelectedServiceType(null);
+      } finally {
+        setIsLoadingShippingFee(false);
+      }
+    },
+    [cartItems, dispatch, getShippingFee, addresses, liveNGNRate]
+  );
+
   const handleAddressSelect = (addressId) => {
     setSelectedAddressId(addressId);
     setShippingInfo(null);
@@ -300,9 +252,10 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     if (isOpen) {
       document.body.style.overflow = "hidden";
       if (addresses.length > 0 && !selectedAddressId) {
-        const firstAddressId = addresses[0]._id || addresses[0].id;
-        setSelectedAddressId(firstAddressId);
-        fetchShippingFee(firstAddressId);
+        const defaultAddr = addresses.find((a) => a.isDefault) || addresses[0];
+        const id = defaultAddr._id || defaultAddr.id;
+        setSelectedAddressId(id);
+        fetchShippingFee(id);
       }
     } else {
       document.body.style.overflow = "unset";
@@ -336,13 +289,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
 
   const handleShowAddForm = () => {
     if (addresses.length >= maxAddresses) {
-      dispatch({
-        type: TOAST_BOX,
-        payload: {
-          type: "error",
-          message: `You can only add up to ${maxAddresses} addresses`,
-        },
-      });
+      dispatch({ type: TOAST_BOX, payload: { type: "error", message: `You can only add up to ${maxAddresses} addresses` } });
       return;
     }
     setIsEditing(false);
@@ -375,89 +322,61 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
 
   const handleCountryChange = (code) => {
     setSelectedCountryCode(code);
-    const matchedCountry = COUNTRIES.find((country) => country.code === code);
-    setSelectedCountryName(matchedCountry?.name || code);
+    const match = COUNTRIES.find((c) => c.code === code);
+    setSelectedCountryName(match?.name || code);
+  };
+
+  const handleSetDefault = async (e, addressId) => {
+    e.stopPropagation();
+    try {
+      await setDefault.mutateAsync(addressId);
+      setSelectedAddressId(addressId);
+      fetchShippingFee(addressId);
+    } catch {
+      dispatch({ type: TOAST_BOX, payload: { type: "error", message: "Failed to set default address" } });
+    }
   };
 
   const handleDeleteAddress = async (addressId) => {
     try {
       await deleteAddress.mutateAsync(addressId);
-      dispatch({
-        type: TOAST_BOX,
-        payload: {
-          type: "success",
-          message: "Address deleted successfully",
-        },
-      });
+      dispatch({ type: TOAST_BOX, payload: { type: "success", message: "Address deleted successfully" } });
       if (selectedAddressId === addressId && addresses.length > 1) {
-        const remainingAddresses = addresses.filter(
-          (addr) => (addr._id || addr.id) !== addressId
-        );
-        if (remainingAddresses.length > 0) {
-          const nextAddressId = remainingAddresses[0]._id || remainingAddresses[0].id;
-          handleAddressSelect(nextAddressId);
+        const remaining = addresses.filter((a) => (a._id || a.id) !== addressId);
+        if (remaining.length > 0) {
+          const nextId = remaining[0]._id || remaining[0].id;
+          handleAddressSelect(nextId);
         } else {
           setSelectedAddressId(null);
           setShippingInfo(null);
         }
       }
     } catch (error) {
-      dispatch({
-        type: TOAST_BOX,
-        payload: {
-          type: "error",
-          message: error?.response?.data?.message || "Failed to delete address",
-        },
-      });
+      dispatch({ type: TOAST_BOX, payload: { type: "error", message: error?.response?.data?.message || "Failed to delete address" } });
     }
   };
 
   const handleSubmitAddress = async (values) => {
     try {
-      const resolvedCountryCode = values.countryCode || selectedCountryCode;
-      if (!resolvedCountryCode) {
-        dispatch({
-          type: TOAST_BOX,
-          payload: {
-            type: "error",
-            message: "Please select a country",
-          },
-        });
+      const resolvedCode = values.countryCode || selectedCountryCode;
+      if (!resolvedCode) {
+        dispatch({ type: TOAST_BOX, payload: { type: "error", message: "Please select a country" } });
         return;
       }
-      const selectedCountry = COUNTRIES.find((c) => c.code === resolvedCountryCode);
-      const countryCode = selectedCountry?.code || resolvedCountryCode;
-      const countryName = selectedCountry?.name || selectedCountryName || resolvedCountryCode;
-
+      const match = COUNTRIES.find((c) => c.code === resolvedCode);
       const addressData = {
         address: values.address,
         postalCode: values.postalCode,
         cityName: values.cityName,
-        countryCode,
-        countryName,
+        countryCode: match?.code || resolvedCode,
+        countryName: match?.name || selectedCountryName || resolvedCode,
       };
-
       if (isEditing && editingAddressId) {
-        await updateAddress.mutateAsync({
-          addressId: editingAddressId,
-          addressData,
-        });
-        dispatch({
-          type: TOAST_BOX,
-          payload: {
-            type: "success",
-            message: "Address updated successfully",
-          },
-        });
+        await updateAddress.mutateAsync({ addressId: editingAddressId, addressData });
+        dispatch({ type: TOAST_BOX, payload: { type: "success", message: "Address updated successfully" } });
       } else {
         await createAddress.mutateAsync(addressData);
-        dispatch({
-          type: TOAST_BOX,
-          payload: {
-            type: "success",
-            message: "Address added successfully",
-          },
-        });
+        dispatch({ type: TOAST_BOX, payload: { type: "success", message: "Address added successfully" } });
       }
       form.resetFields();
       setSelectedCountryCode(undefined);
@@ -466,204 +385,145 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
       setEditingAddressId(null);
       setShowAddForm(false);
     } catch (error) {
-      dispatch({
-        type: TOAST_BOX,
-        payload: {
-          type: "error",
-          message: error?.response?.data?.message || "Failed to save address",
-        },
-      });
+      dispatch({ type: TOAST_BOX, payload: { type: "error", message: error?.response?.data?.message || "Failed to save address" } });
     }
   };
 
-  const createPaymentIntent = useCreatePaymentIntent();
+  // ── Stripe payment ─────────────────────────────────────────────────────────
+  const handleCompletePayment = async () => {
+    if (!selectedAddressId) {
+      dispatch({ type: TOAST_BOX, payload: { type: "error", message: "Please select a delivery address" } });
+      return;
+    }
+    if (!user?._id && !user?.id) {
+      dispatch({ type: TOAST_BOX, payload: { type: "error", message: "User not found. Please log in." } });
+      return;
+    }
+    try {
+      const payload = {
+        buyerId: user._id || user.id,
+        addressId: selectedAddressId,
+        serviceType: selectedServiceType || selectedShippingOption?.serviceType || shippingInfo?.productCode,
+        items: cartItems.map((item) => ({ productId: item._id, quantity: item.quantity })),
+      };
+      const response = await createPaymentIntent.mutateAsync(payload);
+      if (response?.clientSecret) {
+        setClientSecret(response.clientSecret);
+        setPaymentSummary(response.summary);
+      } else {
+        dispatch({ type: TOAST_BOX, payload: { type: "success", message: response?.message || "Payment intent created" } });
+        handleCancel();
+      }
+    } catch (error) {
+      let msg = error?.response?.data?.message || error?.response?.data?.error || "Failed to create payment intent";
+      if (error?.response?.data?.stockIssues?.length > 0) {
+        msg = `Insufficient stock: ${error.response.data.stockIssues.map((i) => `${i.productName} (Available: ${i.availableStock})`).join("; ")}`;
+      }
+      dispatch({ type: TOAST_BOX, payload: { type: "error", message: msg } });
+    }
+  };
 
+  const handlePaymentSuccess = (paymentIntent) => {
+    dispatch({ type: TOAST_BOX, payload: { type: "success", message: "Payment successful!" } });
+    if (setBuyNowItem) setBuyNowItem(null);
+    handleCancel();
+    router.push(paymentIntent?.id ? `/order-confirmation?payment_intent=${paymentIntent.id}` : "/order-confirmation");
+  };
+
+  // ── Paystack payment ───────────────────────────────────────────────────────
   const handlePaystackPayment = async () => {
     if (!selectedAddressId) {
       dispatch({ type: TOAST_BOX, payload: { type: "error", message: "Please select a delivery address" } });
       return;
     }
     if (!user?._id && !user?.id) {
-      dispatch({ type: TOAST_BOX, payload: { type: "error", message: "Please log in to continue" } });
+      dispatch({ type: TOAST_BOX, payload: { type: "error", message: "Please log in to complete payment" } });
       return;
     }
-
-    try {
-      const response = await createPaystackCheckout.mutateAsync({
-        buyerId: user._id || user.id,
-        addressId: selectedAddressId,
-        items: cartItems.map((item) => ({ productId: item._id, quantity: item.quantity })),
-      });
-
-      const { authorizationUrl, reference, summary } = response;
-
-      if (!window.PaystackPop) {
-        // Fallback: redirect to Paystack hosted page if inline script didn't load
-        window.location.href = authorizationUrl;
-        return;
-      }
-
-      const handler = window.PaystackPop.setup({
-        key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
-        email: user.email,
-        amount: summary.total.kobo,
-        ref: reference,
-        currency: 'NGN',
-        onSuccess: () => {
-          dispatch({ type: TOAST_BOX, payload: { type: "success", message: "Payment successful! Your order is being processed." } });
-          if (setBuyNowItem) setBuyNowItem(null);
-          handleCancel();
-          router.push(`/order-confirmation?paystack_reference=${reference}`);
-        },
-        onCancel: () => {
-          dispatch({ type: TOAST_BOX, payload: { type: "info", message: "Payment was cancelled." } });
-        },
-      });
-
-      handler.openIframe();
-    } catch (error) {
-      const message = error?.response?.data?.message || error?.response?.data?.error || "Failed to initialize payment";
-      dispatch({ type: TOAST_BOX, payload: { type: "error", message } });
-    }
-  };
-
-  const handleCompletePayment = async () => {
-    if (!selectedAddressId) {
-      dispatch({
-        type: TOAST_BOX,
-        payload: {
-          type: "error",
-          message: "Please select a delivery address",
-        },
-      });
-      return;
-    }
-
-    if (!user?._id && !user?.id) {
-      dispatch({
-        type: TOAST_BOX,
-        payload: {
-          type: "error",
-          message: "User not found. Please log in.",
-        },
-      });
-      return;
-    }
-
     try {
       const payload = {
         buyerId: user._id || user.id,
         addressId: selectedAddressId,
-        serviceType: selectedServiceType || selectedShippingOption?.serviceType || shippingInfo?.productCode,
-        items: cartItems.map((item) => ({
-          productId: item._id,
-          quantity: item.quantity,
-        })),
+        items: cartItems.map((item) => ({ productId: item._id, quantity: item.quantity })),
       };
+      const response = await createPaystackCheckout.mutateAsync(payload);
+      const { authorizationUrl, reference } = response?.body || response || {};
 
-      const response = await createPaymentIntent.mutateAsync(payload);
+      if (!authorizationUrl || !reference) throw new Error("Paystack did not return a payment URL");
 
-      if (response && response.clientSecret) {
-        setClientSecret(response.clientSecret);
-        setPaymentSummary(response.summary);
-      } else {
-        dispatch({
-          type: TOAST_BOX,
-          payload: {
-            type: "success",
-            message: response?.message || "Payment intent created successfully",
+      if (typeof window !== "undefined" && window.PaystackPop) {
+        const handler = window.PaystackPop.setup({
+          key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
+          email: user.email,
+          amount: totalNGN * 100,
+          currency: "NGN",
+          ref: reference,
+          onClose: () => {
+            dispatch({ type: TOAST_BOX, payload: { type: "error", message: "Payment cancelled" } });
+          },
+          callback: () => {
+            if (setBuyNowItem) setBuyNowItem(null);
+            handleCancel();
+            router.push(`/order-confirmation?paystack_reference=${reference}`);
           },
         });
-        handleCancel();
+        handler.openIframe();
+      } else {
+        window.location.href = authorizationUrl;
       }
-
     } catch (error) {
-      console.error("Error creating payment intent:", error);
-
-      let errorMessage = error?.response?.data?.message || error?.response?.data?.error || "Failed to create payment intent";
-
+      let msg = error?.response?.data?.message || error?.message || "Failed to initiate Paystack payment";
       if (error?.response?.data?.stockIssues?.length > 0) {
-        const issues = error.response.data.stockIssues.map(issue =>
-          `${issue.productName} (Requested: ${issue.requestedQuantity}, Available: ${issue.availableStock})`
-        ).join('; ');
-        errorMessage = `Insufficient stock for: ${issues}`;
+        msg = `Insufficient stock: ${error.response.data.stockIssues.map((i) => `${i.productName} (Available: ${i.availableStock})`).join("; ")}`;
       }
-
-      dispatch({
-        type: TOAST_BOX,
-        payload: {
-          type: "error",
-          message: errorMessage,
-        },
-      });
+      dispatch({ type: TOAST_BOX, payload: { type: "error", message: msg } });
     }
   };
 
-  const handlePaymentSuccess = (paymentIntent) => {
-    dispatch({
-      type: TOAST_BOX,
-      payload: {
-        type: "success",
-        message: "Payment successful!",
-      },
-    });
-
-    if (setBuyNowItem) {
-      setBuyNowItem(null);
-    }
-
-    handleCancel();
-
-    if (paymentIntent?.id) {
-      router.push(`/order-confirmation?payment_intent=${paymentIntent.id}`);
-    } else {
-      router.push("/order-confirmation");
-    }
-  };
+  const isPaymentReady = !!selectedAddressId && !!shippingInfo && !isLoadingShippingFee;
 
   return (
     <StyledModal
-      title={clientSecret ? "Secure Payment" : "Complete Payment"}
+      title={clientSecret ? "Secure Payment" : "Checkout"}
       open={isOpen}
       onCancel={handleCancel}
       centered
       footer={null}
       closable={true}
-      width={600}
+      width={620}
     >
       <PaymentModalContent>
-        {clientSecret && typeof clientSecret === 'string' && clientSecret.length > 5 && stripePromise ? (
-          <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe' } }}>
+        {clientSecret && typeof clientSecret === "string" && clientSecret.length > 5 && stripePromise ? (
+          <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: "stripe" } }}>
             <StripePaymentForm
-              totalAmount={paymentSummary?.totalAmount?.dollars || total}
+              totalAmount={paymentSummary?.totalAmount?.dollars || totalUSD}
               onSuccess={handlePaymentSuccess}
-              onBack={() => {
-                setClientSecret(null);
-                setPaymentSummary(null);
-              }}
+              onBack={() => { setClientSecret(null); setPaymentSummary(null); }}
             />
           </Elements>
         ) : (
-          <FlexibleDiv
-            flexDir="column"
-            gap="25px"
-            justifyContent="flex-start"
-            alignItems="flex-start"
-          >
-            {/* Address Selection Section */}
+          <FlexibleDiv flexDir="column" gap="20px" justifyContent="flex-start" alignItems="flex-start">
+
+            {/* ── 1. Address Section ─────────────────────────────────── */}
             <div className="address__section">
               <h3 className="section__title">
-                <LocationIcon size={18} color="var(--orrsiPrimary)" />
-                Select Delivery Address
+                <LocationIcon size={14} />
+                Delivery Address
               </h3>
               {isLoadingAddresses ? (
-                <FlexibleDiv justifyContent="center" padding="20px">
-                  <Spin size="large" />
-                </FlexibleDiv>
+                <SkeletonTheme baseColor="rgba(148,148,148,0.1)" highlightColor="rgba(202,202,202,0.4)">
+                  <FlexibleDiv flexDir="column" gap="10px" alignItems="stretch">
+                    {[1, 2].map((i) => (
+                      <div key={i} style={{ padding: "14px 16px", borderRadius: 12, border: "1px solid #f0f0f0" }}>
+                        <Skeleton style={{ width: "70%", height: 13, marginBottom: 6 }} />
+                        <Skeleton style={{ width: "45%", height: 11, marginBottom: 4 }} />
+                        <Skeleton style={{ width: "30%", height: 11 }} />
+                      </div>
+                    ))}
+                  </FlexibleDiv>
+                </SkeletonTheme>
               ) : addresses.length === 0 ? (
-                <p className="no__address__text">
-                  No addresses found. Please add an address below.
-                </p>
+                <p className="no__address__text">No addresses found. Add one below.</p>
               ) : (
                 <div className="address__list">
                   {addresses.map((addr) => {
@@ -675,58 +535,40 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                         className={`address__card ${isSelected ? "selected" : ""}`}
                         onClick={() => handleAddressSelect(addressId)}
                       >
-                        <FlexibleDiv
-                          justifyContent="space-between"
-                          alignItems="flex-start"
-                          width="100%"
-                        >
-                          <FlexibleDiv
-                            flexDir="column"
-                            gap="4px"
-                            flex="1"
-                            justifyContent="flex-start"
-                            alignItems="flex-start"
-                          >
+                        <FlexibleDiv justifyContent="space-between" alignItems="flex-start" width="100%">
+                          <FlexibleDiv flexDir="column" gap="4px" flex="1" justifyContent="flex-start" alignItems="flex-start">
                             <p className="address__text">{addr.address}</p>
-                            <p className="address__details">
-                              {addr.cityName}, {addr.postalCode}
-                            </p>
-                            <p className="address__details">
-                              {addr.countryName} ({addr.countryCode})
-                            </p>
+                            <p className="address__details">{addr.cityName}, {addr.postalCode}</p>
+                            <p className="address__details">{addr.countryName} ({addr.countryCode})</p>
+                            {addr.countryCode === "NG" && (
+                              <span className="address__tag paystack__tag">Paystack · ₦{NIGERIAN_FLAT_RATE_NGN.toLocaleString()} flat shipping</span>
+                            )}
+                            {addr.countryCode !== "NG" && (
+                              <span className="address__tag stripe__tag">Stripe · DHL / Haulam shipping</span>
+                            )}
                           </FlexibleDiv>
-                          <FlexibleDiv
-                            gap="8px"
-                            flexWrap="nowrap"
-                            justifyContent="flex-start"
-                            alignItems="center"
-                          >
+                          <FlexibleDiv gap="8px" flexWrap="nowrap" justifyContent="flex-start" alignItems="center">
                             <button
-                              className="icon__button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleEditAddress(addr);
-                              }}
+                              className={`icon__button star__btn${addr.isDefault ? " active" : ""}`}
+                              onClick={(e) => handleSetDefault(e, addressId)}
                               type="button"
+                              title={addr.isDefault ? "Default address" : "Set as default"}
+                              disabled={setDefault.isPending}
                             >
+                              {addr.isDefault
+                                ? <StarFilledIcon size={16} color="#f5a623" />
+                                : <StarOutlineIcon size={16} />}
+                            </button>
+                            <button className="icon__button" onClick={(e) => { e.stopPropagation(); handleEditAddress(addr); }} type="button">
                               <EditIcon size={16} />
                             </button>
                             <button
                               className="icon__button delete__btn"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteAddress(addressId);
-                              }}
+                              onClick={(e) => { e.stopPropagation(); handleDeleteAddress(addressId); }}
                               type="button"
-                              disabled={
-                                deleteAddress.isPending || deleteAddress.isLoading
-                              }
+                              disabled={deleteAddress.isPending || deleteAddress.isLoading}
                             >
-                              {deleteAddress.isPending || deleteAddress.isLoading ? (
-                                <Spin size="small" />
-                              ) : (
-                                <DeleteIcon size={16} />
-                              )}
+                              {deleteAddress.isPending || deleteAddress.isLoading ? <Spin size="small" /> : <DeleteIcon size={16} />}
                             </button>
                           </FlexibleDiv>
                         </FlexibleDiv>
@@ -737,14 +579,10 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
               )}
             </div>
 
-            {/* Add/Edit Address Form */}
+            {/* ── Add/Edit Address Form ──────────────────────────────── */}
             <div className="address__form__section">
               {!showAddForm && !isEditing ? (
-                <FlexibleDiv
-                  justifyContent="flex-start"
-                  alignItems="center"
-                  margin="0"
-                >
+                <FlexibleDiv justifyContent="flex-start" alignItems="center" margin="0">
                   <Button
                     onClick={handleShowAddForm}
                     backgroundColor="var(--orrsiPrimary)"
@@ -754,50 +592,27 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                     padding="0px 16px"
                     fontSize="0.9rem"
                     disabled={addresses.length >= maxAddresses}
-                    style={{
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
                   >
-                    <FlexibleDiv
-                      gap="6px"
-                      justifyContent="flex-start"
-                      alignItems="center"
-                      flexWrap="nowrap"
-                    >
-                      <AddIcon size={16} style={{ margin: "0px" }} />
+                    <FlexibleDiv gap="6px" justifyContent="flex-start" alignItems="center" flexWrap="nowrap">
+                      <AddIcon size={16} style={{ margin: 0 }} />
                       <span>Add New Address</span>
                     </FlexibleDiv>
                   </Button>
                   {addresses.length >= maxAddresses && (
-                    <p
-                      className="max__address__warning"
-                      style={{ marginLeft: "12px", marginTop: 0 }}
-                    >
+                    <p className="max__address__warning" style={{ marginLeft: 12, marginTop: 0 }}>
                       Maximum {maxAddresses} addresses allowed
                     </p>
                   )}
                 </FlexibleDiv>
               ) : (
                 <>
-                  <FlexibleDiv
-                    justifyContent="space-between"
-                    alignItems="center"
-                    margin="0 0 20px 0"
-                  >
-                    <h3 className="section__title">
-                      {isEditing ? "Edit Address" : "Add New Address"}
-                    </h3>
+                  <FlexibleDiv justifyContent="space-between" alignItems="center" margin="0 0 20px 0">
+                    <h3 className="section__title">{isEditing ? "Edit Address" : "Add New Address"}</h3>
                     <button
                       className="cancel__edit__btn"
                       onClick={() => {
-                        if (isEditing) {
-                          setIsEditing(false);
-                          setEditingAddressId(null);
-                        } else {
-                          handleCancelAddForm();
-                        }
+                        if (isEditing) { setIsEditing(false); setEditingAddressId(null); }
+                        else handleCancelAddForm();
                         form.resetFields();
                         setSelectedCountryCode(undefined);
                         setSelectedCountryName(undefined);
@@ -808,95 +623,40 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                     </button>
                   </FlexibleDiv>
                   <Form form={form} onFinish={handleSubmitAddress}>
-                    <FlexibleDiv
-                      flexDir="column"
-                      gap="15px"
-                      justifyContent="flex-start"
-                      alignItems="stretch"
-                      width="100%"
-                    >
-                      {/* Address field — custom autocomplete using AutocompleteService + Geocoder */}
+                    <FlexibleDiv flexDir="column" gap="15px" justifyContent="flex-start" alignItems="stretch" width="100%">
                       <div className="form__field__wrapper">
                         <label className="input__label">Address</label>
-                        <Form.Item
-                          name="address"
-                          rules={[
-                            { required: true, message: "Please enter address" },
-                          ]}
-                        >
-                          <AddressAutocompleteField
-                            onAddressSelect={onAddressAutocompleteSelect}
-                            placeholder="Start typing your address..."
-                            disabled={!isMapsLoaded}
-                          />
+                        <Form.Item name="address" rules={[{ required: true, message: "Please enter address" }]}>
+                          <AddressAutocompleteField onAddressSelect={onAddressAutocompleteSelect} placeholder="Start typing your address..." disabled={!isMapsLoaded} />
                         </Form.Item>
                       </div>
-
-                      <FlexibleDiv
-                        gap="15px"
-                        flexWrap="nowrap"
-                        justifyContent="flex-start"
-                        alignItems="flex-start"
-                        width="100%"
-                      >
-                        <div className="form__field__wrapper" style={{ flex: "1" }}>
+                      <FlexibleDiv gap="15px" flexWrap="nowrap" justifyContent="flex-start" alignItems="flex-start" width="100%">
+                        <div className="form__field__wrapper" style={{ flex: 1 }}>
                           <label className="input__label">City</label>
-                          <Form.Item
-                            name="cityName"
-                            rules={[
-                              { required: true, message: "Please enter city" },
-                            ]}
-                          >
-                            <TextField
-                              placeholder="Auto-filled from address"
-                              borderRadius="10px"
-                              className="move__down"
-                              width="100%"
-                            />
+                          <Form.Item name="cityName" rules={[{ required: true, message: "Please enter city" }]}>
+                            <TextField placeholder="Auto-filled from address" borderRadius="10px" width="100%" />
                           </Form.Item>
                         </div>
-
-                        <div className="form__field__wrapper" style={{ flex: "1" }}>
+                        <div className="form__field__wrapper" style={{ flex: 1 }}>
                           <label className="input__label">Postal Code</label>
-                          <Form.Item
-                            name="postalCode"
-                            rules={[
-                              { required: true, message: "Please enter postal code" },
-                            ]}
-                          >
-                            <TextField
-                              placeholder="Auto-filled from address"
-                              borderRadius="10px"
-                              className="move__down"
-                              width="100%"
-                            />
+                          <Form.Item name="postalCode" rules={[{ required: true, message: "Please enter postal code" }]}>
+                            <TextField placeholder="Auto-filled from address" borderRadius="10px" width="100%" />
                           </Form.Item>
                         </div>
                       </FlexibleDiv>
-
-                        <div className="form__field__wrapper">
-                          <label className="input__label">Country</label>
-                          <Form.Item
-                            name="countryCode"
-                            rules={[
-                              { required: true, message: "Please select a country" },
-                            ]}
-                          >
-                            <Select
-                              placeholder="Auto-filled from address"
-                              className="country__select"
-                              onChange={handleCountryChange}
-                              options={countrySelectOptions}
-                              showSearch
-                              filterOption={(input, option) =>
-                                (option?.label ?? "")
-                                  .toLowerCase()
-                                  .includes(input.toLowerCase())
-                              }
-                            />
-                          </Form.Item>
-                        </div>
-
+                      <div className="form__field__wrapper">
+                        <label className="input__label">Country</label>
+                        <Form.Item name="countryCode" rules={[{ required: true, message: "Please select a country" }]}>
+                          <Select
+                            placeholder="Auto-filled from address"
+                            className="country__select"
+                            onChange={handleCountryChange}
+                            options={countrySelectOptions}
+                            showSearch
+                            filterOption={(input, option) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase())}
+                          />
+                        </Form.Item>
+                      </div>
                       <Button
                         type="submit"
                         htmlType="submit"
@@ -904,12 +664,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                         color="var(--orrsiWhite)"
                         radius="10px"
                         height="40px"
-                        loading={
-                          createAddress.isPending ||
-                          createAddress.isLoading ||
-                          updateAddress.isPending ||
-                          updateAddress.isLoading
-                        }
+                        loading={createAddress.isPending || createAddress.isLoading || updateAddress.isPending || updateAddress.isLoading}
                       >
                         {isEditing ? "Update Address" : "Add Address"}
                       </Button>
@@ -919,90 +674,91 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
               )}
             </div>
 
-            {/* Shipping Details - Compact */}
-            {shippingInfo && (
-              <div className="shipping__details__compact">
-                <FlexibleDiv
-                  gap="8px"
-                  flexWrap="wrap"
-                  justifyContent="flex-start"
-                  alignItems="center"
-                >
-                  <span className="shipping__badge">
-                    📦 {selectedShippingServiceName}
-                  </span>
-                  {selectedShippingProvider && (
-                    <span className="shipping__badge">
-                      🚛 via {selectedShippingProvider}
-                    </span>
-                  )}
-                  {selectedShippingTransitDays && (
-                    <span className="shipping__badge">
-                      ⏱ {selectedShippingTransitDays} {selectedShippingTransitDays === 1 ? 'day' : 'days'}
-                    </span>
-                  )}
-                  {selectedShippingEta && (
-                    <span className="shipping__badge">
-                      🗓 Arrives on or before {new Date(selectedShippingEta).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric'
-                      })}
-                    </span>
-                  )}
-                </FlexibleDiv>
-                {selectedShippingDescription && (
-                  <p className="shipping__service__description" style={{ marginTop: '8px' }}>
-                    {selectedShippingDescription}
-                  </p>
-                )}
-                {selectedShippingFeatures.length > 0 && (
-                  <FlexibleDiv
-                    className="shipping__service__features"
-                    gap="6px"
-                    flexWrap="wrap"
-                    justifyContent="flex-start"
-                    alignItems="center"
-                    style={{ marginTop: '8px' }}
-                  >
-                    {selectedShippingFeatures.map((feature) => (
-                      <span key={feature} className="shipping__service__feature">
-                        {feature}
-                      </span>
-                    ))}
-                  </FlexibleDiv>
+            {/* ── 2. Payment Gateway Banner ──────────────────────────── */}
+            {(selectedAddress || effectiveCountryCode) && (
+              <div className={`gateway__banner ${isNigerianBuyer ? "paystack" : "stripe"}`}>
+                {isNigerianBuyer ? (
+                  <>
+                    <span className="gateway__icon"><PaystackIcon size={20} /></span>
+                    <div className="gateway__info">
+                      <p className="gateway__name">Paystack</p>
+                      <p className="gateway__desc">Secure Nigerian payment — cards, bank transfer, USSD</p>
+                    </div>
+                    <span className="gateway__badge">Selected</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="gateway__icon"><CardIcon size={20} /></span>
+                    <div className="gateway__info">
+                      <p className="gateway__name">Stripe</p>
+                      <p className="gateway__desc">Secure international payment — all major cards</p>
+                    </div>
+                    <span className="gateway__badge">Selected</span>
+                  </>
                 )}
               </div>
             )}
 
-            {shippingEstimates.length > 1 && (
+            {/* ── 3. Shipping Section ────────────────────────────────── */}
+            {(selectedAddress || (isNigerianBuyer && (showAddForm || isEditing))) && (
+              <div className="shipping__details__compact">
+                <h3 className="section__title" style={{ marginBottom: 12 }}><ShippingIcon size={14} /> Delivery</h3>
+                {isLoadingShippingFee ? (
+                  <FlexibleDiv gap="10px" justifyContent="flex-start" alignItems="center">
+                    <Spin size="small" />
+                    <span style={{ fontSize: "0.85rem", color: "#888" }}>Calculating delivery…</span>
+                  </FlexibleDiv>
+                ) : shippingInfo ? (
+                  <>
+                    <FlexibleDiv gap="8px" flexWrap="wrap" justifyContent="flex-start" alignItems="center">
+                      {isNigerianBuyer ? (
+                        <>
+                          <span className="shipping__badge">Standard Delivery</span>
+                          <span className="shipping__badge">3–5 business days</span>
+                          <span className="shipping__badge">₦{NIGERIAN_FLAT_RATE_NGN.toLocaleString()} flat rate</span>
+                        </>
+                      ) : (
+                        <>
+                          {shippingInfo.providerDisplayName && <span className="shipping__badge">via {shippingInfo.providerDisplayName}</span>}
+                          {shippingInfo.totalTransitDays && <span className="shipping__badge">{shippingInfo.totalTransitDays} day{shippingInfo.totalTransitDays !== 1 ? "s" : ""}</span>}
+                          <span className="shipping__badge">{formatPrice(shippingFeeUSD)}</span>
+                        </>
+                      )}
+                    </FlexibleDiv>
+                    {shippingInfo.description && <p className="shipping__service__description" style={{ marginTop: 8 }}>{shippingInfo.description}</p>}
+                  </>
+                ) : isNigerianBuyer ? (
+                  <FlexibleDiv gap="8px" flexWrap="wrap" justifyContent="flex-start" alignItems="center">
+                    <span className="shipping__badge">Standard Delivery</span>
+                    <span className="shipping__badge">3–5 business days</span>
+                    <span className="shipping__badge">₦{NIGERIAN_FLAT_RATE_NGN.toLocaleString()} flat rate</span>
+                  </FlexibleDiv>
+                ) : null}
+              </div>
+            )}
+
+            {/* Multiple shipping options (international only) */}
+            {!isNigerianBuyer && shippingEstimates.length > 1 && (
               <div className="shipping__service__section">
                 <h3 className="section__title">Select Shipping Service</h3>
                 <div className="shipping__service__list">
-                  {shippingEstimates.map((estimate) => {
-                    const isSelected = selectedServiceType === estimate.serviceType;
+                  {shippingEstimates.map((est) => {
+                    const isSelected = selectedServiceType === est.serviceType;
                     return (
                       <button
-                        key={estimate.serviceType}
+                        key={est.serviceType}
                         type="button"
                         className={`shipping__service__card ${isSelected ? "selected" : ""}`}
-                        onClick={() => setSelectedServiceType(estimate.serviceType)}
+                        onClick={() => setSelectedServiceType(est.serviceType)}
                       >
                         <FlexibleDiv justifyContent="space-between" alignItems="center">
-                          <p className="shipping__service__name">{estimate.serviceName}</p>
-                          <p className="shipping__service__price">
-                            {formatCurrency(estimate.estimateUSD || 0)}
-                          </p>
+                          <p className="shipping__service__name">{est.serviceName}</p>
+                          <p className="shipping__service__price">{formatPrice(est.estimateUSD || 0)}</p>
                         </FlexibleDiv>
-                        {estimate.description && (
-                          <p className="shipping__service__description">{estimate.description}</p>
-                        )}
-                        {Array.isArray(estimate.features) && estimate.features.length > 0 && (
-                          <FlexibleDiv className="shipping__service__features" gap="6px" flexWrap="wrap" justifyContent="flex-start" alignItems="center">
-                            {estimate.features.map((feature) => (
-                              <span key={`${estimate.serviceType}-${feature}`} className="shipping__service__feature">
-                                {feature}
-                              </span>
-                            ))}
+                        {est.description && <p className="shipping__service__description">{est.description}</p>}
+                        {Array.isArray(est.features) && est.features.length > 0 && (
+                          <FlexibleDiv className="shipping__service__features" gap="6px" flexWrap="wrap" justifyContent="flex-start">
+                            {est.features.map((f) => <span key={f} className="shipping__service__feature">{f}</span>)}
                           </FlexibleDiv>
                         )}
                       </button>
@@ -1012,110 +768,88 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
               </div>
             )}
 
-            {/* Payment Summary */}
+            {/* ── 4. Payment Summary ─────────────────────────────────── */}
             <div className="payment__summary">
-              <h3 className="section__title">Payment Summary</h3>
-              <FlexibleDiv
-                flexDir="column"
-                gap="8px"
-                className="summary__details"
-                justifyContent="flex-start"
-                alignItems="stretch"
-              >
+              <h3 className="section__title">Order Summary</h3>
+              <FlexibleDiv flexDir="column" gap="8px" className="summary__details" justifyContent="flex-start" alignItems="stretch">
                 <FlexibleDiv justifyContent="space-between" alignItems="center">
                   <p className="summary__label">Subtotal:</p>
                   <p className="summary__value">
-                    {isNigerianBuyer
-                      ? `₦${subtotalNGN.toLocaleString('en-NG')}`
-                      : formatCurrency(subtotal)}
+                    {isNigerianBuyer ? `₦${subtotalNGN.toLocaleString()}` : formatPrice(subtotalUSD)}
                   </p>
                 </FlexibleDiv>
                 <FlexibleDiv justifyContent="space-between" alignItems="center">
-                  <p className="summary__label">Delivery Fee:</p>
+                  <p className="summary__label">Shipping:</p>
                   <p className="summary__value">
-                    {isNigerianBuyer ? (
-                      `₦${NIGERIAN_FLAT_RATE_NGN.toLocaleString('en-NG')}`
-                    ) : isLoadingShippingFee ? (
-                      <span className="calculating__loader">
-                        Calculating<span className="dots"></span>
-                      </span>
+                    {isLoadingShippingFee ? (
+                      <span className="calculating__loader">Calculating…</span>
+                    ) : isNigerianBuyer ? (
+                      `₦${NIGERIAN_FLAT_RATE_NGN.toLocaleString()}`
                     ) : (
-                      formatCurrency(shippingFee)
+                      formatPrice(shippingFeeUSD)
                     )}
                   </p>
                 </FlexibleDiv>
-                <FlexibleDiv
-                  justifyContent="space-between"
-                  alignItems="center"
-                  className="total__row"
-                >
+                <FlexibleDiv justifyContent="space-between" alignItems="center" className="total__row">
                   <p className="summary__label total__label">Total:</p>
                   <p className="summary__value total__value">
-                    {isNigerianBuyer
-                      ? `₦${totalNGN.toLocaleString('en-NG')}`
-                      : formatCurrency(total)}
+                    {isNigerianBuyer ? `₦${totalNGN.toLocaleString()}` : formatPrice(totalUSD)}
                   </p>
                 </FlexibleDiv>
               </FlexibleDiv>
-
-              {isNigerianBuyer && (
-                <p style={{ fontSize: '0.78rem', color: '#888', marginTop: '6px' }}>
-                  You will be charged in Nigerian Naira (NGN) via Paystack.
-                </p>
-              )}
             </div>
 
-            {/* Complete Payment Button */}
+            {/* ── 5. Pay Button ──────────────────────────────────────── */}
             {isNigerianBuyer ? (
-              <Button
-                onClick={handlePaystackPayment}
-                backgroundColor={
-                  !selectedAddressId
-                    ? "#ccc"
-                    : "linear-gradient(135deg, #00c06f 0%, #00a05e 100%)"
-                }
-                color="var(--orrsiWhite)"
-                radius="10px"
-                height="48px"
-                width="100%"
-                fontSize="0.95rem"
-                fontWeight="600"
-                loading={createPaystackCheckout.isPending || createPaystackCheckout.isLoading}
-                disabled={!selectedAddressId || createPaystackCheckout.isPending || createPaystackCheckout.isLoading}
-                style={{
-                  boxShadow: !selectedAddressId ? "none" : "0 4px 20px rgba(0, 192, 111, 0.35)",
-                  transition: "all 0.3s ease",
-                }}
-                className="complete__payment__btn"
-              >
-                Pay ₦{totalNGN.toLocaleString('en-NG')} with Paystack
-              </Button>
+              <div className="pay__button__wrap">
+                <Button
+                  onClick={isPaymentReady ? handlePaystackPayment : undefined}
+                  backgroundColor={isPaymentReady ? "#00b14f" : "#b0bec5"}
+                  hoverBg={isPaymentReady ? "#009944" : "#b0bec5"}
+                  color="#fff"
+                  radius="10px"
+                  height="56px"
+                  width="100%"
+                  fontSize="1rem"
+                  opacity={isPaymentReady ? "1" : "0.65"}
+                  loading={createPaystackCheckout.isPending || createPaystackCheckout.isLoading}
+                  disabled={createPaystackCheckout.isPending || createPaystackCheckout.isLoading}
+                  style={{ cursor: !isPaymentReady ? "not-allowed" : "pointer" }}
+                  className="complete__payment__btn"
+                >
+                  <LockIcon size={14} />
+                  Pay ₦{totalNGN.toLocaleString()} with Paystack
+                </Button>
+                <p className="payment__secure__note">
+                  <LockIcon size={11} />
+                  Secured by Paystack · 256-bit SSL encrypted
+                </p>
+              </div>
             ) : (
-              <Button
-                onClick={handleCompletePayment}
-                backgroundColor={
-                  !selectedAddressId || !shippingFee || isLoadingShippingFee
-                    ? "#ccc"
-                    : "linear-gradient(135deg, var(--orrsiPrimary) 0%, #ff6b6b 100%)"
-                }
-                color="var(--orrsiWhite)"
-                radius="10px"
-                height="48px"
-                width="100%"
-                fontSize="0.95rem"
-                fontWeight="600"
-                loading={createPaymentIntent.isPending || createPaymentIntent.isLoading}
-                disabled={!selectedAddressId || !shippingFee || isLoadingShippingFee || createPaymentIntent.isPending || createPaymentIntent.isLoading}
-                style={{
-                  boxShadow: !selectedAddressId || !shippingFee || isLoadingShippingFee || createPaymentIntent.isPending || createPaymentIntent.isLoading
-                    ? "none"
-                    : "0 4px 20px rgba(252, 83, 83, 0.3)",
-                  transition: "all 0.3s ease",
-                }}
-                className="complete__payment__btn"
-              >
-                Pay {formatCurrency(total)} with Stripe
-              </Button>
+              <div className="pay__button__wrap">
+                <Button
+                  onClick={isPaymentReady ? handleCompletePayment : undefined}
+                  backgroundColor={isPaymentReady ? "var(--orrsiPrimary)" : "#b0bec5"}
+                  hoverBg={isPaymentReady ? "#e04040" : "#b0bec5"}
+                  color="#fff"
+                  radius="10px"
+                  height="56px"
+                  width="100%"
+                  fontSize="1rem"
+                  opacity={isPaymentReady ? "1" : "0.65"}
+                  loading={createPaymentIntent.isPending || createPaymentIntent.isLoading}
+                  disabled={createPaymentIntent.isPending || createPaymentIntent.isLoading}
+                  style={{ cursor: !isPaymentReady ? "not-allowed" : "pointer" }}
+                  className="complete__payment__btn"
+                >
+                  <LockIcon size={14} />
+                  Pay {formatPrice(totalUSD)} with Stripe
+                </Button>
+                <p className="payment__secure__note">
+                  <LockIcon size={11} />
+                  Secured by Stripe · 256-bit SSL encrypted
+                </p>
+              </div>
             )}
           </FlexibleDiv>
         )}

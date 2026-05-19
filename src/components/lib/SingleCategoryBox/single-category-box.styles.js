@@ -1,74 +1,66 @@
 import styled from "styled-components";
-import { FlexibleDiv } from "../Box/styles";
 
-export const SingleCategoryBoxWrapper = styled(FlexibleDiv)`
-  flex-direction: column;
-  flex-basis: 18.5%;
+export const SingleCategoryBoxWrapper = styled.div`
   flex-shrink: 0;
+  width: 155px;
+  border-radius: 14px;
   overflow: hidden;
-  position: relative;
-  border-radius: 12px;
-  background: #f5f5f5;
-  border: 1px solid #ebebeb;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  height: 200px;
-  flex-wrap: nowrap;
-  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
-  box-sizing: border-box;
+  cursor: pointer;
+  background: #f8f8f8;
+  border: 1px solid #efefef;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
 
   &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
     border-color: var(--orrsiPrimary);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-    transform: translateY(-2px);
-    cursor: pointer;
   }
 
-  .category__image {
-    width: 100%;
-    flex: 1;
+  /* Image fill area — must be position:relative for Next.js fill */
+  .img__area {
     position: relative;
-    overflow: hidden;
-  }
-
-  .category__name {
     width: 100%;
-    text-align: center;
-    background: #fff;
-    margin: 0;
-    padding: 11px 8px;
-    font-size: 0.82rem;
-    font-weight: 500;
-    color: #222;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    height: 120px;
     flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  /* Name label */
+  .name__area {
+    background: #fff;
     border-top: 1px solid #f0f0f0;
-  }
+    padding: 9px 10px;
 
-  @media (max-width: 1300px) {
-    flex-basis: 18.5%;
-  }
-
-  @media (max-width: 1050px) {
-    flex-basis: 23.6%;
-    height: 180px;
+    .category__name {
+      margin: 0;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #1a1a1a;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
 
   @media (max-width: 720px) {
-    height: 155px;
-    flex-basis: 30%;
+    width: 128px;
+
+    .img__area { height: 100px; }
   }
 
   @media (max-width: 430px) {
-    flex-basis: auto;
-    min-width: 28%;
-    height: 130px;
-    box-shadow: none;
+    width: 108px;
+    border-radius: 10px;
 
-    .category__name {
-      font-size: 0.73rem;
-      padding: 8px 4px;
+    .img__area { height: 85px; }
+
+    .name__area {
+      padding: 7px 8px;
+
+      .category__name { font-size: 0.72rem; }
     }
   }
 `;

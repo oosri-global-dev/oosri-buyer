@@ -4,9 +4,12 @@ import { HeaderWrapper } from "./header.styles";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import { FiSearch as SearchIcon } from "react-icons/fi";
-import { AiOutlineShoppingCart as CartIcon } from "react-icons/ai";
+import SearchOverlay from "@/components/lib/SearchOverlay/SearchOverlay";
+import { AiOutlineShoppingCart as ShopCartIcon } from "react-icons/ai";
 import { BsHeart as WishlistIcon } from "react-icons/bs";
+import { HiOutlineBellAlert as NotificationIcon } from "react-icons/hi2";
 import ProfileNav from "./ProfileNav/profileNav";
+import CurrencySelector from "./CurrencySelector";
 import NavMenu from "./navMenu/navMenu";
 import { menuItems } from "@/data-helpers/header-helper";
 import Logo from "@/assets/images/homepage/logo.png";
@@ -20,10 +23,14 @@ import { TbLogout2 as LogoutIcon } from "react-icons/tb";
 import ProfileImage from "@/assets/images/profile/profile-1.svg";
 import { deleteAllCookie } from "@/data-helpers/auth-session";
 import { logoutUser } from "@/network/auth";
+import { Popover, Badge } from "antd";
+import { useBuyerNotifications } from "@/hooks/useBuyerNotifications";
+import NotificationPanel from "@/components/lib/NotificationPanel";
 
 export default function Header() {
   const { asPath, push } = useRouter();
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
   const dropdownRef = useRef(null);
   const unauthorizedLinks = [
     {
@@ -50,6 +57,8 @@ export default function Header() {
     },
   ];
   const { user, cart } = useMainContext();
+  const [notifOpen, setNotifOpen] = useState(false);
+  const { notifications, unreadCount, isLoading, markRead, markAllRead, remove } = useBuyerNotifications(!!user?.id);
 
   //This hook helps hide the filter if an outside click is noticed
   useOutsideAlerter(dropdownRef, showDropdown, setShowDropdown);
@@ -57,14 +66,14 @@ export default function Header() {
   return (
     <HeaderWrapper>
       <FlexibleDiv className="logo__section">
-        <Link href={"/"}>
-          <Image src={Logo} className="logo__wrapper" alt="logo" width={120} height={40} style={{ objectFit: 'contain' }} />
-        </Link>
-
         <div className="nav__menu__wrapper">
           <NavMenu menuItems={menuItems} />
         </div>
+        <Link href={"/"}>
+          <Image src={Logo} className="logo__wrapper" alt="logo" width={120} height={40} style={{ objectFit: "contain" }} />
+        </Link>
       </FlexibleDiv>
+
       <FlexibleDiv className="middle__section" flexWrap="nowrap">
         {menuItems.map((sgn, idx) => (
           <button
@@ -78,21 +87,23 @@ export default function Header() {
       </FlexibleDiv>
 
       <FlexibleDiv className="right__section" flexDir="row" flexWrap="nowrap">
+        <CurrencySelector />
         <div
-          onClick={() => push("/search")}
-          className={`single__menu ${
-            asPath === "/search" ? "selected__icon" : ""
-          }`}
+          onClick={() => setShowSearch(true)}
+          className={`single__menu ${showSearch ? "selected__icon" : ""}`}
+          role="button"
+          aria-label="Open search"
         >
           <SearchIcon />
         </div>
+        <SearchOverlay open={showSearch} onClose={() => setShowSearch(false)} />
         <div
           onClick={() => push("/cart")}
           className={`single__menu cart-icon-container ${
             asPath === "/cart" ? "selected__icon" : ""
           }`}
         >
-          <CartIcon />
+          <ShopCartIcon />
           {cart?.length > 0 && (
             <span className="cart-badge">
               {cart.length > 99 ? "99+" : cart.length}
@@ -107,6 +118,32 @@ export default function Header() {
         >
           <WishlistIcon />
         </div>
+
+        {user?.id && (
+          <Popover
+            open={notifOpen}
+            onOpenChange={setNotifOpen}
+            trigger="click"
+            placement="bottomRight"
+            arrow={false}
+            content={
+              <NotificationPanel
+                notifications={notifications}
+                unreadCount={unreadCount}
+                isLoading={isLoading}
+                onRead={(id) => markRead(id)}
+                onMarkAllRead={() => markAllRead()}
+                onDelete={(id) => remove(id)}
+              />
+            }
+          >
+            <div className="single__menu notif__icon__wrap">
+              <Badge count={unreadCount} size="small" color="#ef4444">
+                <NotificationIcon size={20} />
+              </Badge>
+            </div>
+          </Popover>
+        )}
 
         <div ref={dropdownRef}>
           <ProfileNav

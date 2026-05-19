@@ -1,7 +1,7 @@
-import { formatCurrency, useProductPrice } from "@/data-helpers/hooks";
+import { useProductPrice, useFormatPrice } from "@/data-helpers/hooks";
 import { FlexibleDiv } from "../../Box/styles";
 import { SingleCardWrapper } from "./singleCard.styles";
-import { AiFillStar as LikeIcon } from "react-icons/ai";
+import { AiFillStar as StarIcon } from "react-icons/ai";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import SafeImage from "@/components/lib/SafeImage/SafeImage";
@@ -43,6 +43,7 @@ export default function SingleGridCard({ key, product, isLoading = false }) {
   const maxLikes = ["", "", "", "", ""];
   const { push } = useRouter();
   const priceData = useProductPrice(product);
+  const formatPrice = useFormatPrice();
 
   if (isLoading) {
     return <LoadingSingleGridCard key={key} />;
@@ -57,8 +58,8 @@ export default function SingleGridCard({ key, product, isLoading = false }) {
             <SafeImage
               src={product?.productImages?.[0]}
               alt={`${product?._id} product image`}
-              layout="fill"
-              objectFit="cover"
+              fill
+              style={{ objectFit: "cover" }}
             />
           </FlexibleDiv>
           <FlexibleDiv className="product__info">
@@ -69,13 +70,13 @@ export default function SingleGridCard({ key, product, isLoading = false }) {
               className="price__wrapper"
             >
               <p className="product__price__grid">
-                {formatCurrency(priceData?.originalPrice || priceData?.price || 0)}
+                {formatPrice(priceData?.originalPrice || priceData?.price || 0)}
               </p>
             </FlexibleDiv>
 
             <div className="likes__wrapper">
               {maxLikes.map((like, idx) => (
-                <LikeIcon
+                <StarIcon
                   className={`= ${maxLikes.length}`}
                   size={8}
                   fill={`${product?.productRating >= idx + 1 ? "#FCCB1B" : "#BDBDBD"

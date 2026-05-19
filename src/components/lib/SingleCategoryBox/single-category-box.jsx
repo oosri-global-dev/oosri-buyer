@@ -2,24 +2,25 @@ import { SingleCategoryBoxWrapper } from "./single-category-box.styles";
 import Image from "next/image";
 import { useRouter } from "next/router";
 
-export default function SingleCategoryBox({ data, key }) {
+export default function SingleCategoryBox({ data }) {
   const { push } = useRouter();
   return (
     <SingleCategoryBoxWrapper
-      key={key}
       onClick={() => push(`/shop?category=${encodeURIComponent(data.name)}`)}
     >
-      <div className="category__image">
+      {/* position:relative container required for Next.js fill */}
+      <div className="img__area">
         <Image
           src={data.image || "/images/homepage/default.png"}
-          alt="single-category"
+          alt={data.name || "category"}
           fill
           style={{ objectFit: "cover" }}
-          unoptimized
+          sizes="(max-width: 430px) 110px, (max-width: 720px) 130px, 160px"
         />
       </div>
-
-      <p className="category__name">{data.name}</p>
+      <div className="name__area">
+        <p className="category__name">{data.name}</p>
+      </div>
     </SingleCategoryBoxWrapper>
   );
 }

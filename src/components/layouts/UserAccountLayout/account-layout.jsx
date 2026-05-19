@@ -4,8 +4,10 @@ import { accountMenuItems } from "@/data-helpers/profile-helper";
 import { useState } from "react";
 import { deleteAllCookie } from "@/data-helpers/auth-session";
 import { logoutUser } from "@/network/auth";
+import { useRouter } from "next/router";
 
 export default function AccountLayout({ children }) {
+  const router = useRouter();
   const [activeMenu, setActiveMenu] = useState("Profile");
 
   const routeToView = (menu) => {
@@ -45,6 +47,11 @@ export default function AccountLayout({ children }) {
                   } catch (_error) {}
                   deleteAllCookie();
                   window.open("/login", "_self");
+                  return;
+                }
+                if (sgn.href) {
+                  router.push(sgn.href);
+                  return;
                 }
                 routeToView(sgn.name);
               }}

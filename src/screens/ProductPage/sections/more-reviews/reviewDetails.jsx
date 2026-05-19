@@ -1,7 +1,7 @@
 import { FlexibleDiv } from "@/components/lib/Box/styles";
 import Image from "next/image";
 import ReviewerImage from "@/assets/images/product-related/reviewer-image.png";
-import { AiFillStar as LikeIcon } from "react-icons/ai";
+import { AiFillStar as StarIcon } from "react-icons/ai";
 import { ProductReviewWrapper } from "../product-reviews/productReview.styles";
 import { ReviewDetailWrapper } from "./moreReviews.styles";
 
@@ -40,7 +40,7 @@ export default function ReviewDetails({ reviews }) {
                 <p className="reviewer__name">{review?.reviewer}</p>
                 <FlexibleDiv flexWrap="nowrap" justifyContent="flex-start">
                   {new Array(review?.productRating || 1).fill(null).map((sgn, idx) => (
-                    <LikeIcon color="#FCCB1B" key={idx} />
+                    <StarIcon color="#FCCB1B" key={idx} />
                   ))}
                 </FlexibleDiv>
               </FlexibleDiv>
