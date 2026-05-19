@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import SafeImage from '@/components/lib/SafeImage/SafeImage';
@@ -6,10 +6,14 @@ import { OrderDetailsWrapper } from './index.styles';
 import { NameTag } from '../components/nameTag';
 import { useGetOrderById } from '@/network/orders';
 import { formatCurrency, stripHtml } from '@/data-helpers/hooks';
+import ReturnRequestModal from './ReturnRequestModal';
+
+const RETURNABLE_STATUSES = ['completed', 'processing', 'pending_logistics'];
 
 export default function OrderDetailsScreen() {
     const router = useRouter();
     const { id } = router.query;
+    const [showReturnModal, setShowReturnModal] = useState(false);
 
     const { data, isLoading, isError } = useGetOrderById(id);
     // The network layer does: const { data } = await instance.get(...)  → data = API response
@@ -235,7 +239,38 @@ export default function OrderDetailsScreen() {
                     <p className='total_text'>Grand Total:</p>
                     <p className='grand_total_value'>{grandTotal}</p>
                 </span>
+
+                {RETURNABLE_STATUSES.includes(orderStatus?.toLowerCase()) && (
+                    <div style={{ marginTop: 24, borderTop: '1px solid #EEEEEE', paddingTop: 20 }}>
+                        <p style={{ fontSize: 13, color: '#9E9E9E', margin: '0 0 10px' }}>
+                            Not satisfied with your order? You can request a return within the eligible window.
+                        </p>
+                        <button
+                            onClick={() => setShowReturnModal(true)}
+                            style={{
+                                background: '#fff',
+                                border: '1px solid #FC5353',
+                                color: '#FC5353',
+                                borderRadius: 8,
+                                padding: '10px 20px',
+                                fontSize: 14,
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                fontFamily: 'inherit',
+                            }}
+                        >
+                            Request Return
+                        </button>
+                    </div>
+                )}
             </div>
+
+            {showReturnModal && (
+                <ReturnRequestModal
+                    orderId={String(orderNumber)}
+                    onClose={() => setShowReturnModal(false)}
+                />
+            )}
         </OrderDetailsWrapper>
     );
 }

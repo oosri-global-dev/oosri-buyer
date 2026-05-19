@@ -34,11 +34,12 @@ function GoogleLoginButton({ setGoogleLoading }) {
   }, [replace]);
 
   const handleGoogleLoginSuccess = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
+    flow: 'auth-code',
+    onSuccess: async (codeResponse) => {
       setGoogleLoading(true);
       try {
         const res = await googleLoginUser({
-          accessToken: tokenResponse.access_token,
+          code: codeResponse.code,
         });
 
         storeAuthTokens(true, true);

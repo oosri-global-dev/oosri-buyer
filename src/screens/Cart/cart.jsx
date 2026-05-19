@@ -1,36 +1,47 @@
 import { useState } from "react";
 import { CartPageWrapper } from "./cart.styles";
-import { FlexibleDiv } from "@/components/lib/Box/styles";
 import { IoCartOutline as CartIcon } from "react-icons/io5";
+import { MdLockOutline as LockIcon } from "react-icons/md";
 import Button from "@/components/lib/Button";
-import ProductCarousel from "@/components/lib/ProductCarousel/productCarousel";
 import { useMainContext } from "@/context";
 import SingleCartProduct from "@/components/lib/SingleCartProduct/single-cart-product";
 import RemoveFromCartModal from "@/components/lib/RemoveFromCartModal/remove-from-cart";
 import PaymentModal from "@/components/lib/PaymentModal";
-import { formatCurrency, calculateProductPrice } from "@/data-helpers/hooks";
+import { calculateProductPrice, useFormatPrice } from "@/data-helpers/hooks";
 import { useRouter } from "next/router";
 import _ from "lodash";
 
 export default function CartPage() {
-  const { cart, dispatch, user } = useMainContext();
+  const { cart, user, fxRates } = useMainContext();
+  const formatPrice = useFormatPrice();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const { push, pathname } = useRouter();
-  // Defensive Array bounds check in case localStorage is corrupted
+
   const safeCart = Array.isArray(cart) ? cart : [];
   const cartIsEmpty = safeCart.length === 0;
+  const itemCount = safeCart.reduce((sum, item) => sum + (item?.quantity || 1), 0);
 
+  const liveNGNRate = fxRates?.NGN || 1550;
   const subTotal = safeCart.reduce((acc, item) => {
-    if (!item) return acc; // Defensive null check for malformed array items
+    if (!item) return acc;
     const priceData = calculateProductPrice(item);
-    // Ensure quantity is a valid number to prevent NaN propagation
-    const qty = (typeof item.quantity === 'number' && item.quantity > 0) ? item.quantity : 1;
-    return acc + (priceData?.price || 0) * qty;
+    let priceUSD = priceData?.price || 0;
+    if (!item.regularPriceUSD && !item.fxRate && priceUSD > 10000) {
+      priceUSD = Number((priceUSD / liveNGNRate).toFixed(2));
+    }
+    const qty = (typeof item.quantity === "number" && item.quantity > 0) ? item.quantity : 1;
+    return acc + priceUSD * qty;
   }, 0);
-  const total = subTotal;
 
+  const handleCheckout = () => {
+    if (_.isEmpty(user) || !user?.id) {
+      push(`/login?from=${pathname}&action=MERGE_CART`);
+    } else {
+      setIsPaymentModalOpen(true);
+    }
+  };
 
   return (
     <CartPageWrapper>
@@ -45,89 +56,103 @@ export default function CartPage() {
         subtotal={subTotal}
         cartItems={cart}
       />
+
       {cartIsEmpty ? (
-        <FlexibleDiv
-          className="empty__cart__box"
-          flexDir="column"
-          justifyContent="center"
-          alignItems="center"
-          gap="25px"
-        >
+        <div className="empty__cart__box">
           <div className="icon__wrapper">
-            <CartIcon color="#999999" size={100} />
+            <CartIcon color="#ccc" size={56} />
           </div>
-          <FlexibleDiv flexDir="column" gap="10px">
-            <p className="no__empty__text">
-              Your own cart no get anything inside am!
-            </p>
-            <p className="no__empty__subtext">
-              Abeg, add some goodies make we dey roll.
-            </p>
-          </FlexibleDiv>
+          <p className="empty__title">Your cart is empty</p>
+          <p className="empty__subtitle">
+            Looks like you haven&apos;t added anything yet.
+          </p>
           <Button
             backgroundColor="var(--orrsiPrimary)"
             color="var(--orrsiWhite)"
+            radius="12px"
+            height="48px"
+            padding="0 40px"
             onClick={() => push("/shop")}
           >
             Start Shopping
           </Button>
-        </FlexibleDiv>
+        </div>
       ) : (
         <>
-          <FlexibleDiv className="cart__section">
-            {safeCart.map((item, idx) => (
-              item ? (
-                <SingleCartProduct
-                  item={item}
-                  key={item._id || item.id || idx}
-                  setIsModalOpen={setIsModalOpen}
-                  setSelectedItem={setSelectedItem}
-                />
-              ) : null
-            ))}
-            <FlexibleDiv
-              className="summary__box"
-              flexDir="row"
-              justifyContent="flex-end"
-              margin="50px 100px 0 0"
-            >
-              <FlexibleDiv
-                className="total__prices__box"
-                flexDir="column"
-                gap="25px"
-                justifyContent="flex-end"
-                alignItems="flex-start"
-                width="fit-content"
-              >
-                <h2>Cart Summary</h2>
-                <p className="shipping__fee__text">
-                  Sub Total: <span>{formatCurrency(subTotal || 0)}</span>
+          <div className="cart__header">
+            <h1>Shopping Cart</h1>
+            <p className="cart__item__count">
+              {itemCount} {itemCount === 1 ? "item" : "items"}
+            </p>
+          </div>
+
+          <div className="cart__grid">
+            {/* ── Left: items list ── */}
+            <div className="cart__items__panel">
+              {safeCart.map((item, idx) =>
+                item ? (
+                  <SingleCartProduct
+                    item={item}
+                    key={item._id || item.id || idx}
+                    setIsModalOpen={setIsModalOpen}
+                    setSelectedItem={setSelectedItem}
+                  />
+                ) : null
+              )}
+            </div>
+
+            {/* ── Right: order summary ── */}
+            <div className="cart__summary__card">
+              <p className="summary__title">Order Summary</p>
+
+              <div className="summary__row">
+                <p className="summary__label">
+                  Subtotal ({itemCount} {itemCount === 1 ? "item" : "items"})
                 </p>
-                <Button
-                  backgroundColor="var(--orrsiPrimary)"
-                  radius="10px"
-                  height="40px"
-                  color="var(--orrsiWhite)"
-                  padding="0px 45px"
-                  onClick={() => {
-                    if (_.isEmpty(user) || !user?.id) {
-                      push(`/login?from=${pathname}&action=MERGE_CART`);
-                    } else {
-                      setIsPaymentModalOpen(true);
-                    }
-                  }}
-                >
-                  Checkout ({formatCurrency(total)})
-                </Button>
-              </FlexibleDiv>
-            </FlexibleDiv>
-          </FlexibleDiv>
+                <p className="summary__value">{formatPrice(subTotal)}</p>
+              </div>
+
+              <div className="summary__row">
+                <p className="summary__label">Shipping</p>
+                <p className="summary__note">Calculated at checkout</p>
+              </div>
+
+              <hr className="summary__divider" />
+
+              <div className="summary__total__row">
+                <p className="total__label">Estimated Total</p>
+                <p className="total__value">{formatPrice(subTotal)}</p>
+              </div>
+
+              <Button
+                backgroundColor="var(--orrsiPrimary)"
+                color="var(--orrsiWhite)"
+                radius="12px"
+                height="50px"
+                width="100%"
+                fontSize="0.95rem"
+                fontWeight="700"
+                className="checkout__cta"
+                onClick={handleCheckout}
+              >
+                Proceed to Checkout
+              </Button>
+
+              <span
+                className="continue__shopping"
+                onClick={() => push("/shop")}
+              >
+                ← Continue Shopping
+              </span>
+
+              <div className="secure__badge">
+                <LockIcon size={13} />
+                Secure checkout
+              </div>
+            </div>
+          </div>
         </>
       )}
-
-      {/* <FlexibleDiv>
-        <ProductCarousel carouselTitle={`You may also like`} />
-      </FlexibleDiv> */}
     </CartPageWrapper>
   );
 }

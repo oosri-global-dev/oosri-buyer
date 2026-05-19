@@ -27,6 +27,7 @@ export const HeaderWrapper = styled(FlexibleDiv)`
     }
   }
 
+
   .middle__section {
     gap: 40px;
     text-shadow: 1px 2px 2px rgba(0, 0, 0, 0.3);
@@ -94,6 +95,90 @@ export const HeaderWrapper = styled(FlexibleDiv)`
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+
+    .currency__selector {
+      position: relative;
+      display: flex;
+      align-items: center;
+
+      .currency__trigger {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        background: none;
+        border: 1px solid #e0ded3;
+        border-radius: 4px;
+        padding: 4px 8px;
+        cursor: pointer;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--orrsiBlack);
+        white-space: nowrap;
+        transition: border-color 0.2s ease;
+
+        &:hover {
+          border-color: var(--orrsiPrimary);
+        }
+
+        .currency__flag {
+          font-size: 1rem;
+          line-height: 1;
+        }
+
+        .currency__chevron {
+          font-size: 0.5rem;
+          opacity: 0.6;
+        }
+      }
+
+      .currency__dropdown {
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 0;
+        background: white;
+        border: 1px solid #e0ded3;
+        border-radius: 6px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        min-width: 140px;
+        z-index: 10;
+        overflow: hidden;
+
+        .currency__option {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          width: 100%;
+          padding: 8px 12px;
+          background: none;
+          border: none;
+          cursor: pointer;
+          font-size: 0.85rem;
+          color: var(--orrsiBlack);
+          text-align: left;
+          transition: background 0.15s ease;
+
+          &:hover {
+            background: #f5f4f0;
+          }
+
+          &.active {
+            background: #f0ede4;
+            font-weight: 600;
+          }
+
+          .currency__flag {
+            font-size: 1rem;
+            line-height: 1;
+          }
+
+          .currency__symbol {
+            margin-left: auto;
+            opacity: 0.5;
+            font-size: 0.8rem;
+          }
+        }
+      }
     }
 
     .selected__icon {
@@ -220,19 +305,50 @@ export const HeaderWrapper = styled(FlexibleDiv)`
 
   /* Header menu shrinks here */
   @media (max-width: 820px) {
-    max-height: 40px;
+    max-height: 56px;
+    width: calc(100% + 40px);
+    margin-left: -20px;
+    padding: 10px 20px;
 
-    .logo__section .nav__menu__wrapper {
-      display: flex;
+    .logo__section {
+      gap: 10px;
+      align-items: center;
+
+      .nav__menu__wrapper {
+        display: flex;
+      }
+
+      /* show logo on mobile at compact size */
+      .logo__wrapper {
+        width: 90px !important;
+        height: auto !important;
+      }
     }
 
-    .logo__section .logo__wrapper,
     .middle__section {
       display: none;
     }
 
     .right__section {
-      gap: 18px;
+      gap: 16px;
+      padding-left: 0;
+
+      /* compact: flag only, hide code + chevron */
+      .currency__selector .currency__trigger {
+        border: none;
+        padding: 2px 4px;
+        background: transparent;
+
+        .currency__code,
+        .currency__chevron {
+          display: none;
+        }
+
+        .currency__flag {
+          font-size: 1.3rem;
+          line-height: 1;
+        }
+      }
     }
 
     .right__section .wishlist__icon {
@@ -241,6 +357,10 @@ export const HeaderWrapper = styled(FlexibleDiv)`
   }
 
   @media (max-width: 550px) {
+    width: calc(100% + 20px);
+    margin-left: -10px;
+    padding: 10px 16px;
+
     .right__section {
       .account__dropdown {
         min-width: 200px;
