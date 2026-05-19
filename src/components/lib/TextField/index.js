@@ -1,7 +1,11 @@
 import styled from "styled-components";
 import { Input } from "antd";
 
-export default styled(Input)`
+const STYLE_PROPS = new Set(["borderRadius", "border", "margin", "height", "width"]);
+
+export default styled(Input).withConfig({
+  shouldForwardProp: (prop) => !STYLE_PROPS.has(prop),
+})`
   width: ${({ width }) => width || "100%"};
   margin: ${({ margin }) => margin || 0};
   height: ${({ height }) => height || "45px"};
