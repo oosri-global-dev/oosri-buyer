@@ -9,13 +9,11 @@ export function LoadingCategoryBox() {
         baseColor="rgba(148, 148, 148, 0.1)"
         highlightColor="rgba(202, 202, 202, 0.4)"
       >
-        <div className="category__image" style={{ width: "100%", maxWidth: "90%", padding: "10px 0" }}>
-          <Skeleton style={{ height: "100%" }} />
+        <div className="category__image" style={{ width: "100%" }}>
+          <Skeleton style={{ height: "100%", width: "100%" }} />
         </div>
-        <div style={{ width: "100%", marginTop: "10px" }}>
-          <Skeleton
-            style={{ width: "60%", height: "22px", margin: "0px 0 5px 10px" }}
-          />
+        <div style={{ width: "100%", padding: "11px 12px", borderTop: "1px solid #f0f0f0" }}>
+          <Skeleton style={{ width: "65%", height: "14px" }} />
         </div>
       </SkeletonTheme>
     </SingleCategoryBoxWrapper>
