@@ -38,3 +38,8 @@ export const handleMergeUserCartWithCartKey = async (payload) => {
 
   return data;
 };
+
+export const handleClearCart = async () => {
+  const { data } = await instance.delete(`/buyer/cart`);
+  return data;
+};
