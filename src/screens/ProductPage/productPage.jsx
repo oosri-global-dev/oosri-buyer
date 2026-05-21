@@ -130,10 +130,10 @@ export default function ProductPage({ product, loading, relatedProducts }) {
 
   const sellerStoreName = product?.seller?.storeProfile?.storeName || product?.seller?._id || product?.seller;
   const sellerDisplayName =
+    product?.seller?.corporateBusinessAccount?.companyName ||
+    product?.seller?.storeProfile?.storeName ||
     product?.sellerName ||
-    (product?.seller?.firstName
-      ? `${product.seller.firstName} ${product.seller.lastName || ""}`.trim()
-      : null);
+    null;
 
   const handleDecrement = async () => {
     if (numOfProduct <= 1 || isLoadingDecrease) return;
