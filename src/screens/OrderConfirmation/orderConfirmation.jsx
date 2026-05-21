@@ -4,18 +4,21 @@ import { useRouter } from 'next/router';
 import { MdCheck, MdShoppingBag, MdListAlt } from 'react-icons/md';
 import { Spin } from 'antd';
 import { ConfirmationContainer } from './orderConfirmation.styles';
-import { usePaymentStatus } from '@/network/checkout';
+import { usePaymentStatus, usePaystackPaymentStatus } from '@/network/checkout';
 
 const OrderConfirmation = () => {
     const router = useRouter();
-    const { payment_intent } = router.query;
-    const { data, isLoading, isError } = usePaymentStatus(payment_intent, {
-        enabled: !!payment_intent,
-    });
+    const { payment_intent, paystack_reference } = router.query;
+
+    const stripeStatus = usePaymentStatus(payment_intent, { enabled: !!payment_intent });
+    const paystackStatus = usePaystackPaymentStatus(paystack_reference, { enabled: !!paystack_reference });
+
+    const { data, isLoading, isError } = payment_intent ? stripeStatus : paystackStatus;
+    const reference = payment_intent || paystack_reference;
 
     const paymentState = data?.state || null;
     const orderCount = data?.confirmedOrders || 0;
-    const isProcessing = !!payment_intent && (isLoading || paymentState === "processing");
+    const isProcessing = !!reference && (isLoading || paymentState === "processing");
     const needsAttention = paymentState === "failed" || isError;
 
     return (
@@ -39,9 +42,9 @@ const OrderConfirmation = () => {
                     : `Your payment and order${orderCount > 1 ? "s have" : " has"} been confirmed successfully.`}
             </p>
 
-            {payment_intent && (
+            {reference && (
                 <div className="reference">
-                    Transaction Reference: <strong>{payment_intent}</strong>
+                    Transaction Reference: <strong>{reference}</strong>
                 </div>
             )}
 
