@@ -1,5 +1,346 @@
-import styled from "styled-components";
+import styled, { createGlobalStyle } from "styled-components";
 import { FlexibleDiv } from "@/components/lib/Box/styles";
+
+export const FilterDrawerStyles = createGlobalStyle`
+  /* ── Drawer shell ── */
+  .filter__drawer .ant-drawer-content-wrapper {
+    border-radius: 22px 22px 0 0 !important;
+    overflow: hidden;
+  }
+
+  .filter__drawer .ant-drawer-header {
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid #f0f0f0;
+    background: #fff;
+  }
+
+  .filter__drawer .ant-drawer-header-title {
+    width: 100%;
+  }
+
+  .filter__drawer .ant-drawer-title {
+    width: 100%;
+  }
+
+  .filter__drawer .ant-drawer-body {
+    padding: 0;
+    overflow-y: auto;
+    max-height: 62vh;
+    background: #fafafa;
+  }
+
+  .filter__drawer .ant-drawer-footer {
+    padding: 14px 20px 18px;
+    border-top: 1px solid #f0f0f0;
+    background: #fff;
+  }
+
+  /* ── Drawer header elements ── */
+  .filter__drawer .drawer__title__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .filter__drawer .drawer__title__text {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #111;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .filter__drawer .drawer__filter__badge {
+    background: var(--orrsiPrimary);
+    color: #fff;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    line-height: 1.5;
+  }
+
+  .filter__drawer .drawer__close__btn {
+    background: #f0f0f0;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.78rem;
+    color: #444;
+    flex-shrink: 0;
+  }
+  .filter__drawer .drawer__close__btn:hover { background: #e4e4e4; }
+
+  /* ── Drawer footer buttons ── */
+  .filter__drawer .drawer__footer {
+    display: flex;
+    gap: 10px;
+  }
+
+  .filter__drawer .drawer__clear__btn {
+    flex: 1;
+    height: 46px;
+    border-radius: 12px;
+    border: 1.5px solid #e0e0e0;
+    background: #fff;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #555;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .filter__drawer .drawer__clear__btn:hover { border-color: #bbb; color: #111; }
+
+  .filter__drawer .drawer__apply__btn {
+    flex: 2;
+    height: 46px;
+    border-radius: 12px;
+    border: none;
+    background: var(--orrsiPrimary);
+    color: #fff;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .filter__drawer .drawer__apply__btn:hover { opacity: 0.88; }
+
+  /* ── Filter content inside drawer body ── */
+  .filter__drawer .ant-drawer-body .category__filters {
+    padding: 0;
+  }
+
+  .filter__drawer .ant-drawer-body .category__filters .filter__meta {
+    display: none;
+  }
+
+  /* Section blocks */
+  .filter__drawer .ant-drawer-body .filter__section {
+    background: #fff;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 18px 20px;
+  }
+
+  .filter__drawer .ant-drawer-body .filter__section__label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #999;
+    margin: 0 0 14px;
+  }
+
+  /* Category checkboxes */
+  .filter__drawer .ant-drawer-body .custom__checkbox__group {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .filter__drawer .ant-drawer-body .custom__checkbox__group .ant-checkbox-wrapper {
+    margin-inline-start: 0 !important;
+    display: flex;
+    align-items: center;
+    padding: 11px 0;
+    border-bottom: 1px solid #f5f5f5;
+    font-size: 0.9rem;
+    color: #222;
+    font-weight: 500;
+  }
+  .filter__drawer .ant-drawer-body .custom__checkbox__group .ant-checkbox-wrapper:last-child {
+    border-bottom: none;
+  }
+
+  .filter__drawer .ant-drawer-body .custom__checkbox__group .ant-checkbox {
+    top: 0;
+  }
+
+  .filter__drawer .ant-drawer-body .custom__checkbox__group .ant-checkbox-inner {
+    border-radius: 5px;
+    width: 18px;
+    height: 18px;
+  }
+
+  .filter__drawer .ant-drawer-body .custom__checkbox__group .ant-checkbox-wrapper-checked {
+    color: var(--orrsiPrimary);
+  }
+
+  .filter__drawer .ant-drawer-body .custom__checkbox__group .ant-checkbox-wrapper-checked .ant-checkbox-inner,
+  .filter__drawer .ant-drawer-body .custom__checkbox__group .ant-checkbox-checked .ant-checkbox-inner {
+    background-color: var(--orrsiPrimary);
+    border-color: var(--orrsiPrimary);
+  }
+
+  .filter__drawer .ant-drawer-body .custom__checkbox__group .ant-checkbox-wrapper:hover .ant-checkbox-inner,
+  .filter__drawer .ant-drawer-body .custom__checkbox__group .ant-checkbox:hover .ant-checkbox-inner {
+    border-color: var(--orrsiPrimary);
+  }
+
+  /* Price filter */
+  .filter__drawer .ant-drawer-body .price__filter {
+    width: 100%;
+    margin: 0;
+  }
+
+  .filter__drawer .ant-drawer-body .price__filter > label {
+    display: none;
+  }
+
+  .filter__drawer .ant-drawer-body .price__chips {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .filter__drawer .ant-drawer-body .price__chip {
+    flex: 1;
+    background: #f8f8f8;
+    border: 1.5px solid #e8e8e8;
+    border-radius: 10px;
+    padding: 9px 12px;
+    text-align: center;
+  }
+
+  .filter__drawer .ant-drawer-body .chip__label {
+    font-size: 0.68rem;
+    color: #999;
+    display: block;
+    margin-bottom: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .filter__drawer .ant-drawer-body .chip__value {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #111;
+  }
+
+  .filter__drawer .ant-drawer-body .price__chip__divider {
+    font-size: 1rem;
+    color: #ccc;
+    font-weight: 300;
+  }
+
+  .filter__drawer .ant-drawer-body .ant-slider {
+    margin: 0 6px;
+  }
+
+  .filter__drawer .ant-drawer-body .ant-slider .ant-slider-rail {
+    background: #e8e8e8;
+    height: 4px;
+    border-radius: 99px;
+  }
+
+  .filter__drawer .ant-drawer-body .ant-slider .ant-slider-track {
+    background: var(--orrsiPrimary);
+    height: 4px;
+    border-radius: 99px;
+  }
+
+  .filter__drawer .ant-drawer-body .ant-slider .ant-slider-handle {
+    width: 20px;
+    height: 20px;
+    margin-top: -8px;
+    border: 2.5px solid var(--orrsiPrimary);
+    background: #fff;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.12);
+  }
+
+  .filter__drawer .ant-drawer-body .ant-slider .ant-slider-handle::after {
+    display: none;
+  }
+
+  .filter__drawer .ant-drawer-body .ant-slider .ant-slider-handle:hover,
+  .filter__drawer .ant-drawer-body .ant-slider .ant-slider-handle:focus {
+    border-color: var(--orrsiPrimary);
+  }
+
+  .filter__drawer .ant-drawer-body .price__hint {
+    margin: 10px 0 0;
+    font-size: 0.72rem;
+    color: #bbb;
+    text-align: center;
+  }
+
+  /* Subcategory select */
+  .filter__drawer .ant-drawer-body .subcategory__select {
+    width: 100%;
+    margin-top: 0;
+    background: #fff;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 18px 20px;
+  }
+
+  .filter__drawer .ant-drawer-body .subcategory__select label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #999;
+  }
+
+  .filter__drawer .ant-drawer-body .subcategory__select .ant-select-selector {
+    border-radius: 10px !important;
+    border-color: #e0e0e0 !important;
+    background: #f8f8f8 !important;
+    min-height: 42px !important;
+  }
+
+  .filter__drawer .ant-drawer-body .subcategory__select .ant-select-selector:hover {
+    border-color: var(--orrsiPrimary) !important;
+  }
+
+  .filter__drawer .ant-drawer-body .subcategory__select .ant-select-focused .ant-select-selector {
+    border-color: var(--orrsiPrimary) !important;
+    box-shadow: 0 0 0 2px rgba(220, 80, 80, 0.12) !important;
+  }
+
+  /* Active filter chips */
+  .filter__drawer .ant-drawer-body .selected__tags {
+    background: #fff;
+    padding: 14px 20px 18px;
+  }
+
+  .filter__drawer .ant-drawer-body .selected__tags p {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #999;
+    margin: 0 0 10px;
+  }
+
+  .filter__drawer .ant-drawer-body .selected__tags .ant-tag {
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    background: rgba(220, 80, 80, 0.06);
+    border: 1px solid rgba(220, 80, 80, 0.25);
+    color: var(--orrsiPrimary);
+    margin: 0 6px 6px 0;
+  }
+
+  .filter__drawer .ant-drawer-body .selected__tags .ant-tag .ant-tag-close-icon {
+    color: var(--orrsiPrimary);
+    opacity: 0.6;
+  }
+
+  .filter__drawer .ant-drawer-body .selected__tags .ant-tag .ant-tag-close-icon:hover {
+    opacity: 1;
+  }
+`;
 
 export const ShopPageWrapper = styled(FlexibleDiv)`
   position: relative;
@@ -273,332 +614,6 @@ export const ShopPageWrapper = styled(FlexibleDiv)`
 
   .floating__filter__btn {
     display: none;
-  }
-
-  /* ── Filter drawer shell ── */
-  .ant-drawer-content-wrapper {
-    border-radius: 22px 22px 0 0 !important;
-    overflow: hidden;
-  }
-
-  .ant-drawer-header {
-    padding: 18px 20px 14px;
-    border-bottom: 1px solid #f0f0f0;
-    background: #fff;
-  }
-
-  .ant-drawer-header-title {
-    width: 100%;
-  }
-
-  .ant-drawer-title {
-    width: 100%;
-  }
-
-  .ant-drawer-body {
-    padding: 0;
-    overflow-y: auto;
-    max-height: 62vh;
-    background: #fafafa;
-  }
-
-  .ant-drawer-footer {
-    padding: 14px 20px 18px;
-    border-top: 1px solid #f0f0f0;
-    background: #fff;
-  }
-
-  /* ── Drawer header elements ── */
-  .drawer__title__row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-  }
-
-  .drawer__title__text {
-    font-size: 1rem;
-    font-weight: 700;
-    color: #111;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .drawer__filter__badge {
-    background: var(--orrsiPrimary);
-    color: #fff;
-    border-radius: 999px;
-    font-size: 0.68rem;
-    font-weight: 700;
-    padding: 2px 8px;
-    line-height: 1.5;
-  }
-
-  .drawer__close__btn {
-    background: #f0f0f0;
-    border: none;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 0.78rem;
-    color: #444;
-    flex-shrink: 0;
-    &:hover { background: #e4e4e4; }
-  }
-
-  /* ── Drawer footer buttons ── */
-  .drawer__footer {
-    display: flex;
-    gap: 10px;
-  }
-
-  .drawer__clear__btn {
-    flex: 1;
-    height: 46px;
-    border-radius: 12px;
-    border: 1.5px solid #e0e0e0;
-    background: #fff;
-    font-size: 0.88rem;
-    font-weight: 600;
-    color: #555;
-    cursor: pointer;
-    transition: border-color 0.15s;
-    &:hover { border-color: #bbb; color: #111; }
-  }
-
-  .drawer__apply__btn {
-    flex: 2;
-    height: 46px;
-    border-radius: 12px;
-    border: none;
-    background: var(--orrsiPrimary);
-    color: #fff;
-    font-size: 0.88rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity 0.15s;
-    &:hover { opacity: 0.88; }
-  }
-
-  /* ── Filter content inside the drawer ── */
-  .ant-drawer-body .category__filters {
-    padding: 0;
-
-    .filter__meta {
-      display: none; /* "Clear" button moved to footer */
-    }
-
-    /* ── Section block ── */
-    .filter__section {
-      background: #fff;
-      border-bottom: 1px solid #f0f0f0;
-      padding: 18px 20px;
-    }
-
-    .filter__section__label {
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #999;
-      margin: 0 0 14px;
-    }
-
-    /* ── Category chips ── */
-    .custom__checkbox__group {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-
-      .ant-checkbox-wrapper {
-        margin-inline-start: 0 !important;
-        display: flex;
-        align-items: center;
-        padding: 11px 0;
-        border-bottom: 1px solid #f5f5f5;
-        font-size: 0.9rem;
-        color: #222;
-        font-weight: 500;
-
-        &:last-child { border-bottom: none; }
-
-        .ant-checkbox {
-          top: 0;
-        }
-
-        .ant-checkbox-inner {
-          border-radius: 5px;
-          width: 18px;
-          height: 18px;
-        }
-      }
-
-      .ant-checkbox-wrapper-checked {
-        color: var(--orrsiPrimary);
-
-        .ant-checkbox-inner {
-          background-color: var(--orrsiPrimary);
-          border-color: var(--orrsiPrimary);
-        }
-      }
-
-      .ant-checkbox-wrapper:hover .ant-checkbox-inner,
-      .ant-checkbox:hover .ant-checkbox-inner {
-        border-color: var(--orrsiPrimary);
-      }
-    }
-
-    /* ── Price filter ── */
-    .price__filter {
-      width: 100%;
-      margin: 0;
-
-      label {
-        display: none; /* replaced by section label + price chips */
-      }
-
-      .price__chips {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 18px;
-
-        .price__chip {
-          flex: 1;
-          background: #f8f8f8;
-          border: 1.5px solid #e8e8e8;
-          border-radius: 10px;
-          padding: 9px 12px;
-          text-align: center;
-
-          .chip__label {
-            font-size: 0.68rem;
-            color: #999;
-            display: block;
-            margin-bottom: 2px;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-          }
-
-          .chip__value {
-            font-size: 0.92rem;
-            font-weight: 700;
-            color: #111;
-          }
-        }
-
-        .price__chip__divider {
-          font-size: 1rem;
-          color: #ccc;
-          font-weight: 300;
-        }
-      }
-
-      .ant-slider {
-        margin: 0 6px;
-
-        .ant-slider-rail { background: #e8e8e8; height: 4px; border-radius: 99px; }
-        .ant-slider-track { background: var(--orrsiPrimary); height: 4px; border-radius: 99px; }
-        .ant-slider-handle {
-          width: 20px;
-          height: 20px;
-          margin-top: -8px;
-          border: 2.5px solid var(--orrsiPrimary);
-          background: #fff;
-          box-shadow: 0 1px 6px rgba(0,0,0,0.12);
-          &::after { display: none; }
-          &:hover, &:focus { border-color: var(--orrsiPrimary); }
-        }
-      }
-
-      .price__hint {
-        margin: 10px 0 0;
-        font-size: 0.72rem;
-        color: #bbb;
-        text-align: center;
-      }
-    }
-
-    /* ── Subcategory select ── */
-    .subcategory__select {
-      width: 100%;
-      margin-top: 0;
-      background: #fff;
-      border-bottom: 1px solid #f0f0f0;
-      padding: 18px 20px;
-
-      label {
-        display: block;
-        margin-bottom: 10px;
-        font-size: 0.7rem;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: #999;
-      }
-
-      .ant-select-selector {
-        border-radius: 10px !important;
-        border-color: #e0e0e0 !important;
-        background: #f8f8f8 !important;
-        min-height: 42px !important;
-
-        &:hover { border-color: var(--orrsiPrimary) !important; }
-      }
-
-      .ant-select-focused .ant-select-selector,
-      .ant-select-selector:focus,
-      .ant-select-selector:active {
-        border-color: var(--orrsiPrimary) !important;
-        box-shadow: 0 0 0 2px rgba(220, 80, 80, 0.12) !important;
-      }
-
-      .ant-select-selection-item {
-        background: rgba(var(--orrsiPrimaryRgb, 220, 80, 80), 0.08);
-        border-color: rgba(var(--orrsiPrimaryRgb, 220, 80, 80), 0.2);
-        border-radius: 6px;
-        color: var(--orrsiPrimary);
-        font-size: 0.8rem;
-        font-weight: 500;
-      }
-    }
-
-    /* ── Active filter chips ── */
-    .selected__tags {
-      background: #fff;
-      padding: 14px 20px 18px;
-
-      p {
-        font-size: 0.7rem;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: #999;
-        margin: 0 0 10px;
-      }
-
-      .ant-tag {
-        border-radius: 999px;
-        padding: 4px 10px;
-        font-size: 0.8rem;
-        font-weight: 500;
-        background: rgba(var(--orrsiPrimaryRgb, 220, 80, 80), 0.06);
-        border: 1px solid rgba(var(--orrsiPrimaryRgb, 220, 80, 80), 0.25);
-        color: var(--orrsiPrimary);
-        margin: 0 6px 6px 0;
-
-        .ant-tag-close-icon {
-          color: var(--orrsiPrimary);
-          opacity: 0.6;
-          &:hover { opacity: 1; }
-        }
-      }
-    }
   }
 
   .pagination__wrapper {

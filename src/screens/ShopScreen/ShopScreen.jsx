@@ -1,5 +1,5 @@
 import Breadcrumb from "@/components/lib/Breadcrumb/breadcrumb";
-import { ShopPageWrapper } from "./ShopScreen.styles";
+import { ShopPageWrapper, FilterDrawerStyles } from "./ShopScreen.styles";
 import { FlexibleDiv } from "@/components/lib/Box/styles";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
@@ -524,6 +524,7 @@ export default function ShopPage() {
 
   return (
     <>
+      <FilterDrawerStyles />
       <Breadcrumb />
 
       <ShopPageWrapper>
