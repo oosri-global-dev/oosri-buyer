@@ -148,8 +148,17 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     ? Number((subtotal / liveNGNRate).toFixed(2))
     : subtotal;
 
-  // Derived totals
-  const subtotalNGN = Math.round(subtotalUSD * liveNGNRate);
+  // For Nigerian buyers, derive the NGN total directly from each cart item's raw NGN
+  // price (salesPrice ?? regularPrice) to match the exact amount the backend will
+  // charge — avoids the NGN→USD→NGN round-trip rounding gap.
+  const subtotalNGN = isNigerianBuyer
+    ? cartItems.reduce((acc, item) => {
+        if (!item) return acc;
+        const priceNGN = (item.salesPrice > 0 ? item.salesPrice : item.regularPrice) || 0;
+        return acc + priceNGN * (item.quantity || 1);
+      }, 0)
+    : Math.round(subtotalUSD * liveNGNRate);
+
   const totalNGN = subtotalNGN + (isNigerianBuyer ? NIGERIAN_FLAT_RATE_NGN : 0);
   const totalUSD = subtotalUSD + shippingFeeUSD;
 
