@@ -447,24 +447,19 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
         items: cartItems.map((item) => ({ productId: item._id, quantity: item.quantity })),
       };
       const response = await createPaystackCheckout.mutateAsync(payload);
-      const { authorizationUrl, reference } = response?.body || response || {};
+      const { authorizationUrl, accessCode, reference } = response?.body || response || {};
 
-      if (!authorizationUrl || !reference) throw new Error("Paystack did not return a payment URL");
+      if (!accessCode) throw new Error("Paystack did not return an access code");
 
       if (typeof window !== "undefined" && window.PaystackPop) {
-        const handler = window.PaystackPop.setup({
-          key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
-          email: user.email,
-          amount: totalNGN * 100,
-          currency: "NGN",
-          ref: reference,
-          onClose: () => {
-            dispatch({ type: TOAST_BOX, payload: { type: "error", message: "Payment cancelled" } });
-          },
-          callback: () => {
+        const handler = window.PaystackPop.resumeTransaction(accessCode, {
+          onSuccess: () => {
             if (setBuyNowItem) setBuyNowItem(null);
             handleCancel();
             router.push(`/order-confirmation?paystack_reference=${reference}`);
+          },
+          onCancel: () => {
+            dispatch({ type: TOAST_BOX, payload: { type: "error", message: "Payment cancelled" } });
           },
         });
         handler.openIframe();
