@@ -379,33 +379,55 @@ export default function ShopPage() {
               </button>
             </div>
 
-            <Checkbox.Group
-              className="custom__checkbox__group"
-              options={categoryOptions}
-              onChange={handleCategoryChange}
-              value={selectedCategories}
-            />
-
-            <div className="price__filter">
-              <label>
-                Price: {currencySymbol}{Number(priceRange[0]).toLocaleString()} – {currencySymbol}{Number(priceRange[1]).toLocaleString()}
-              </label>
-
-              <Slider
-                range
-                min={0}
-                max={maxPriceLocal}
-                step={priceStep}
-                value={priceRange}
-                onChange={(val) => setPriceRange(val)}
-                tooltip={{
-                  formatter: (v) => `${currencySymbol}${Number(v).toLocaleString()}`,
-                }}
+            <div className="filter__section">
+              <p className="filter__section__label">Categories</p>
+              <Checkbox.Group
+                className="custom__checkbox__group"
+                options={categoryOptions}
+                onChange={handleCategoryChange}
+                value={selectedCategories}
               />
+            </div>
 
-              <p className="price__hint">
-                price filters only the currently viewed products by their prices
-              </p>
+            <div className="filter__section">
+              <p className="filter__section__label">Price Range</p>
+              <div className="price__filter">
+                <label>
+                  Price: {currencySymbol}{Number(priceRange[0]).toLocaleString()} – {currencySymbol}{Number(priceRange[1]).toLocaleString()}
+                </label>
+
+                <div className="price__chips">
+                  <div className="price__chip">
+                    <span className="chip__label">Min</span>
+                    <span className="chip__value">
+                      {currencySymbol}{Number(priceRange[0]).toLocaleString()}
+                    </span>
+                  </div>
+                  <span className="price__chip__divider">—</span>
+                  <div className="price__chip">
+                    <span className="chip__label">Max</span>
+                    <span className="chip__value">
+                      {currencySymbol}{Number(priceRange[1]).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+
+                <Slider
+                  range
+                  min={0}
+                  max={maxPriceLocal}
+                  step={priceStep}
+                  value={priceRange}
+                  onChange={(val) => setPriceRange(val)}
+                  tooltip={{
+                    formatter: (v) => `${currencySymbol}${Number(v).toLocaleString()}`,
+                  }}
+                />
+
+                <p className="price__hint">
+                  price filters only the currently viewed products by their prices
+                </p>
+              </div>
             </div>
 
             {selectedCategories.map((categoryName) => {
@@ -445,7 +467,7 @@ export default function ShopPage() {
             {(selectedCategories.length > 0 ||
               allSelectedSubCategories.length > 0) && (
               <div className="selected__tags">
-                <p style={{ marginBottom: 6 }}>Selected Filters:</p>
+                <p>Active Filters</p>
 
                 {selectedCategories.map((cat) => (
                   <Tag
