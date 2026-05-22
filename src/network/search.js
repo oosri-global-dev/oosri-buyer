@@ -2,7 +2,7 @@ import { publicInstance } from "./axios";
 import { useQuery } from "@tanstack/react-query";
 
 export const searchProducts = async (query) => {
-  const { data } = await publicInstance.get(`/products/buyer`, { params: { productName: query, limit: 10 } });
+  const { data } = await publicInstance.get(`/products/buyer/search`, { params: { searchTerm: query, limit: 10 } });
   return data;
 };
 
