@@ -4,6 +4,15 @@ import { FlexibleDiv } from "@/components/lib/Box/styles";
 export const ShopPageWrapper = styled(FlexibleDiv)`
   position: relative;
 
+  .mobile__shop__header {
+    display: none;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #111;
+    margin: 16px 0 4px;
+    letter-spacing: -0.01em;
+  }
+
   hr {
     border: 0.4px solid #f5f5f5;
     width: 100%;
@@ -263,6 +272,100 @@ export const ShopPageWrapper = styled(FlexibleDiv)`
     display: none;
   }
 
+  /* ── Filter drawer (Ant Design Drawer overrides) ── */
+  .ant-drawer-content-wrapper {
+    border-radius: 20px 20px 0 0 !important;
+    overflow: hidden;
+  }
+
+  .ant-drawer-header {
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .ant-drawer-body {
+    padding: 16px 20px;
+    overflow-y: auto;
+    max-height: 60vh;
+  }
+
+  .ant-drawer-footer {
+    padding: 12px 20px;
+    border-top: 1px solid #f0f0f0;
+  }
+
+  .drawer__title__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .drawer__title__text {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #111;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .drawer__filter__badge {
+    background: var(--orrsiPrimary);
+    color: #fff;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 1px 7px;
+    line-height: 1.5;
+  }
+
+  .drawer__close__btn {
+    background: #f5f5f5;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.75rem;
+    color: #555;
+    &:hover { background: #ebebeb; }
+  }
+
+  .drawer__footer {
+    display: flex;
+    gap: 10px;
+  }
+
+  .drawer__clear__btn {
+    flex: 1;
+    height: 44px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    background: #fff;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #444;
+    cursor: pointer;
+    &:hover { border-color: #aaa; }
+  }
+
+  .drawer__apply__btn {
+    flex: 2;
+    height: 44px;
+    border-radius: 10px;
+    border: none;
+    background: var(--orrsiPrimary);
+    color: #fff;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    &:hover { opacity: 0.9; }
+  }
+
   .pagination__wrapper {
     width: 100%;
     height: 100px;
@@ -298,6 +401,10 @@ export const ShopPageWrapper = styled(FlexibleDiv)`
   }
 
   @media (max-width: 600px) {
+    .mobile__shop__header {
+      display: block;
+    }
+
     .products__section {
       flex-direction: column;
     }
@@ -308,21 +415,43 @@ export const ShopPageWrapper = styled(FlexibleDiv)`
 
     .products__section {
       .products__grid {
-        grid-template-columns: repeat(2, 1fr);
         grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
       }
     }
 
     .floating__filter__btn {
-      display: flex;
-      justify-content: center;
+      display: inline-flex;
       align-items: center;
+      gap: 7px;
       position: fixed;
-      bottom: 30px;
-      right: 30px;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
       z-index: 1000;
-      background-color: var(--orrsiPrimary);
-      padding: 25px;
+      background: #111;
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      padding: 12px 22px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+      white-space: nowrap;
+
+      .floating__filter__count {
+        background: var(--orrsiPrimary);
+        color: #fff;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 1px 6px;
+        line-height: 1.5;
+      }
+
+      &:hover {
+        background: #222;
+      }
     }
   }
 

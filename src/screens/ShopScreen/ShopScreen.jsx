@@ -8,7 +8,7 @@ import {
   Select,
   Tag,
   Alert,
-  Modal,
+  Drawer,
   Button,
   Pagination,
   Slider,
@@ -340,6 +340,11 @@ export default function ShopPage() {
     setCurrentPage(page);
   }, []);
 
+  const activeFilterCount =
+    selectedCategories.length +
+    allSelectedSubCategories.length +
+    (priceRange[0] > 0 || priceRange[1] < maxPriceLocal ? 1 : 0);
+
   const showFilterModal = useCallback(() => setIsFilterModalVisible(true), []);
   const handleFilterModalCancel = useCallback(
     () => setIsFilterModalVisible(false),
@@ -497,9 +502,11 @@ export default function ShopPage() {
 
   return (
     <>
-      <Breadcrumb numOfProducts={productsList.length} />
+      <Breadcrumb />
 
       <ShopPageWrapper>
+        <p className="mobile__shop__header">Shop</p>
+
         <hr />
 
         <FlexibleDiv
@@ -614,23 +621,47 @@ export default function ShopPage() {
           </FlexibleDiv>
         </FlexibleDiv>
 
-        <Button
-          className="floating__filter__btn"
-          type="primary"
-          shape="circle"
-          icon={<FaFilter size="20px" />}
-          onClick={showFilterModal}
-        />
+        <button className="floating__filter__btn" onClick={showFilterModal}>
+          <FaFilter size={13} />
+          <span>Filters</span>
+          {activeFilterCount > 0 && (
+            <span className="floating__filter__count">{activeFilterCount}</span>
+          )}
+        </button>
 
-        <Modal
-          title="Filters"
+        <Drawer
           open={isFilterModalVisible}
-          onCancel={handleFilterModalCancel}
-          footer={null}
-          width={300}
+          onClose={handleFilterModalCancel}
+          placement="bottom"
+          height="auto"
+          className="filter__drawer"
+          closable={false}
+          title={
+            <div className="drawer__title__row">
+              <span className="drawer__title__text">
+                Filters
+                {activeFilterCount > 0 && (
+                  <span className="drawer__filter__badge">{activeFilterCount}</span>
+                )}
+              </span>
+              <button className="drawer__close__btn" onClick={handleFilterModalCancel}>
+                ✕
+              </button>
+            </div>
+          }
+          footer={
+            <div className="drawer__footer">
+              <button className="drawer__clear__btn" onClick={() => { clearFilters(); }}>
+                Clear all
+              </button>
+              <button className="drawer__apply__btn" onClick={handleFilterModalCancel}>
+                Show results
+              </button>
+            </div>
+          }
         >
           {filterContentNode}
-        </Modal>
+        </Drawer>
       </ShopPageWrapper>
     </>
   );
