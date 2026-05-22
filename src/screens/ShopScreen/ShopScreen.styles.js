@@ -450,10 +450,13 @@ export const ShopPageWrapper = styled(FlexibleDiv)`
 
           label {
             font-weight: 500;
-            font-size: 12px;
-            color: #111;
+            font-size: 10.5px;
+            color: #555;
             display: block;
             margin-bottom: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
           }
 
           /* ✅ Red hint line like screenshot */
