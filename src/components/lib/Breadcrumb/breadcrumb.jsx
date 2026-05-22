@@ -3,7 +3,7 @@ import Image from "next/image";
 import { FlexibleDiv } from "@/components/lib/Box/styles";
 import { useState } from "react";
 
-export default function Breadcrumb({ numOfProducts }) {
+export default function Breadcrumb() {
   const [firstBC, setFirstBC] = useState("Products");
   return (
     <BreadcrumbWrapper>
@@ -18,9 +18,6 @@ export default function Breadcrumb({ numOfProducts }) {
           style={{ objectFit: "cover" }}
         />
       </FlexibleDiv>
-      {numOfProducts && (
-        <p className="breadcrumb__paragraph">{numOfProducts} Products Found</p>
-      )}
     </BreadcrumbWrapper>
   );
 }

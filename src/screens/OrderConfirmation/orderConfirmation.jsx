@@ -1,22 +1,35 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { MdCheck, MdShoppingBag, MdListAlt } from 'react-icons/md';
 import { Spin } from 'antd';
 import { ConfirmationContainer } from './orderConfirmation.styles';
-import { usePaymentStatus } from '@/network/checkout';
+import { usePaymentStatus, usePaystackPaymentStatus } from '@/network/checkout';
+
+const POLL_TIMEOUT_MS = 2 * 60 * 1000; // stop polling after 2 minutes
 
 const OrderConfirmation = () => {
     const router = useRouter();
-    const { payment_intent } = router.query;
-    const { data, isLoading, isError } = usePaymentStatus(payment_intent, {
-        enabled: !!payment_intent,
-    });
+    const { payment_intent, paystack_reference } = router.query;
+    const [pollTimedOut, setPollTimedOut] = useState(false);
+    const timerRef = useRef(null);
+
+    const stripeStatus = usePaymentStatus(payment_intent, { enabled: !!payment_intent && !pollTimedOut });
+    const paystackStatus = usePaystackPaymentStatus(paystack_reference, { enabled: !!paystack_reference && !pollTimedOut });
+
+    const { data, isLoading, isError } = payment_intent ? stripeStatus : paystackStatus;
+    const reference = payment_intent || paystack_reference;
 
     const paymentState = data?.state || null;
     const orderCount = data?.confirmedOrders || 0;
-    const isProcessing = !!payment_intent && (isLoading || paymentState === "processing");
-    const needsAttention = paymentState === "failed" || isError;
+    const isProcessing = !!reference && !pollTimedOut && (isLoading || paymentState === "processing");
+    const needsAttention = pollTimedOut || paymentState === "failed" || isError;
+
+    useEffect(() => {
+        if (!reference || paymentState === "confirmed") return;
+        timerRef.current = setTimeout(() => setPollTimedOut(true), POLL_TIMEOUT_MS);
+        return () => clearTimeout(timerRef.current);
+    }, [reference, paymentState]);
 
     return (
         <ConfirmationContainer>
@@ -33,15 +46,17 @@ const OrderConfirmation = () => {
             </h1>
             <p className="description">
                 {isProcessing
-                    ? "Your payment was received and we are waiting for the backend to finish creating your order. This page updates automatically."
+                    ? "Your payment was received. We're waiting for confirmation — this page updates automatically."
+                    : pollTimedOut
+                    ? "This is taking longer than expected. Your payment was received — please check your orders in a few minutes or contact support if nothing appears."
                     : needsAttention
                     ? "We received your payment but could not fully confirm the order yet. Please check your orders shortly or contact support if this persists."
                     : `Your payment and order${orderCount > 1 ? "s have" : " has"} been confirmed successfully.`}
             </p>
 
-            {payment_intent && (
+            {reference && (
                 <div className="reference">
-                    Transaction Reference: <strong>{payment_intent}</strong>
+                    Transaction Reference: <strong>{reference}</strong>
                 </div>
             )}
 

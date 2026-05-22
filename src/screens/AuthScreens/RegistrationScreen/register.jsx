@@ -21,17 +21,13 @@ import Logo from "@/assets/images/homepage/logo.png";
  */
 function GoogleRegisterButton({ form, setGoogleLoading }) {
   const handleGoogleAuth = useGoogleLogin({
-    flow: 'auth-code',
-    onSuccess: async (codeResponse) => {
+    onSuccess: async (tokenResponse) => {
       setGoogleLoading(true);
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/auth/buyer/google-userinfo`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code: codeResponse.code }),
+        const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
         });
-        const data = await res.json();
-        const userInfo = data?.body;
+        const userInfo = await userInfoRes.json();
 
         form.setFieldsValue({
           fullName: userInfo.name,

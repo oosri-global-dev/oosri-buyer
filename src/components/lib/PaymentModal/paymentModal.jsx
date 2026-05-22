@@ -22,8 +22,9 @@ import {
   useCreatePaystackCheckout,
 } from "@/network/checkout";
 import { useFormatPrice } from "@/data-helpers/hooks";
-import { TOAST_BOX } from "@/context/types";
+import { TOAST_BOX, CART } from "@/context/types";
 import { useMainContext } from "@/context";
+import { handleClearCart } from "@/network/cart";
 import { MdEdit as EditIcon, MdDelete as DeleteIcon, MdStar as StarFilledIcon, MdStarOutline as StarOutlineIcon, MdPayments as PaystackIcon, MdCreditCard as CardIcon, MdLocalShipping as ShippingIcon, MdLock as LockIcon } from "react-icons/md";
 import { Spin } from "antd";
 import { useRouter } from "next/router";
@@ -425,6 +426,8 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
 
   const handlePaymentSuccess = (paymentIntent) => {
     dispatch({ type: TOAST_BOX, payload: { type: "success", message: "Payment successful!" } });
+    dispatch({ type: CART, payload: [] });
+    handleClearCart().catch(() => {});
     if (setBuyNowItem) setBuyNowItem(null);
     handleCancel();
     router.push(paymentIntent?.id ? `/order-confirmation?payment_intent=${paymentIntent.id}` : "/order-confirmation");
@@ -462,6 +465,8 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
             dispatch({ type: TOAST_BOX, payload: { type: "error", message: "Payment cancelled" } });
           },
           callback: () => {
+            dispatch({ type: CART, payload: [] });
+            handleClearCart().catch(() => {});
             if (setBuyNowItem) setBuyNowItem(null);
             handleCancel();
             router.push(`/order-confirmation?paystack_reference=${reference}`);

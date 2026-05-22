@@ -1,5 +1,5 @@
 import Breadcrumb from "@/components/lib/Breadcrumb/breadcrumb";
-import { ShopPageWrapper } from "./ShopScreen.styles";
+import { ShopPageWrapper, FilterDrawerStyles } from "./ShopScreen.styles";
 import { FlexibleDiv } from "@/components/lib/Box/styles";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
@@ -8,7 +8,7 @@ import {
   Select,
   Tag,
   Alert,
-  Modal,
+  Drawer,
   Button,
   Pagination,
   Slider,
@@ -156,7 +156,6 @@ export default function ShopPage() {
   const [priceRange, setPriceRange] = useState([0, MAX_PRICE_USD]);
   const [sortBy, setSortBy] = useState("featured");
   const [currentPage, setCurrentPage] = useState(1);
-  const [openSelects, setOpenSelects] = useState({});
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
   const [itemOffset, setItemOffset] = useState(0);
   const [shuffleSeed, setShuffleSeed] = useState(null);
@@ -265,10 +264,6 @@ export default function ShopPage() {
     }));
   }, []);
 
-  const handleDropdownVisibleChange = useCallback((open, categoryName) => {
-    setOpenSelects((prev) => ({ ...prev, [categoryName]: open }));
-  }, []);
-
   const handleRemoveSubCategory = useCallback((removedTag) => {
     setSelectedSubCategories((prev) => {
       const next = { ...prev };
@@ -340,6 +335,11 @@ export default function ShopPage() {
     setCurrentPage(page);
   }, []);
 
+  const activeFilterCount =
+    selectedCategories.length +
+    allSelectedSubCategories.length +
+    (priceRange[0] > 0 || priceRange[1] < maxPriceLocal ? 1 : 0);
+
   const showFilterModal = useCallback(() => setIsFilterModalVisible(true), []);
   const handleFilterModalCancel = useCallback(
     () => setIsFilterModalVisible(false),
@@ -350,7 +350,6 @@ export default function ShopPage() {
     setSelectedCategories([]);
     setSelectedSubCategories({});
     setPriceRange([0, maxPriceLocal]);
-    setOpenSelects({});
   }, [maxPriceLocal]);
 
   const filterContentNode = useMemo(() => (
@@ -374,33 +373,55 @@ export default function ShopPage() {
               </button>
             </div>
 
-            <Checkbox.Group
-              className="custom__checkbox__group"
-              options={categoryOptions}
-              onChange={handleCategoryChange}
-              value={selectedCategories}
-            />
-
-            <div className="price__filter">
-              <label>
-                Price: {currencySymbol}{Number(priceRange[0]).toLocaleString()} – {currencySymbol}{Number(priceRange[1]).toLocaleString()}
-              </label>
-
-              <Slider
-                range
-                min={0}
-                max={maxPriceLocal}
-                step={priceStep}
-                value={priceRange}
-                onChange={(val) => setPriceRange(val)}
-                tooltip={{
-                  formatter: (v) => `${currencySymbol}${Number(v).toLocaleString()}`,
-                }}
+            <div className="filter__section">
+              <p className="filter__section__label">Categories</p>
+              <Checkbox.Group
+                className="custom__checkbox__group"
+                options={categoryOptions}
+                onChange={handleCategoryChange}
+                value={selectedCategories}
               />
+            </div>
 
-              <p className="price__hint">
-                price filters only the currently viewed products by their prices
-              </p>
+            <div className="filter__section">
+              <p className="filter__section__label">Price Range</p>
+              <div className="price__filter">
+                <label>
+                  Price: {currencySymbol}{Number(priceRange[0]).toLocaleString()} – {currencySymbol}{Number(priceRange[1]).toLocaleString()}
+                </label>
+
+                <div className="price__chips">
+                  <div className="price__chip">
+                    <span className="chip__label">Min</span>
+                    <span className="chip__value">
+                      {currencySymbol}{Number(priceRange[0]).toLocaleString()}
+                    </span>
+                  </div>
+                  <span className="price__chip__divider">—</span>
+                  <div className="price__chip">
+                    <span className="chip__label">Max</span>
+                    <span className="chip__value">
+                      {currencySymbol}{Number(priceRange[1]).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+
+                <Slider
+                  range
+                  min={0}
+                  max={maxPriceLocal}
+                  step={priceStep}
+                  value={priceRange}
+                  onChange={(val) => setPriceRange(val)}
+                  tooltip={{
+                    formatter: (v) => `${currencySymbol}${Number(v).toLocaleString()}`,
+                  }}
+                />
+
+                <p className="price__hint">
+                  price filters only the currently viewed products by their prices
+                </p>
+              </div>
             </div>
 
             {selectedCategories.map((categoryName) => {
@@ -417,21 +438,10 @@ export default function ShopPage() {
                     allowClear
                     style={{ width: "100%" }}
                     placeholder={`Select from ${categoryName}`}
-                    onChange={(values) =>
-                      handleSubCategoryChange(categoryName, values)
-                    }
-                    onSelect={() =>
-                      handleDropdownVisibleChange(false, categoryName)
-                    }
-                    onDeselect={() =>
-                      handleDropdownVisibleChange(false, categoryName)
-                    }
-                    onDropdownVisibleChange={(open) =>
-                      handleDropdownVisibleChange(open, categoryName)
-                    }
-                    open={openSelects[categoryName]}
+                    onChange={(values) => handleSubCategoryChange(categoryName, values)}
                     value={selectedSubCategories[categoryName] || []}
                     options={formatCategory(category.subcategories)}
+                    getPopupContainer={(trigger) => trigger.closest(".ant-drawer-body") || document.body}
                   />
                 </div>
               );
@@ -440,7 +450,7 @@ export default function ShopPage() {
             {(selectedCategories.length > 0 ||
               allSelectedSubCategories.length > 0) && (
               <div className="selected__tags">
-                <p style={{ marginBottom: 6 }}>Selected Filters:</p>
+                <p>Active Filters</p>
 
                 {selectedCategories.map((cat) => (
                   <Tag
@@ -483,8 +493,6 @@ export default function ShopPage() {
     priceRange,
     productCategories,
     handleSubCategoryChange,
-    handleDropdownVisibleChange,
-    openSelects,
     formatCategory,
     allSelectedSubCategories,
     handleRemoveSubCategory,
@@ -497,9 +505,12 @@ export default function ShopPage() {
 
   return (
     <>
-      <Breadcrumb numOfProducts={productsList.length} />
+      <FilterDrawerStyles />
+      <Breadcrumb />
 
       <ShopPageWrapper>
+        <p className="mobile__shop__header">Shop</p>
+
         <hr />
 
         <FlexibleDiv
@@ -614,23 +625,47 @@ export default function ShopPage() {
           </FlexibleDiv>
         </FlexibleDiv>
 
-        <Button
-          className="floating__filter__btn"
-          type="primary"
-          shape="circle"
-          icon={<FaFilter size="20px" />}
-          onClick={showFilterModal}
-        />
+        <button className="floating__filter__btn" onClick={showFilterModal}>
+          <FaFilter size={13} />
+          <span>Filters</span>
+          {activeFilterCount > 0 && (
+            <span className="floating__filter__count">{activeFilterCount}</span>
+          )}
+        </button>
 
-        <Modal
-          title="Filters"
+        <Drawer
           open={isFilterModalVisible}
-          onCancel={handleFilterModalCancel}
-          footer={null}
-          width={300}
+          onClose={handleFilterModalCancel}
+          placement="bottom"
+          height="78vh"
+          className="filter__drawer"
+          closable={false}
+          title={
+            <div className="drawer__title__row">
+              <span className="drawer__title__text">
+                Filters
+                {activeFilterCount > 0 && (
+                  <span className="drawer__filter__badge">{activeFilterCount}</span>
+                )}
+              </span>
+              <button className="drawer__close__btn" onClick={handleFilterModalCancel}>
+                ✕
+              </button>
+            </div>
+          }
+          footer={
+            <div className="drawer__footer">
+              <button className="drawer__clear__btn" onClick={() => { clearFilters(); }}>
+                Clear all
+              </button>
+              <button className="drawer__apply__btn" onClick={handleFilterModalCancel}>
+                Show results
+              </button>
+            </div>
+          }
         >
           {filterContentNode}
-        </Modal>
+        </Drawer>
       </ShopPageWrapper>
     </>
   );
