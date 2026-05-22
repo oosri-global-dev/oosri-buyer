@@ -9,7 +9,7 @@ export const FilterDrawerStyles = createGlobalStyle`
   }
 
   .filter__drawer .ant-drawer-header {
-    padding: 18px 20px 14px;
+    padding: 14px 16px 12px;
     border-bottom: 1px solid #f0f0f0;
     background: #fff;
   }
@@ -25,12 +25,12 @@ export const FilterDrawerStyles = createGlobalStyle`
   .filter__drawer .ant-drawer-body {
     padding: 0;
     overflow-y: auto;
-    max-height: 62vh;
     background: #fafafa;
+    flex: 1;
   }
 
   .filter__drawer .ant-drawer-footer {
-    padding: 14px 20px 18px;
+    padding: 10px 16px 14px;
     border-top: 1px solid #f0f0f0;
     background: #fff;
   }
@@ -86,8 +86,8 @@ export const FilterDrawerStyles = createGlobalStyle`
 
   .filter__drawer .drawer__clear__btn {
     flex: 1;
-    height: 46px;
-    border-radius: 12px;
+    height: 42px;
+    border-radius: 10px;
     border: 1.5px solid #e0e0e0;
     background: #fff;
     font-size: 0.88rem;
@@ -100,8 +100,8 @@ export const FilterDrawerStyles = createGlobalStyle`
 
   .filter__drawer .drawer__apply__btn {
     flex: 2;
-    height: 46px;
-    border-radius: 12px;
+    height: 42px;
+    border-radius: 10px;
     border: none;
     background: var(--orrsiPrimary);
     color: #fff;
@@ -125,16 +125,16 @@ export const FilterDrawerStyles = createGlobalStyle`
   .filter__drawer .ant-drawer-body .filter__section {
     background: #fff;
     border-bottom: 1px solid #f0f0f0;
-    padding: 18px 20px;
+    padding: 12px 16px;
   }
 
   .filter__drawer .ant-drawer-body .filter__section__label {
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #999;
-    margin: 0 0 14px;
+    color: #aaa;
+    margin: 0 0 8px;
   }
 
   /* Category checkboxes */
@@ -148,9 +148,9 @@ export const FilterDrawerStyles = createGlobalStyle`
     margin-inline-start: 0 !important;
     display: flex;
     align-items: center;
-    padding: 11px 0;
+    padding: 8px 0;
     border-bottom: 1px solid #f5f5f5;
-    font-size: 0.9rem;
+    font-size: 0.86rem;
     color: #222;
     font-weight: 500;
   }
@@ -196,30 +196,30 @@ export const FilterDrawerStyles = createGlobalStyle`
   .filter__drawer .ant-drawer-body .price__chips {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 18px;
+    gap: 8px;
+    margin-bottom: 12px;
   }
 
   .filter__drawer .ant-drawer-body .price__chip {
     flex: 1;
     background: #f8f8f8;
     border: 1.5px solid #e8e8e8;
-    border-radius: 10px;
-    padding: 9px 12px;
+    border-radius: 8px;
+    padding: 6px 10px;
     text-align: center;
   }
 
   .filter__drawer .ant-drawer-body .chip__label {
-    font-size: 0.68rem;
-    color: #999;
+    font-size: 0.62rem;
+    color: #aaa;
     display: block;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
     text-transform: uppercase;
     letter-spacing: 0.04em;
   }
 
   .filter__drawer .ant-drawer-body .chip__value {
-    font-size: 0.92rem;
+    font-size: 0.85rem;
     font-weight: 700;
     color: #111;
   }
@@ -277,17 +277,17 @@ export const FilterDrawerStyles = createGlobalStyle`
     margin-top: 0;
     background: #fff;
     border-bottom: 1px solid #f0f0f0;
-    padding: 18px 20px;
+    padding: 12px 16px;
   }
 
   .filter__drawer .ant-drawer-body .subcategory__select label {
     display: block;
-    margin-bottom: 10px;
-    font-size: 0.7rem;
+    margin-bottom: 8px;
+    font-size: 0.68rem;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #999;
+    color: #aaa;
   }
 
   .filter__drawer .ant-drawer-body .subcategory__select .ant-select-selector {
@@ -309,16 +309,16 @@ export const FilterDrawerStyles = createGlobalStyle`
   /* Active filter chips */
   .filter__drawer .ant-drawer-body .selected__tags {
     background: #fff;
-    padding: 14px 20px 18px;
+    padding: 10px 16px 14px;
   }
 
   .filter__drawer .ant-drawer-body .selected__tags p {
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #999;
-    margin: 0 0 10px;
+    color: #aaa;
+    margin: 0 0 8px;
   }
 
   .filter__drawer .ant-drawer-body .selected__tags .ant-tag {

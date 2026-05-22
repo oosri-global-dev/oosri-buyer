@@ -156,7 +156,6 @@ export default function ShopPage() {
   const [priceRange, setPriceRange] = useState([0, MAX_PRICE_USD]);
   const [sortBy, setSortBy] = useState("featured");
   const [currentPage, setCurrentPage] = useState(1);
-  const [openSelects, setOpenSelects] = useState({});
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
   const [itemOffset, setItemOffset] = useState(0);
   const [shuffleSeed, setShuffleSeed] = useState(null);
@@ -265,10 +264,6 @@ export default function ShopPage() {
     }));
   }, []);
 
-  const handleDropdownVisibleChange = useCallback((open, categoryName) => {
-    setOpenSelects((prev) => ({ ...prev, [categoryName]: open }));
-  }, []);
-
   const handleRemoveSubCategory = useCallback((removedTag) => {
     setSelectedSubCategories((prev) => {
       const next = { ...prev };
@@ -355,7 +350,6 @@ export default function ShopPage() {
     setSelectedCategories([]);
     setSelectedSubCategories({});
     setPriceRange([0, maxPriceLocal]);
-    setOpenSelects({});
   }, [maxPriceLocal]);
 
   const filterContentNode = useMemo(() => (
@@ -444,21 +438,10 @@ export default function ShopPage() {
                     allowClear
                     style={{ width: "100%" }}
                     placeholder={`Select from ${categoryName}`}
-                    onChange={(values) =>
-                      handleSubCategoryChange(categoryName, values)
-                    }
-                    onSelect={() =>
-                      handleDropdownVisibleChange(false, categoryName)
-                    }
-                    onDeselect={() =>
-                      handleDropdownVisibleChange(false, categoryName)
-                    }
-                    onDropdownVisibleChange={(open) =>
-                      handleDropdownVisibleChange(open, categoryName)
-                    }
-                    open={openSelects[categoryName]}
+                    onChange={(values) => handleSubCategoryChange(categoryName, values)}
                     value={selectedSubCategories[categoryName] || []}
                     options={formatCategory(category.subcategories)}
+                    getPopupContainer={(trigger) => trigger.closest(".ant-drawer-body") || document.body}
                   />
                 </div>
               );
@@ -510,8 +493,6 @@ export default function ShopPage() {
     priceRange,
     productCategories,
     handleSubCategoryChange,
-    handleDropdownVisibleChange,
-    openSelects,
     formatCategory,
     allSelectedSubCategories,
     handleRemoveSubCategory,
@@ -656,7 +637,7 @@ export default function ShopPage() {
           open={isFilterModalVisible}
           onClose={handleFilterModalCancel}
           placement="bottom"
-          height="auto"
+          height="78vh"
           className="filter__drawer"
           closable={false}
           title={
