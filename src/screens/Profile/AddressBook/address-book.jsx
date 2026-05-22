@@ -45,7 +45,6 @@ export default function AddressBook({ setCurrentPage }) {
   const [editingId, setEditingId] = useState(null);
   const [selectedCountryCode, setSelectedCountryCode] = useState(undefined);
   const [selectedCountryName, setSelectedCountryName] = useState(undefined);
-  const watchedCountryCode = Form.useWatch("countryCode", form);
 
   const { isLoaded: isMapsLoaded } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
@@ -194,7 +193,7 @@ export default function AddressBook({ setCurrentPage }) {
                       </span>
                     )}
                     <span className="payment__tag">
-                      {addr.countryCode === "NG" ? "🇳🇬 Paystack · Flat-rate delivery" : "💳 Stripe · DHL / Haulam delivery"}
+                      {addr.countryCode === "NG" ? "🇳🇬 Paystack · Flat-rate delivery" : "💳 Stripe · Haulam / DHL delivery"}
                     </span>
                   </FlexibleDiv>
                   <FlexibleDiv gap="6px" flexWrap="nowrap" alignItems="center">

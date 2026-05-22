@@ -61,15 +61,6 @@ const COUNTRIES = [
 const countryOptions = COUNTRIES.map((c) => ({ label: c.name, value: c.code }));
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
-function loadPaystackScript() {
-  if (typeof window === "undefined" || document.getElementById("paystack-inline-script")) return;
-  const script = document.createElement("script");
-  script.id = "paystack-inline-script";
-  script.src = "https://js.paystack.co/v1/inline.js";
-  script.async = true;
-  document.body.appendChild(script);
-}
-
 export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItems = [] }) {
   const router = useRouter();
 
@@ -149,7 +140,6 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     shippingEstimates[0] ||
     null;
   const shippingFeeUSD = selectedShippingOption?.estimateUSD || shippingInfo?.totalPriceUSD || 0;
-  const shippingFeeNGN = isNigerianBuyer ? NIGERIAN_FLAT_RATE_NGN : 0;
 
   // Ensure subtotal is treated as USD. If the caller accidentally passed an NGN amount
   // (large value with no fxRate hint), normalise it back to USD using the live rate.
@@ -164,11 +154,6 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
   const totalUSD = subtotalUSD + shippingFeeUSD;
 
   const maxAddresses = 5;
-
-  // Load Paystack script when a Nigerian address is selected
-  useEffect(() => {
-    if (isNigerianBuyer) loadPaystackScript();
-  }, [isNigerianBuyer]);
 
   const syncAddressFormValues = useCallback(
     ({ address = "", cityName = "", postalCode = "", countryCode, countryName }) => {
@@ -454,26 +439,8 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
 
       if (!authorizationUrl || !reference) throw new Error("Paystack did not return a payment URL");
 
-      if (typeof window !== "undefined" && window.PaystackPop) {
-        const handler = window.PaystackPop.setup({
-          key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
-          email: user.email,
-          amount: totalNGN * 100,
-          currency: "NGN",
-          ref: reference,
-          onClose: () => {
-            dispatch({ type: TOAST_BOX, payload: { type: "error", message: "Payment cancelled" } });
-          },
-          callback: () => {
-            dispatch({ type: CART, payload: [] });
-            handleClearCart().catch(() => {});
-            if (setBuyNowItem) setBuyNowItem(null);
-            handleCancel();
-            router.push(`/order-confirmation?paystack_reference=${reference}`);
-          },
-        });
-        handler.openIframe();
-      } else {
+      if (typeof window !== "undefined") {
+        window.sessionStorage.setItem("oosri_pending_paystack_reference", reference);
         window.location.href = authorizationUrl;
       }
     } catch (error) {
@@ -549,7 +516,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                               <span className="address__tag paystack__tag">Paystack · ₦{NIGERIAN_FLAT_RATE_NGN.toLocaleString()} flat shipping</span>
                             )}
                             {addr.countryCode !== "NG" && (
-                              <span className="address__tag stripe__tag">Stripe · DHL / Haulam shipping</span>
+                              <span className="address__tag stripe__tag">Stripe · Haulam / DHL shipping</span>
                             )}
                           </FlexibleDiv>
                           <FlexibleDiv gap="8px" flexWrap="nowrap" justifyContent="flex-start" alignItems="center">

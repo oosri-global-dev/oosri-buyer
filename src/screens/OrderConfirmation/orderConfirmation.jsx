@@ -1,18 +1,26 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { useQueryClient } from '@tanstack/react-query';
 import { MdCheck, MdShoppingBag, MdListAlt } from 'react-icons/md';
 import { Spin } from 'antd';
 import { ConfirmationContainer } from './orderConfirmation.styles';
 import { usePaymentStatus, usePaystackPaymentStatus } from '@/network/checkout';
+import { useMainContext } from '@/context';
+import { CART } from '@/context/types';
+import { handleClearCart } from '@/network/cart';
 
 const POLL_TIMEOUT_MS = 2 * 60 * 1000; // stop polling after 2 minutes
 
 const OrderConfirmation = () => {
     const router = useRouter();
+    const queryClient = useQueryClient();
     const { payment_intent, paystack_reference } = router.query;
+    const { dispatch, setBuyNowItem } = useMainContext();
     const [pollTimedOut, setPollTimedOut] = useState(false);
     const timerRef = useRef(null);
+    const hasClearedCartRef = useRef(false);
+    const hasInvalidatedOrdersRef = useRef(false);
 
     const stripeStatus = usePaymentStatus(payment_intent, { enabled: !!payment_intent && !pollTimedOut });
     const paystackStatus = usePaystackPaymentStatus(paystack_reference, { enabled: !!paystack_reference && !pollTimedOut });
@@ -26,10 +34,46 @@ const OrderConfirmation = () => {
     const needsAttention = pollTimedOut || paymentState === "failed" || isError;
 
     useEffect(() => {
+        if (!router.isReady || payment_intent || paystack_reference || typeof window === "undefined") return;
+
+        const pendingPaystackReference = window.sessionStorage.getItem("oosri_pending_paystack_reference");
+        if (!pendingPaystackReference) return;
+
+        router.replace(
+            {
+                pathname: router.pathname,
+                query: { paystack_reference: pendingPaystackReference },
+            },
+            undefined,
+            { shallow: true }
+        );
+    }, [payment_intent, paystack_reference, router]);
+
+    useEffect(() => {
         if (!reference || paymentState === "confirmed") return;
         timerRef.current = setTimeout(() => setPollTimedOut(true), POLL_TIMEOUT_MS);
         return () => clearTimeout(timerRef.current);
     }, [reference, paymentState]);
+
+    useEffect(() => {
+        if (paymentState !== "confirmed" || hasInvalidatedOrdersRef.current) return;
+
+        hasInvalidatedOrdersRef.current = true;
+        queryClient.invalidateQueries({ queryKey: ["user-orders"] });
+    }, [paymentState, queryClient]);
+
+    useEffect(() => {
+        if (!paystack_reference || paymentState !== "confirmed" || hasClearedCartRef.current) return;
+
+        hasClearedCartRef.current = true;
+        dispatch({ type: CART, payload: [] });
+        handleClearCart().catch(() => {});
+        if (setBuyNowItem) setBuyNowItem(null);
+
+        if (typeof window !== "undefined") {
+            window.sessionStorage.removeItem("oosri_pending_paystack_reference");
+        }
+    }, [dispatch, paystack_reference, paymentState, setBuyNowItem]);
 
     return (
         <ConfirmationContainer>

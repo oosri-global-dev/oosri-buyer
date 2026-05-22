@@ -34,7 +34,7 @@ function StarRow({ rating = 0, size = 15 }) {
   );
 }
 
-function copyToClipboard(text) {
+async function copyToClipboard(text) {
   if (navigator.clipboard && window.isSecureContext) {
     return navigator.clipboard.writeText(text);
   }
@@ -46,12 +46,16 @@ function copyToClipboard(text) {
   el.select();
   const ok = document.execCommand("copy");
   document.body.removeChild(el);
-  return ok ? Promise.resolve() : Promise.reject(new Error("copy failed"));
+  if (!ok) throw new Error("copy failed");
 }
 
 function ShareButtons({ product }) {
   const [copied, setCopied] = useState(false);
-  const canNativeShare = typeof navigator !== "undefined" && !!navigator.share;
+  const [canNativeShare, setCanNativeShare] = useState(false);
+
+  useEffect(() => {
+    setCanNativeShare(typeof navigator !== "undefined" && !!navigator.share);
+  }, []);
 
   const handleCopy = async () => {
     const url = typeof window !== "undefined" ? window.location.href : "";
