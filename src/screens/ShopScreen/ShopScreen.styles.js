@@ -444,26 +444,71 @@ export const ShopPageWrapper = styled(FlexibleDiv)`
           }
         }
 
+        .filter__section {
+          margin-bottom: 4px;
+        }
+
+        .filter__section__label {
+          font-size: 10.5px;
+          font-weight: 700;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          color: #111;
+          margin: 12px 0 6px;
+        }
+
         .price__filter {
           width: 100%;
-          margin: 0.9rem 0;
+          margin: 0.6rem 0 0.9rem;
 
           label {
-            font-weight: 500;
-            font-size: 10.5px;
-            color: #555;
-            display: block;
-            margin-bottom: 6px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            display: none;
           }
 
-          /* ✅ Red hint line like screenshot */
+          .price__chips {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 10px;
+
+            .price__chip {
+              flex: 1;
+              background: #f8f8f8;
+              border: 1px solid #e8e8e8;
+              border-radius: 8px;
+              padding: 5px 8px;
+              text-align: center;
+
+              .chip__label {
+                font-size: 9px;
+                color: #aaa;
+                display: block;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+                margin-bottom: 1px;
+              }
+
+              .chip__value {
+                font-size: 10.5px;
+                font-weight: 700;
+                color: #111;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                display: block;
+              }
+            }
+
+            .price__chip__divider {
+              font-size: 0.8rem;
+              color: #ccc;
+            }
+          }
+
           .price__hint {
-            margin: 8px 0 0;
-            font-size: 11px;
-            color: var(--orrsiPrimary);
+            margin: 6px 0 0;
+            font-size: 10px;
+            color: #bbb;
           }
         }
 
