@@ -61,10 +61,12 @@ const countryOptions = COUNTRIES.map((c) => ({ label: c.name, value: c.code }));
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
 function loadPaystackScript() {
-  if (typeof window === "undefined" || document.getElementById("paystack-inline-script")) return;
+  if (typeof window === "undefined" || document.getElementById("paystack-v2-script")) return;
+  const old = document.getElementById("paystack-inline-script");
+  if (old) old.remove();
   const script = document.createElement("script");
-  script.id = "paystack-inline-script";
-  script.src = "https://js.paystack.co/v1/inline.js";
+  script.id = "paystack-v2-script";
+  script.src = "https://js.paystack.co/v2/inline.js";
   script.async = true;
   document.body.appendChild(script);
 }
@@ -452,7 +454,8 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
       if (!accessCode) throw new Error("Paystack did not return an access code");
 
       if (typeof window !== "undefined" && window.PaystackPop) {
-        const handler = window.PaystackPop.resumeTransaction(accessCode, {
+        const popup = new window.PaystackPop();
+        popup.resumeTransaction(accessCode, {
           onSuccess: () => {
             if (setBuyNowItem) setBuyNowItem(null);
             handleCancel();
@@ -462,7 +465,6 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
             dispatch({ type: TOAST_BOX, payload: { type: "error", message: "Payment cancelled" } });
           },
         });
-        handler.openIframe();
       } else {
         window.location.href = authorizationUrl;
       }
