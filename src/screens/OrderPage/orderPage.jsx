@@ -5,6 +5,7 @@ import OrderCard from "./components/OrderCard";
 import OrderCardSkeleton from "./components/OrderCardSkeleton";
 import { useRouter } from "next/router";
 import { AiOutlineShoppingCart as ShopCartIcon } from "react-icons/ai";
+import { useMainContext } from "@/context";
 
 const TABS = [
   { key: "inprogress", label: "In Progress" },
@@ -22,9 +23,17 @@ const getStatusCategory = (order) => {
 export default function OrderPage() {
   const [activeTab, setActiveTab] = useState("inprogress");
   const { push } = useRouter();
+  const { user, isLoadingUser } = useMainContext();
+  const buyerId = user?._id || user?.id;
 
-  const { data, isLoading, isError } = useGetUserOrders({ skip: 0, limit: 50 });
-  const orders = data?.body?.orders || data?.orders || [];
+  const { data, isLoading, isError } = useGetUserOrders({
+    buyerId,
+    skip: 0,
+    limit: 50,
+    enabled: !isLoadingUser,
+  });
+  const orders = data?.orders || [];
+  const isOrdersLoading = isLoadingUser || isLoading;
 
   const counts = orders.reduce(
     (acc, order) => {
@@ -45,7 +54,7 @@ export default function OrderPage() {
       <div className="page__header">
         <div>
           <h1>My Orders</h1>
-          {!isLoading && !isError && (
+          {!isOrdersLoading && !isError && (
             <p className="order__total__count">
               {orders.length} {orders.length === 1 ? "order" : "orders"} total
             </p>
@@ -62,7 +71,7 @@ export default function OrderPage() {
             onClick={() => setActiveTab(tab.key)}
           >
             {tab.label}
-            {!isLoading && (
+            {!isOrdersLoading && (
               <span className={`tab__count${activeTab === tab.key ? " active" : ""}`}>
                 {counts[tab.key] || 0}
               </span>
@@ -73,7 +82,7 @@ export default function OrderPage() {
 
       {/* ── Content ── */}
       <div className="orders__content">
-        {isLoading ? (
+        {isOrdersLoading ? (
           <div className="orders__list">
             {[...Array(4)].map((_, i) => (
               <OrderCardSkeleton key={i} />

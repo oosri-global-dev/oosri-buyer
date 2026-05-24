@@ -22,8 +22,16 @@ import {
   useCreatePaystackCheckout,
 } from "@/network/checkout";
 import { useFormatPrice } from "@/data-helpers/hooks";
-import { TOAST_BOX } from "@/context/types";
+
+const formatStockIssues = (issues = []) =>
+  issues.map((i) => {
+    if (i.issueType === "NOT_FOUND") return `${i.productName} is no longer available`;
+    if (i.issueType === "NOT_AVAILABLE") return `${i.productName} is currently unavailable for purchase`;
+    return `${i.productName}: only ${i.availableStock} unit${i.availableStock === 1 ? "" : "s"} left`;
+  }).join("; ");
+import { TOAST_BOX, CART } from "@/context/types";
 import { useMainContext } from "@/context";
+import { handleClearCart } from "@/network/cart";
 import { MdEdit as EditIcon, MdDelete as DeleteIcon, MdStar as StarFilledIcon, MdStarOutline as StarOutlineIcon, MdPayments as PaystackIcon, MdCreditCard as CardIcon, MdLocalShipping as ShippingIcon, MdLock as LockIcon } from "react-icons/md";
 import { Spin } from "antd";
 import { useRouter } from "next/router";
@@ -143,6 +151,10 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     : (selectedAddress?.countryCode || null);
   const isNigerianBuyer = effectiveCountryCode === "NG";
 
+  useEffect(() => {
+    if (isNigerianBuyer) loadPaystackScript();
+  }, [isNigerianBuyer]);
+
   // Shipping calculations
   const shippingEstimates = Array.isArray(shippingInfo?.estimates) ? shippingInfo.estimates : [];
   const selectedShippingOption =
@@ -150,7 +162,6 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     shippingEstimates[0] ||
     null;
   const shippingFeeUSD = selectedShippingOption?.estimateUSD || shippingInfo?.totalPriceUSD || 0;
-  const shippingFeeNGN = isNigerianBuyer ? NIGERIAN_FLAT_RATE_NGN : 0;
 
   // Ensure subtotal is treated as USD. If the caller accidentally passed an NGN amount
   // (large value with no fxRate hint), normalise it back to USD using the live rate.
@@ -159,17 +170,21 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     ? Number((subtotal / liveNGNRate).toFixed(2))
     : subtotal;
 
-  // Derived totals
-  const subtotalNGN = Math.round(subtotalUSD * liveNGNRate);
+  // For Nigerian buyers, derive the NGN total directly from each cart item's raw NGN
+  // price (salesPrice ?? regularPrice) to match the exact amount the backend will
+  // charge — avoids the NGN→USD→NGN round-trip rounding gap.
+  const subtotalNGN = isNigerianBuyer
+    ? cartItems.reduce((acc, item) => {
+        if (!item) return acc;
+        const priceNGN = (item.salesPrice > 0 ? item.salesPrice : item.regularPrice) || 0;
+        return acc + priceNGN * (item.quantity || 1);
+      }, 0)
+    : Math.round(subtotalUSD * liveNGNRate);
+
   const totalNGN = subtotalNGN + (isNigerianBuyer ? NIGERIAN_FLAT_RATE_NGN : 0);
   const totalUSD = subtotalUSD + shippingFeeUSD;
 
   const maxAddresses = 5;
-
-  // Load Paystack script when a Nigerian address is selected
-  useEffect(() => {
-    if (isNigerianBuyer) loadPaystackScript();
-  }, [isNigerianBuyer]);
 
   const syncAddressFormValues = useCallback(
     ({ address = "", cityName = "", postalCode = "", countryCode, countryName }) => {
@@ -419,7 +434,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     } catch (error) {
       let msg = error?.response?.data?.message || error?.response?.data?.error || "Failed to create payment intent";
       if (error?.response?.data?.stockIssues?.length > 0) {
-        msg = `Insufficient stock: ${error.response.data.stockIssues.map((i) => `${i.productName} (Available: ${i.availableStock})`).join("; ")}`;
+        msg = formatStockIssues(error.response.data.stockIssues);
       }
       dispatch({ type: TOAST_BOX, payload: { type: "error", message: msg } });
     }
@@ -427,6 +442,8 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
 
   const handlePaymentSuccess = (paymentIntent) => {
     dispatch({ type: TOAST_BOX, payload: { type: "success", message: "Payment successful!" } });
+    dispatch({ type: CART, payload: [] });
+    handleClearCart().catch(() => {});
     if (setBuyNowItem) setBuyNowItem(null);
     handleCancel();
     router.push(paymentIntent?.id ? `/order-confirmation?payment_intent=${paymentIntent.id}` : "/order-confirmation");
@@ -457,6 +474,10 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
         const popup = new window.PaystackPop();
         popup.resumeTransaction(accessCode, {
           onSuccess: () => {
+            window.sessionStorage.setItem("oosri_pending_paystack_reference", reference);
+            dispatch({ type: TOAST_BOX, payload: { type: "success", message: "Payment successful!" } });
+            dispatch({ type: CART, payload: [] });
+            handleClearCart().catch(() => {});
             if (setBuyNowItem) setBuyNowItem(null);
             handleCancel();
             router.push(`/order-confirmation?paystack_reference=${reference}`);
@@ -466,12 +487,13 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
           },
         });
       } else {
+        window.sessionStorage.setItem("oosri_pending_paystack_reference", reference);
         window.location.href = authorizationUrl;
       }
     } catch (error) {
       let msg = error?.response?.data?.message || error?.message || "Failed to initiate Paystack payment";
       if (error?.response?.data?.stockIssues?.length > 0) {
-        msg = `Insufficient stock: ${error.response.data.stockIssues.map((i) => `${i.productName} (Available: ${i.availableStock})`).join("; ")}`;
+        msg = formatStockIssues(error.response.data.stockIssues);
       }
       dispatch({ type: TOAST_BOX, payload: { type: "error", message: msg } });
     }
@@ -541,7 +563,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                               <span className="address__tag paystack__tag">Paystack · ₦{NIGERIAN_FLAT_RATE_NGN.toLocaleString()} flat shipping</span>
                             )}
                             {addr.countryCode !== "NG" && (
-                              <span className="address__tag stripe__tag">Stripe · DHL / Haulam shipping</span>
+                              <span className="address__tag stripe__tag">Stripe · Haulam / DHL shipping</span>
                             )}
                           </FlexibleDiv>
                           <FlexibleDiv gap="8px" flexWrap="nowrap" justifyContent="flex-start" alignItems="center">
@@ -768,6 +790,32 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
             {/* ── 4. Payment Summary ─────────────────────────────────── */}
             <div className="payment__summary">
               <h3 className="section__title">Order Summary</h3>
+              {cartItems.length > 0 && (
+                <div className="order__items">
+                  {cartItems.map((item) => {
+                    const priceNGN = (item.salesPrice > 0 ? item.salesPrice : item.regularPrice) || 0;
+                    const qty = item.quantity || 1;
+                    const imgUrl = item.images?.[0]?.url || (typeof item.images?.[0] === "string" ? item.images[0] : null);
+                    const itemPrice = isNigerianBuyer
+                      ? `₦${(priceNGN * qty).toLocaleString()}`
+                      : formatPrice(Number(((priceNGN / liveNGNRate) * qty).toFixed(2)));
+                    return (
+                      <div key={item._id} className="order__item">
+                        {imgUrl ? (
+                          <img src={imgUrl} alt={item.productName} className="order__item__img" />
+                        ) : (
+                          <div className="order__item__img__placeholder" />
+                        )}
+                        <div className="order__item__info">
+                          <p className="order__item__name">{item.productName}</p>
+                          <p className="order__item__meta">Qty: {qty}</p>
+                        </div>
+                        <p className="order__item__price">{itemPrice}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
               <FlexibleDiv flexDir="column" gap="8px" className="summary__details" justifyContent="flex-start" alignItems="stretch">
                 <FlexibleDiv justifyContent="space-between" alignItems="center">
                   <p className="summary__label">Subtotal:</p>

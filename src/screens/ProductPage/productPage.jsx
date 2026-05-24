@@ -19,9 +19,127 @@ import ProductReviewBox from "./sections/product-reviews/productReview";
 import { MoreReviews } from "./sections/more-reviews/moreReviews";
 import { useMainContext } from "@/context";
 import { useProductPrice, useFormatPrice } from "@/data-helpers/hooks";
-import { useReviewsQuery } from "@/network/reviews";
+import { useReviewsQuery, createReview } from "@/network/reviews";
 import { handleAddProductToSavedItems, handleRemoveProductFromSavedItems } from "@/network/product";
 import { TOAST_BOX } from "@/context/types";
+
+function StarPicker({ value, onChange }) {
+  const [hovered, setHovered] = useState(0);
+  return (
+    <div style={{ display: "flex", gap: 4, cursor: "pointer" }}>
+      {[1, 2, 3, 4, 5].map((n) => (
+        <StarIcon
+          key={n}
+          size={24}
+          color={(hovered || value) >= n ? "#FCCB1B" : "#E0E0E0"}
+          onMouseEnter={() => setHovered(n)}
+          onMouseLeave={() => setHovered(0)}
+          onClick={() => onChange(n)}
+        />
+      ))}
+    </div>
+  );
+}
+
+function WriteReviewForm({ productId, user, queryClient }) {
+  const [rating, setRating] = useState(0);
+  const [text, setText] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
+  const { push, asPath } = useRouter();
+
+  if (!user || (!user._id && !user.id)) {
+    return (
+      <div style={{
+        border: "1px dashed #E0E0E0", borderRadius: 12,
+        padding: "20px 24px", marginBottom: 24, textAlign: "center",
+      }}>
+        <p style={{ fontSize: 14, color: "#555", margin: "0 0 12px" }}>
+          Log in to leave a review
+        </p>
+        <button
+          onClick={() => push(`/login?from=${encodeURIComponent(asPath)}`)}
+          style={{
+            background: "var(--orrsiPrimary)", color: "#fff",
+            border: "none", borderRadius: 8, padding: "9px 20px",
+            fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+          }}
+        >
+          Log in
+        </button>
+      </div>
+    );
+  }
+
+  if (submitted) {
+    return (
+      <div style={{
+        border: "1px solid #E8F5E9", borderRadius: 12, background: "#F0FDF4",
+        padding: "16px 20px", marginBottom: 24,
+        fontSize: 14, color: "#15803D", fontWeight: 500,
+      }}>
+        Review submitted — thank you!
+      </div>
+    );
+  }
+
+  const handleSubmit = async () => {
+    if (rating === 0) { setError("Please select a star rating."); return; }
+    if (!text.trim()) { setError("Please write something about the product."); return; }
+    setError("");
+    setSubmitting(true);
+    try {
+      await createReview({ productId, review: text.trim(), productRating: rating });
+      queryClient.invalidateQueries({ queryKey: ["reviews", productId] });
+      setSubmitted(true);
+    } catch (err) {
+      setError(err?.response?.data?.message || "Failed to submit review. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div style={{
+      border: "1px solid #F0F0F0", borderRadius: 12,
+      padding: "20px 20px 16px", marginBottom: 24, background: "#FAFAFA",
+    }}>
+      <p style={{ fontSize: 14, fontWeight: 700, color: "#212121", margin: "0 0 12px" }}>
+        Write a Review
+      </p>
+      <StarPicker value={rating} onChange={setRating} />
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="Share your experience with this product…"
+        style={{
+          width: "100%", minHeight: 80, marginTop: 12, padding: "10px 12px",
+          border: "1px solid #E0E0E0", borderRadius: 8, fontSize: 13,
+          fontFamily: "inherit", resize: "vertical", color: "#212121",
+          outline: "none", boxSizing: "border-box", background: "#fff",
+        }}
+      />
+      {error && (
+        <p style={{ fontSize: 12, color: "#DC2626", margin: "6px 0 0" }}>{error}</p>
+      )}
+      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }}>
+        <button
+          onClick={handleSubmit}
+          disabled={submitting}
+          style={{
+            background: "var(--orrsiPrimary)", color: "#fff",
+            border: "none", borderRadius: 8, padding: "9px 22px",
+            fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+            opacity: submitting ? 0.6 : 1,
+          }}
+        >
+          {submitting ? "Submitting…" : "Submit Review"}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function StarRow({ rating = 0, size = 15 }) {
   const filled = Math.round(rating);
@@ -34,7 +152,7 @@ function StarRow({ rating = 0, size = 15 }) {
   );
 }
 
-function copyToClipboard(text) {
+async function copyToClipboard(text) {
   if (navigator.clipboard && window.isSecureContext) {
     return navigator.clipboard.writeText(text);
   }
@@ -46,12 +164,16 @@ function copyToClipboard(text) {
   el.select();
   const ok = document.execCommand("copy");
   document.body.removeChild(el);
-  return ok ? Promise.resolve() : Promise.reject(new Error("copy failed"));
+  if (!ok) throw new Error("copy failed");
 }
 
 function ShareButtons({ product }) {
   const [copied, setCopied] = useState(false);
-  const canNativeShare = typeof navigator !== "undefined" && !!navigator.share;
+  const [canNativeShare, setCanNativeShare] = useState(false);
+
+  useEffect(() => {
+    setCanNativeShare(typeof navigator !== "undefined" && !!navigator.share);
+  }, []);
 
   const handleCopy = async () => {
     const url = typeof window !== "undefined" ? window.location.href : "";
@@ -88,7 +210,7 @@ function ShareButtons({ product }) {
 
 export default function ProductPage({ product, loading, relatedProducts }) {
   const { push, asPath } = useRouter();
-  const { cart, addToCart, removeFromCart, updateQuantity, dispatch, setBuyNowItem, user } =
+  const { cart, addToCart, removeFromCart, updateQuantity, dispatch, setBuyNowItem, user, currency } =
     useMainContext();
   const queryClient = useQueryClient();
 
@@ -313,11 +435,31 @@ export default function ProductPage({ product, loading, relatedProducts }) {
             <div className="pdp__divider" />
 
             <div className="pdp__price__block">
-              <span className="pdp__price">{formatPrice(priceData?.price || 0)}</span>
-              {priceData?.hasDiscount && priceData?.originalPrice && (
+              {currency === 'NGN' ? (
+                // For NGN buyers: use the raw NGN price directly — avoids NGN→USD→NGN
+                // double conversion which introduces rounding errors of ₦1–₦125.
                 <>
-                  <span className="pdp__original__price">{formatPrice(priceData.originalPrice)}</span>
-                  {discountPct > 0 && <span className="pdp__discount__badge">-{discountPct}%</span>}
+                  <span className="pdp__price">
+                    ₦{Math.round(product?.salesPrice > 0 ? product.salesPrice : (product?.regularPrice || 0)).toLocaleString()}
+                  </span>
+                  {product?.salesPrice > 0 && product?.regularPrice > product.salesPrice && (
+                    <>
+                      <span className="pdp__original__price">
+                        ₦{Math.round(product.regularPrice).toLocaleString()}
+                      </span>
+                      {discountPct > 0 && <span className="pdp__discount__badge">-{discountPct}%</span>}
+                    </>
+                  )}
+                </>
+              ) : (
+                <>
+                  <span className="pdp__price">{formatPrice(priceData?.price || 0)}</span>
+                  {priceData?.hasDiscount && priceData?.originalPrice && (
+                    <>
+                      <span className="pdp__original__price">{formatPrice(priceData.originalPrice)}</span>
+                      {discountPct > 0 && <span className="pdp__discount__badge">-{discountPct}%</span>}
+                    </>
+                  )}
                 </>
               )}
             </div>
@@ -442,11 +584,18 @@ export default function ProductPage({ product, loading, relatedProducts }) {
               <ProductDescription content={product?.productDescription || ""} />
             )}
             {activeTab === "reviews" && (
-              <ProductReviewBox
-                reviews={reviews}
-                loading={isLoadingReviews}
-                onSeeMore={reviews.length > 0 ? () => setMoreReviewsActive(true) : null}
-              />
+              <>
+                <WriteReviewForm
+                  productId={product?._id}
+                  user={user}
+                  queryClient={queryClient}
+                />
+                <ProductReviewBox
+                  reviews={reviews}
+                  loading={isLoadingReviews}
+                  onSeeMore={reviews.length > 0 ? () => setMoreReviewsActive(true) : null}
+                />
+              </>
             )}
           </div>
         </div>

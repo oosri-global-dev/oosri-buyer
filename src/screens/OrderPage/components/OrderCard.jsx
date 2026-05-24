@@ -73,8 +73,9 @@ export default function OrderCard({ order }) {
     ""
   );
 
-  const totalAmount =
-    order?.totalAmount || order?.subtotalUSD || order?.totalAmountUSD || 0;
+  const currencyCode = order?.currencyCode || null;
+  const usdAmount = order?.totalAmountUSD ?? null;
+  const ngnAmount = order?.totalAmount ?? null;
 
   const statusClass = getStatusClass(orderStatus);
   const statusLabel = getStatusLabel(orderStatus);
@@ -124,7 +125,13 @@ export default function OrderCard({ order }) {
         <span className="footer__items__count">
           {allProducts.length} {allProducts.length === 1 ? "item" : "items"}
         </span>
-        <span className="order__total">{formatPrice(totalAmount)}</span>
+        <span className="order__total">
+          {currencyCode === 'NGN'
+            ? (ngnAmount != null ? `₦${Number(ngnAmount).toLocaleString()}` : '—')
+            : usdAmount != null
+            ? formatPrice(usdAmount)
+            : '—'}
+        </span>
       </div>
     </OrderCardWrapper>
   );

@@ -63,7 +63,7 @@ export default function ProductCard({ card, keyProp, isLoading = false }) {
   const { push, asPath } = useRouter();
 
   // ✅ ALL hooks declared unconditionally at the top — Rules of Hooks
-  const { cart, addToCart, removeFromCart, dispatch, user, setBuyNowItem } = useMainContext();
+  const { cart, addToCart, removeFromCart, dispatch, user, setBuyNowItem, currency } = useMainContext();
   const queryClient = useQueryClient();
   const [isLoadingBtn, setIsLoadingBtn] = useState(false);
   const [isFavorite, setIsFavorite] = useState(card?.isFavorite || false);
@@ -268,13 +268,28 @@ export default function ProductCard({ card, keyProp, isLoading = false }) {
         </div>
 
         <div className="card__price__row">
-          <span className="card__price">
-            {formatPrice(priceData?.price || 0)}
-          </span>
-          {priceData?.hasDiscount && priceData?.originalPrice && (
-            <span className="card__original__price">
-              {formatPrice(priceData.originalPrice)}
-            </span>
+          {currency === 'NGN' ? (
+            <>
+              <span className="card__price">
+                ₦{Math.round(card?.salesPrice > 0 ? card.salesPrice : (card?.regularPrice || 0)).toLocaleString()}
+              </span>
+              {card?.salesPrice > 0 && card?.regularPrice > card.salesPrice && (
+                <span className="card__original__price">
+                  ₦{Math.round(card.regularPrice).toLocaleString()}
+                </span>
+              )}
+            </>
+          ) : (
+            <>
+              <span className="card__price">
+                {formatPrice(priceData?.price || 0)}
+              </span>
+              {priceData?.hasDiscount && priceData?.originalPrice && (
+                <span className="card__original__price">
+                  {formatPrice(priceData.originalPrice)}
+                </span>
+              )}
+            </>
           )}
         </div>
       </div>

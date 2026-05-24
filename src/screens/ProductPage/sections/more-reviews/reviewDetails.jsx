@@ -1,9 +1,28 @@
 import { FlexibleDiv } from "@/components/lib/Box/styles";
-import Image from "next/image";
-import ReviewerImage from "@/assets/images/product-related/reviewer-image.png";
 import { AiFillStar as StarIcon } from "react-icons/ai";
 import { ProductReviewWrapper } from "../product-reviews/productReview.styles";
 import { ReviewDetailWrapper } from "./moreReviews.styles";
+
+function ReviewerAvatar({ name, size = 35 }) {
+  const initials = (name || "?")
+    .split(" ")
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() || "")
+    .join("");
+  return (
+    <div
+      style={{
+        width: size, height: size, borderRadius: "50%",
+        background: "#F5F5F5", color: "#555",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize: size * 0.38, fontWeight: 700, flexShrink: 0,
+        fontFamily: "Inter, sans-serif",
+      }}
+    >
+      {initials}
+    </div>
+  );
+}
 
 export default function ReviewDetails({ reviews }) {
   return (
@@ -14,7 +33,7 @@ export default function ReviewDetails({ reviews }) {
           isLastElem={index === elements?.length - 1 ? true : false}
         >
           <FlexibleDiv className="reviewer__image__wrapper">
-            <Image alt="reviewer__dp" src={review?.reviewerImage} width={35} height={35} />
+            <ReviewerAvatar name={review?.reviewer} />
           </FlexibleDiv>
           <FlexibleDiv
             className="reviewer__content__wrapper"
@@ -30,7 +49,7 @@ export default function ReviewDetails({ reviews }) {
               alignItems="flex-start"
             >
               <FlexibleDiv className="reviewer__image__wrapper__mobile">
-                <Image alt="reviewer__dp" src={review?.reviewerImage} width={35} height={35} />
+                <ReviewerAvatar name={review?.reviewer} />
               </FlexibleDiv>
               <FlexibleDiv
                 flexDir="column"
