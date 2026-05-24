@@ -475,6 +475,9 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
         popup.resumeTransaction(accessCode, {
           onSuccess: () => {
             window.sessionStorage.setItem("oosri_pending_paystack_reference", reference);
+            dispatch({ type: TOAST_BOX, payload: { type: "success", message: "Payment successful!" } });
+            dispatch({ type: CART, payload: [] });
+            handleClearCart().catch(() => {});
             if (setBuyNowItem) setBuyNowItem(null);
             handleCancel();
             router.push(`/order-confirmation?paystack_reference=${reference}`);
