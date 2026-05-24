@@ -210,7 +210,7 @@ function ShareButtons({ product }) {
 
 export default function ProductPage({ product, loading, relatedProducts }) {
   const { push, asPath } = useRouter();
-  const { cart, addToCart, removeFromCart, updateQuantity, dispatch, setBuyNowItem, user } =
+  const { cart, addToCart, removeFromCart, updateQuantity, dispatch, setBuyNowItem, user, currency } =
     useMainContext();
   const queryClient = useQueryClient();
 
@@ -435,11 +435,31 @@ export default function ProductPage({ product, loading, relatedProducts }) {
             <div className="pdp__divider" />
 
             <div className="pdp__price__block">
-              <span className="pdp__price">{formatPrice(priceData?.price || 0)}</span>
-              {priceData?.hasDiscount && priceData?.originalPrice && (
+              {currency === 'NGN' ? (
+                // For NGN buyers: use the raw NGN price directly — avoids NGN→USD→NGN
+                // double conversion which introduces rounding errors of ₦1–₦125.
                 <>
-                  <span className="pdp__original__price">{formatPrice(priceData.originalPrice)}</span>
-                  {discountPct > 0 && <span className="pdp__discount__badge">-{discountPct}%</span>}
+                  <span className="pdp__price">
+                    ₦{Math.round(product?.salesPrice > 0 ? product.salesPrice : (product?.regularPrice || 0)).toLocaleString()}
+                  </span>
+                  {product?.salesPrice > 0 && product?.regularPrice > product.salesPrice && (
+                    <>
+                      <span className="pdp__original__price">
+                        ₦{Math.round(product.regularPrice).toLocaleString()}
+                      </span>
+                      {discountPct > 0 && <span className="pdp__discount__badge">-{discountPct}%</span>}
+                    </>
+                  )}
+                </>
+              ) : (
+                <>
+                  <span className="pdp__price">{formatPrice(priceData?.price || 0)}</span>
+                  {priceData?.hasDiscount && priceData?.originalPrice && (
+                    <>
+                      <span className="pdp__original__price">{formatPrice(priceData.originalPrice)}</span>
+                      {discountPct > 0 && <span className="pdp__discount__badge">-{discountPct}%</span>}
+                    </>
+                  )}
                 </>
               )}
             </div>

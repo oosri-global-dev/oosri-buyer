@@ -73,9 +73,7 @@ export default function OrderCard({ order }) {
     ""
   );
 
-  // totalAmountUSD is the correct input for formatPrice (which expects USD).
-  // totalAmount from the API is in NGN for Paystack orders — passing it to
-  // formatPrice would multiply by 1550 again, giving a wildly wrong figure.
+  const currencyCode = order?.currencyCode || null;
   const usdAmount = order?.totalAmountUSD ?? null;
   const ngnAmount = order?.totalAmount ?? null;
 
@@ -128,10 +126,10 @@ export default function OrderCard({ order }) {
           {allProducts.length} {allProducts.length === 1 ? "item" : "items"}
         </span>
         <span className="order__total">
-          {usdAmount != null
+          {currencyCode === 'NGN'
+            ? (ngnAmount != null ? `₦${Number(ngnAmount).toLocaleString()}` : '—')
+            : usdAmount != null
             ? formatPrice(usdAmount)
-            : ngnAmount != null
-            ? `₦${Number(ngnAmount).toLocaleString()}`
             : '—'}
         </span>
       </div>

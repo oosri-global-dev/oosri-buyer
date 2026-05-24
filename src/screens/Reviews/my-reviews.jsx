@@ -1,6 +1,7 @@
 import { useState } from "react";
 import styled from "styled-components";
 import { AiFillStar as StarIcon } from "react-icons/ai";
+import { IoChevronBackOutline, IoChevronForwardOutline } from "react-icons/io5";
 import { useMyReviewsQuery, useUpdateReview, useDeleteReview } from "@/network/reviews";
 import toast, { Toaster } from "react-hot-toast";
 
@@ -99,6 +100,25 @@ const Wrapper = styled.div`
     p { font-size: 13px; color: #B91C1C; margin: 0 0 10px; font-weight: 500; }
     .confirm__btns { display: flex; gap: 8px; }
   }
+
+  .pagination {
+    display: flex; align-items: center; justify-content: center;
+    gap: 12px; margin-top: 24px;
+
+    .page__btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 34px; height: 34px; border-radius: 8px;
+      border: 1px solid #E0E0E0; background: #fff;
+      cursor: pointer; color: #555; transition: all .15s;
+      &:hover:not(:disabled) { border-color: #D24545; color: #D24545; }
+      &:disabled { opacity: 0.35; cursor: not-allowed; }
+    }
+
+    .page__info {
+      font-size: 13px; color: #555;
+      span { font-weight: 700; color: #212121; }
+    }
+  }
 `;
 
 function StarPicker({ value, onChange }) {
@@ -129,11 +149,7 @@ function ReviewCard({ review }) {
   const deleteMutation = useDeleteReview(review.productId?.id);
 
   const productName = review.productId?.productName || review.productName || "Product";
-  const formattedDate = review.reviewDate
-    ? new Date(review.reviewDate).toLocaleDateString("en-GB", {
-        day: "numeric", month: "short", year: "numeric",
-      })
-    : "";
+  const formattedDate = review.reviewDate || "";
 
   const handleSave = async () => {
     if (!editText.trim()) return;
@@ -223,8 +239,13 @@ function ReviewCard({ review }) {
 }
 
 export default function MyReviews() {
-  const { data, isLoading } = useMyReviewsQuery();
-  const reviews = Array.isArray(data?.body) ? data.body : [];
+  const [page, setPage] = useState(1);
+  const { data, isLoading } = useMyReviewsQuery(page);
+
+  const reviews    = data?.body?.reviews || [];
+  const pagination = data?.body?.pagination || {};
+  const totalPages = pagination.totalPages || 1;
+  const total      = pagination.total || 0;
 
   return (
     <Wrapper>
@@ -243,9 +264,34 @@ export default function MyReviews() {
           <p>After purchasing a product, share your experience to help other buyers.</p>
         </div>
       ) : (
-        reviews.map((review) => (
-          <ReviewCard key={review.id || review._id} review={review} />
-        ))
+        <>
+          {reviews.map((review) => (
+            <ReviewCard key={review.id || review._id} review={review} />
+          ))}
+
+          {totalPages > 1 && (
+            <div className="pagination">
+              <button
+                className="page__btn"
+                disabled={page <= 1}
+                onClick={() => setPage((p) => p - 1)}
+              >
+                <IoChevronBackOutline size={15} />
+              </button>
+              <p className="page__info">
+                Page <span>{page}</span> of <span>{totalPages}</span>
+                <span style={{ color: "#BBBBBB", fontWeight: 400 }}> &nbsp;({total} reviews)</span>
+              </p>
+              <button
+                className="page__btn"
+                disabled={page >= totalPages}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                <IoChevronForwardOutline size={15} />
+              </button>
+            </div>
+          )}
+        </>
       )}
     </Wrapper>
   );

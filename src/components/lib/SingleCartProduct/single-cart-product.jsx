@@ -12,7 +12,7 @@ export default function SingleCartProduct({
   setIsModalOpen,
   setSelectedItem,
 }) {
-  const { updateQuantity } = useMainContext();
+  const { updateQuantity, currency } = useMainContext();
   const [numOfProduct, setNumOfProduct] = useState(item.quantity);
   const [isLoadingIncrease, setIsLoadingIncrease] = useState(false);
   const [isLoadingDecrease, setIsLoadingDecrease] = useState(false);
@@ -41,7 +41,11 @@ export default function SingleCartProduct({
     await updateQuantity(item, next, setIsLoadingIncrease);
   };
 
-  const lineTotal = (priceData?.price || 0) * numOfProduct;
+  const rawPriceNGN = item?.salesPrice > 0 ? item.salesPrice : (item?.regularPrice || 0);
+  const hasNGNDiscount = item?.salesPrice > 0 && item?.regularPrice > item.salesPrice;
+  const lineTotal = currency === 'NGN'
+    ? Math.round(rawPriceNGN * numOfProduct)
+    : (priceData?.price || 0) * numOfProduct;
 
   return (
     <SCProductWrapper>
@@ -98,12 +102,28 @@ export default function SingleCartProduct({
 
       {/* Price block */}
       <div className="price__block">
-        <p className="line__total">{formatPrice(lineTotal)}</p>
+        <p className="line__total">
+          {currency === 'NGN'
+            ? `₦${lineTotal.toLocaleString()}`
+            : formatPrice(lineTotal)
+          }
+        </p>
         {numOfProduct > 1 && (
-          <p className="unit__price">{formatPrice(priceData?.price || 0)} each</p>
+          <p className="unit__price">
+            {currency === 'NGN'
+              ? `₦${Math.round(rawPriceNGN).toLocaleString()} each`
+              : `${formatPrice(priceData?.price || 0)} each`
+            }
+          </p>
         )}
-        {priceData?.hasDiscount && priceData?.originalPrice && (
-          <p className="unit__original">{formatPrice(priceData.originalPrice)}</p>
+        {currency === 'NGN' ? (
+          hasNGNDiscount && (
+            <p className="unit__original">₦{Math.round(item.regularPrice).toLocaleString()}</p>
+          )
+        ) : (
+          priceData?.hasDiscount && priceData?.originalPrice && (
+            <p className="unit__original">{formatPrice(priceData.originalPrice)}</p>
+          )
         )}
       </div>
     </SCProductWrapper>

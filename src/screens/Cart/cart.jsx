@@ -12,7 +12,7 @@ import { useRouter } from "next/router";
 import _ from "lodash";
 
 export default function CartPage() {
-  const { cart, user, fxRates } = useMainContext();
+  const { cart, user, fxRates, currency } = useMainContext();
   const formatPrice = useFormatPrice();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -24,6 +24,8 @@ export default function CartPage() {
   const itemCount = safeCart.reduce((sum, item) => sum + (item?.quantity || 1), 0);
 
   const liveNGNRate = fxRates?.NGN || 1550;
+
+  // subTotal stays in USD — PaymentModal and Stripe depend on it
   const subTotal = safeCart.reduce((acc, item) => {
     if (!item) return acc;
     const priceData = calculateProductPrice(item);
@@ -33,6 +35,14 @@ export default function CartPage() {
     }
     const qty = (typeof item.quantity === "number" && item.quantity > 0) ? item.quantity : 1;
     return acc + priceUSD * qty;
+  }, 0);
+
+  // For NGN display: use raw stored NGN prices to avoid double-conversion rounding
+  const subTotalNGN = safeCart.reduce((acc, item) => {
+    if (!item) return acc;
+    const priceNGN = (item.salesPrice > 0 ? item.salesPrice : (item.regularPrice || 0));
+    const qty = (typeof item.quantity === "number" && item.quantity > 0) ? item.quantity : 1;
+    return acc + Math.round(priceNGN) * qty;
   }, 0);
 
   const handleCheckout = () => {
@@ -109,7 +119,9 @@ export default function CartPage() {
                 <p className="summary__label">
                   Subtotal ({itemCount} {itemCount === 1 ? "item" : "items"})
                 </p>
-                <p className="summary__value">{formatPrice(subTotal)}</p>
+                <p className="summary__value">
+                  {currency === 'NGN' ? `₦${subTotalNGN.toLocaleString()}` : formatPrice(subTotal)}
+                </p>
               </div>
 
               <div className="summary__row">
@@ -121,7 +133,9 @@ export default function CartPage() {
 
               <div className="summary__total__row">
                 <p className="total__label">Estimated Total</p>
-                <p className="total__value">{formatPrice(subTotal)}</p>
+                <p className="total__value">
+                  {currency === 'NGN' ? `₦${subTotalNGN.toLocaleString()}` : formatPrice(subTotal)}
+                </p>
               </div>
 
               <Button

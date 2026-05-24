@@ -22,6 +22,13 @@ import {
   useCreatePaystackCheckout,
 } from "@/network/checkout";
 import { useFormatPrice } from "@/data-helpers/hooks";
+
+const formatStockIssues = (issues = []) =>
+  issues.map((i) => {
+    if (i.issueType === "NOT_FOUND") return `${i.productName} is no longer available`;
+    if (i.issueType === "NOT_AVAILABLE") return `${i.productName} is currently unavailable for purchase`;
+    return `${i.productName}: only ${i.availableStock} unit${i.availableStock === 1 ? "" : "s"} left`;
+  }).join("; ");
 import { TOAST_BOX, CART } from "@/context/types";
 import { useMainContext } from "@/context";
 import { handleClearCart } from "@/network/cart";
@@ -412,7 +419,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     } catch (error) {
       let msg = error?.response?.data?.message || error?.response?.data?.error || "Failed to create payment intent";
       if (error?.response?.data?.stockIssues?.length > 0) {
-        msg = `Insufficient stock: ${error.response.data.stockIssues.map((i) => `${i.productName} (Available: ${i.availableStock})`).join("; ")}`;
+        msg = formatStockIssues(error.response.data.stockIssues);
       }
       dispatch({ type: TOAST_BOX, payload: { type: "error", message: msg } });
     }
@@ -455,7 +462,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     } catch (error) {
       let msg = error?.response?.data?.message || error?.message || "Failed to initiate Paystack payment";
       if (error?.response?.data?.stockIssues?.length > 0) {
-        msg = `Insufficient stock: ${error.response.data.stockIssues.map((i) => `${i.productName} (Available: ${i.availableStock})`).join("; ")}`;
+        msg = formatStockIssues(error.response.data.stockIssues);
       }
       dispatch({ type: TOAST_BOX, payload: { type: "error", message: msg } });
     }
@@ -752,6 +759,32 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
             {/* ── 4. Payment Summary ─────────────────────────────────── */}
             <div className="payment__summary">
               <h3 className="section__title">Order Summary</h3>
+              {cartItems.length > 0 && (
+                <div className="order__items">
+                  {cartItems.map((item) => {
+                    const priceNGN = (item.salesPrice > 0 ? item.salesPrice : item.regularPrice) || 0;
+                    const qty = item.quantity || 1;
+                    const imgUrl = item.images?.[0]?.url || (typeof item.images?.[0] === "string" ? item.images[0] : null);
+                    const itemPrice = isNigerianBuyer
+                      ? `₦${(priceNGN * qty).toLocaleString()}`
+                      : formatPrice(Number(((priceNGN / liveNGNRate) * qty).toFixed(2)));
+                    return (
+                      <div key={item._id} className="order__item">
+                        {imgUrl ? (
+                          <img src={imgUrl} alt={item.productName} className="order__item__img" />
+                        ) : (
+                          <div className="order__item__img__placeholder" />
+                        )}
+                        <div className="order__item__info">
+                          <p className="order__item__name">{item.productName}</p>
+                          <p className="order__item__meta">Qty: {qty}</p>
+                        </div>
+                        <p className="order__item__price">{itemPrice}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
               <FlexibleDiv flexDir="column" gap="8px" className="summary__details" justifyContent="flex-start" alignItems="stretch">
                 <FlexibleDiv justifyContent="space-between" alignItems="center">
                   <p className="summary__label">Subtotal:</p>

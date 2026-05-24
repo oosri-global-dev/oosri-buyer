@@ -6,6 +6,7 @@ import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import SafeImage from "@/components/lib/SafeImage/SafeImage";
 import { useRouter } from "next/router";
+import { useMainContext } from "@/context";
 
 export function LoadingSingleGridCard({ key }) {
   return (
@@ -42,6 +43,7 @@ export function LoadingSingleGridCard({ key }) {
 export default function SingleGridCard({ key, product, isLoading = false }) {
   const maxLikes = ["", "", "", "", ""];
   const { push } = useRouter();
+  const { currency } = useMainContext();
   const priceData = useProductPrice(product);
   const formatPrice = useFormatPrice();
 
@@ -70,7 +72,10 @@ export default function SingleGridCard({ key, product, isLoading = false }) {
               className="price__wrapper"
             >
               <p className="product__price__grid">
-                {formatPrice(priceData?.originalPrice || priceData?.price || 0)}
+                {currency === 'NGN'
+                  ? `₦${Math.round(product?.salesPrice > 0 ? product.salesPrice : (product?.regularPrice || 0)).toLocaleString()}`
+                  : formatPrice(priceData?.originalPrice || priceData?.price || 0)
+                }
               </p>
             </FlexibleDiv>
 

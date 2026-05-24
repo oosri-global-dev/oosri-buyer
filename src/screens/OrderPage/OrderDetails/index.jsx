@@ -72,44 +72,12 @@ export default function OrderDetailsScreen() {
 
     // ─── Vendor ────────────────────────────────────────────────────────────────
     // The API returns sellerFullName at the order level (not on each product object)
-    const firstProduct = order?.products?.[0] || {};
     const vendorName = order?.sellerFullName || '';
     const vendorImage = order?.vendorImage || 'https://placehold.co/24x24';
-
-    // ─── Product fields ─────────────────────────────────────────────────────────
-    // API response product object keys (from buyerOrderService retrieveOrderById):
-    //   productName, productDescription, productBrand, color, condition,
-    //   productType, dimension, productImage (array), productAmount (NGN), productAmountUSD
-    const productTitle = firstProduct?.productName || 'Product';
-
-    // productImage is an array of Cloudinary URLs
-    const productImage = Array.isArray(firstProduct?.productImage)
-        ? (firstProduct.productImage[0] || 'https://placehold.co/150x150')
-        : (firstProduct?.productImage || 'https://placehold.co/150x150');
-
-    // productDescription comes as HTML — strip tags before displaying
-    const productDescription = stripHtml(firstProduct?.productDescription || '');
 
     // ─── Currency detection ───────────────────────────────────────────────────────
     const currencyCode = order?.currencyCode || 'USD';
     const isNGN = currencyCode === 'NGN';
-
-    // ─── Product price ────────────────────────────────────────────────────────────
-    // NGN orders: productAmount is the native NGN price stored in DB.
-    // USD orders: productAmountUSD = productAmount × fxRate, computed server-side.
-    const productAmountRaw = isNGN
-        ? (firstProduct?.productAmount ?? null)
-        : (firstProduct?.productAmountUSD ?? null);
-    const productPrice = productAmountRaw !== null
-        ? formatCurrency(productAmountRaw, currencyCode)
-        : '—';
-
-    // Extra product fields
-    const productBrand = firstProduct?.productBrand || "";
-    const color = firstProduct?.color || "";
-    const condition = firstProduct?.condition || "";
-    const productType = firstProduct?.productType || "";
-    const dimension = firstProduct?.dimension || "";
 
     // ─── Delivery address ────────────────────────────────────────────────────────
     const addr = order?.deliveryAddress || {};
@@ -165,49 +133,61 @@ export default function OrderDetailsScreen() {
             <div>
                 {vendorName && <NameTag name={vendorName} image={vendorImage} />}
 
-                {/* Product Card */}
-                <div className='product_card'>
-                    <div className='product_card_content'>
-                        <div className='product_image_container'>
-                            <SafeImage
-                                src={productImage}
-                                alt={productTitle}
-                                className='product_image'
-                                width={150}
-                                height={150}
-                            />
-                        </div>
-                        <div className='product_info'>
-                            <p className='order_id'>Order #{orderNumber}</p>
-                            <h4 className='product_title'>{productTitle}</h4>
-                            {productDescription && (
-                                <p className='product_description' style={{ fontSize: '13px', color: '#666', marginTop: '4px' }}>
-                                    {productDescription}
-                                </p>
-                            )}
+                {/* Product list — all items */}
+                {(order?.products || order?.items || []).map((product, idx) => {
+                    const pTitle = product?.productName || product?.title || 'Product';
+                    const pImage = Array.isArray(product?.productImage)
+                        ? (product.productImage[0] || null)
+                        : (product?.productImage || product?.images?.[0] || null);
+                    const pDesc = stripHtml(product?.productDescription || product?.description || '');
+                    const pBrand = product?.productBrand || '';
+                    const pColor = product?.color || '';
+                    const pCondition = product?.condition || '';
+                    const pType = product?.productType || '';
+                    const pDimension = product?.dimension || '';
+                    const pQty = product?.quantity || 1;
+                    const pAmountRaw = isNGN
+                        ? (product?.productAmount ?? null)
+                        : (product?.productAmountUSD ?? null);
+                    const pPrice = pAmountRaw !== null ? formatCurrency(pAmountRaw, currencyCode) : '—';
 
-                            {/* Extra Product Attributes */}
-                            <div className='product_extra_attributes' style={{ marginTop: '12px', display: 'flex', flexWrap: 'wrap', gap: '8px', fontSize: '12px', color: '#555' }}>
-                                {productBrand && <span style={{ background: '#f5f5f5', padding: '4px 8px', borderRadius: '4px' }}><b>Brand:</b> {productBrand}</span>}
-                                {color && <span style={{ background: '#f5f5f5', padding: '4px 8px', borderRadius: '4px' }}><b>Color:</b> {color}</span>}
-                                {condition && <span style={{ background: '#f5f5f5', padding: '4px 8px', borderRadius: '4px' }}><b>Condition:</b> {condition}</span>}
-                                {productType && <span style={{ background: '#f5f5f5', padding: '4px 8px', borderRadius: '4px' }}><b>Type:</b> {productType}</span>}
-                                {dimension && <span style={{ background: '#f5f5f5', padding: '4px 8px', borderRadius: '4px' }}><b>Dimensions:</b> {dimension}</span>}
-                            </div>
-                            <div className='product_footer'>
-                                <h3 className='product_price'>{productPrice}</h3>
-                                <p className='product_time'>{createdAt}</p>
+                    return (
+                        <div key={product?.productId || idx} className='product_card' style={{ marginBottom: idx < (order?.products || order?.items).length - 1 ? '12px' : '0' }}>
+                            <div className='product_card_content'>
+                                <div className='product_image_container'>
+                                    <SafeImage
+                                        src={pImage}
+                                        alt={pTitle}
+                                        className='product_image'
+                                        width={150}
+                                        height={150}
+                                    />
+                                </div>
+                                <div className='product_info'>
+                                    <p className='order_id'>Order #{orderNumber}</p>
+                                    <h4 className='product_title'>{pTitle}</h4>
+                                    {pDesc && (
+                                        <p className='product_description' style={{ fontSize: '13px', color: '#666', marginTop: '4px' }}>
+                                            {pDesc}
+                                        </p>
+                                    )}
+                                    <div className='product_extra_attributes' style={{ marginTop: '12px', display: 'flex', flexWrap: 'wrap', gap: '8px', fontSize: '12px', color: '#555' }}>
+                                        <span style={{ background: '#f0f4ff', padding: '4px 8px', borderRadius: '4px', fontWeight: 700 }}>Qty: {pQty}</span>
+                                        {pBrand && <span style={{ background: '#f5f5f5', padding: '4px 8px', borderRadius: '4px' }}><b>Brand:</b> {pBrand}</span>}
+                                        {pColor && <span style={{ background: '#f5f5f5', padding: '4px 8px', borderRadius: '4px' }}><b>Color:</b> {pColor}</span>}
+                                        {pCondition && <span style={{ background: '#f5f5f5', padding: '4px 8px', borderRadius: '4px' }}><b>Condition:</b> {pCondition}</span>}
+                                        {pType && <span style={{ background: '#f5f5f5', padding: '4px 8px', borderRadius: '4px' }}><b>Type:</b> {pType}</span>}
+                                        {pDimension && <span style={{ background: '#f5f5f5', padding: '4px 8px', borderRadius: '4px' }}><b>Dimensions:</b> {pDimension}</span>}
+                                    </div>
+                                    <div className='product_footer'>
+                                        <h3 className='product_price'>{pPrice}</h3>
+                                        <p className='product_time'>{createdAt}</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                {/* Extra items */}
-                {(order?.products || order?.items || []).length > 1 && (
-                    <p style={{ fontSize: '13px', color: '#888', marginTop: '8px' }}>
-                        +{(order?.products || order?.items).length - 1} more item(s) in this order
-                    </p>
-                )}
+                    );
+                })}
 
                 <span className='total_amount'>
                     <p className='total_text'>Sub Total:</p>
