@@ -1,5 +1,5 @@
 import { instance } from "./axios";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 const normalizeOrdersResponse = (data) => {
   const body = data?.body || {};
@@ -38,6 +38,23 @@ export function useGetUserOrders({ buyerId, skip = 0, limit = 10, enabled = true
     refetchOnWindowFocus: false,
     refetchOnMount: true,
     refetchOnReconnect: false,
+  });
+}
+
+// Cancel an order
+export const handleCancelOrder = async (orderId) => {
+  const { data } = await instance.patch(`/buyer/order/${orderId}/cancel`);
+  return data;
+};
+
+export function useCancelOrder() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (orderId) => handleCancelOrder(orderId),
+    onSuccess: (_, orderId) => {
+      queryClient.invalidateQueries({ queryKey: ['order', orderId] });
+      queryClient.invalidateQueries({ queryKey: ['user-orders'] });
+    },
   });
 }
 

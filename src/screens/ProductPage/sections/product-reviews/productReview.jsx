@@ -11,11 +11,7 @@ function ReviewCard({ review }) {
     .join("");
   const rating = review?.productRating || 0;
 
-  const formattedDate = review?.reviewDate
-    ? new Date(review.reviewDate).toLocaleDateString("en-GB", {
-        day: "numeric", month: "short", year: "numeric",
-      })
-    : null;
+  const formattedDate = review?.reviewDate || null;
 
   return (
     <div className="review__card">

@@ -20,6 +20,9 @@ import Button from "@/components/lib/Button";
 import useOutsideAlerter, { truncateString } from "@/data-helpers/hooks";
 import { useMainContext } from "@/context";
 import { TbLogout2 as LogoutIcon } from "react-icons/tb";
+import { BsBoxSeam as OrdersIcon } from "react-icons/bs";
+import { TbArrowBackUp as ReturnsIcon } from "react-icons/tb";
+import { AiOutlineStar as ReviewsIcon } from "react-icons/ai";
 import ProfileImage from "@/assets/images/profile/profile-1.svg";
 import { deleteAllCookie } from "@/data-helpers/auth-session";
 import { logoutUser } from "@/network/auth";
@@ -49,6 +52,21 @@ export default function Header() {
       label: "Profile",
       link: "/profile",
       icon: <ProfileIcon color="white" size={12} />,
+    },
+    {
+      label: "My Orders",
+      link: "/order",
+      icon: <OrdersIcon color="white" size={12} />,
+    },
+    {
+      label: "My Returns",
+      link: "/returns",
+      icon: <ReturnsIcon color="white" size={12} />,
+    },
+    {
+      label: "My Reviews",
+      link: "/reviews",
+      icon: <ReviewsIcon color="white" size={12} />,
     },
     {
       label: "Logout",

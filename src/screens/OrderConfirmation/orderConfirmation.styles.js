@@ -16,13 +16,18 @@ export const ConfirmationContainer = styled.div`
   .success-icon-wrapper {
     width: 80px;
     height: 80px;
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: linear-gradient(135deg, var(--orrsiPrimary) 0%, #ff6b6b 100%);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 24px;
-    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 4px 15px rgba(252, 83, 83, 0.3);
+
+    /* Ant Design Spin — white dots visible on primary-color background */
+    .ant-spin-dot-item {
+      background-color: #fff !important;
+    }
   }
 
   .title {

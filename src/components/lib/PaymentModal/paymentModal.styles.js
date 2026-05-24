@@ -578,6 +578,67 @@ export const PaymentModalContent = styled.div`
     padding: 18px 20px;
     border: 1px solid #ebebeb;
 
+    .order__items {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-bottom: 14px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid #e4e4e4;
+
+      .order__item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .order__item__img {
+        width: 42px;
+        height: 42px;
+        border-radius: 6px;
+        object-fit: cover;
+        flex-shrink: 0;
+        border: 1px solid #e8e8e8;
+      }
+
+      .order__item__img__placeholder {
+        width: 42px;
+        height: 42px;
+        border-radius: 6px;
+        background: #e8e8e8;
+        flex-shrink: 0;
+      }
+
+      .order__item__info {
+        flex: 1;
+        min-width: 0;
+
+        .order__item__name {
+          font-size: 0.82rem;
+          font-weight: 600;
+          color: #333;
+          margin: 0 0 3px 0;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .order__item__meta {
+          font-size: 0.77rem;
+          color: #999;
+          margin: 0;
+        }
+      }
+
+      .order__item__price {
+        font-size: 0.84rem;
+        font-weight: 700;
+        color: #333;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+    }
+
     .summary__details {
       .summary__label {
         font-size: 0.85rem;

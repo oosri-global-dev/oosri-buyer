@@ -30,7 +30,10 @@ const OrderConfirmation = () => {
 
     const paymentState = data?.state || null;
     const orderCount = data?.confirmedOrders || 0;
-    const isProcessing = !!reference && !pollTimedOut && (isLoading || paymentState === "processing");
+    // !router.isReady: query params not yet populated on first render — prevents "Order Confirmed" flash.
+    // !data && !isError: reference is known but the first poll hasn't returned yet.
+    const isProcessing = !router.isReady ||
+        (!!reference && !pollTimedOut && (isLoading || (!data && !isError) || paymentState === "processing"));
     const needsAttention = pollTimedOut || paymentState === "failed" || isError;
 
     useEffect(() => {

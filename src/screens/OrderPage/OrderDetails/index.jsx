@@ -4,16 +4,20 @@ import Image from 'next/image';
 import SafeImage from '@/components/lib/SafeImage/SafeImage';
 import { OrderDetailsWrapper } from './index.styles';
 import { NameTag } from '../components/nameTag';
-import { useGetOrderById } from '@/network/orders';
+import { useGetOrderById, useCancelOrder } from '@/network/orders';
 import { formatCurrency, stripHtml } from '@/data-helpers/hooks';
 import ReturnRequestModal from './ReturnRequestModal';
+import toast, { Toaster } from 'react-hot-toast';
 
 const RETURNABLE_STATUSES = ['completed', 'processing', 'pending_logistics'];
+const CANCELLABLE_STATUSES = ['pending', 'processing', 'pending_logistics'];
 
 export default function OrderDetailsScreen() {
     const router = useRouter();
     const { id } = router.query;
     const [showReturnModal, setShowReturnModal] = useState(false);
+    const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+    const { mutate: cancelOrder, isLoading: isCancelling } = useCancelOrder();
 
     const { data, isLoading, isError } = useGetOrderById(id);
     // The network layer does: const { data } = await instance.get(...)  → data = API response
@@ -57,7 +61,7 @@ export default function OrderDetailsScreen() {
     const getStatusClass = (status) => {
         const s = status?.toLowerCase() || "";
         if (s.includes("delivered") || s.includes("completed")) return "delivered";
-        if (s.includes("cancelled")) return "cancelled";
+        if (s.includes("cancel")) return "cancelled";
         return "pending";
     };
 
@@ -68,39 +72,12 @@ export default function OrderDetailsScreen() {
 
     // ─── Vendor ────────────────────────────────────────────────────────────────
     // The API returns sellerFullName at the order level (not on each product object)
-    const firstProduct = order?.products?.[0] || {};
     const vendorName = order?.sellerFullName || '';
     const vendorImage = order?.vendorImage || 'https://placehold.co/24x24';
 
-    // ─── Product fields ─────────────────────────────────────────────────────────
-    // API response product object keys (from buyerOrderService retrieveOrderById):
-    //   productName, productDescription, productBrand, color, condition,
-    //   productType, dimension, productImage (array), productAmount (NGN), productAmountUSD
-    const productTitle = firstProduct?.productName || 'Product';
-
-    // productImage is an array of Cloudinary URLs
-    const productImage = Array.isArray(firstProduct?.productImage)
-        ? (firstProduct.productImage[0] || 'https://placehold.co/150x150')
-        : (firstProduct?.productImage || 'https://placehold.co/150x150');
-
-    // productDescription comes as HTML — strip tags before displaying
-    const productDescription = stripHtml(firstProduct?.productDescription || '');
-
-    // ─── Product price ────────────────────────────────────────────────────────────
-    // productAmountUSD = product.totalPrice (NGN) × fxRate → correctly computed USD
-    // by the backend at request time. Use it directly; never recompute on the frontend.
-    // If null (fxRate service was unavailable server-side), show '—' gracefully.
-    const productAmountUSD = firstProduct?.productAmountUSD ?? null;
-    const productPrice = productAmountUSD !== null
-        ? formatCurrency(productAmountUSD)
-        : '—';
-
-    // Extra product fields
-    const productBrand = firstProduct?.productBrand || "";
-    const color = firstProduct?.color || "";
-    const condition = firstProduct?.condition || "";
-    const productType = firstProduct?.productType || "";
-    const dimension = firstProduct?.dimension || "";
+    // ─── Currency detection ───────────────────────────────────────────────────────
+    const currencyCode = order?.currencyCode || 'USD';
+    const isNGN = currencyCode === 'NGN';
 
     // ─── Delivery address ────────────────────────────────────────────────────────
     const addr = order?.deliveryAddress || {};
@@ -112,34 +89,25 @@ export default function OrderDetailsScreen() {
 
     // ─── Financial summary ────────────────────────────────────────────────────────
     //
-    // Backend response — currency type of each field:
+    // NGN orders (Paystack): subtotal/totalAmount/deliveryFee are all in NGN.
+    // USD orders (Stripe):   subtotalUSD/totalAmountUSD/deliveryFeeUSD are the real values.
     //
-    //   subtotalUSD   = sum(product.totalPrice [NGN]) × fxRate  → USD ✓  USE THIS
-    //   deliveryFee   = order.deliveryFee saved as shippingFeeUSD → USD ✓  USE THIS
-    //   totalAmount   = Stripe product charge (USD) + deliveryFee  → USD ✓  USE THIS
-    //
-    //   deliveryFeeUSD = deliveryFee (USD) × fxRate → USD×(USD/NGN) ✗  NEVER USE
-    //   totalAmountUSD = totalAmount (USD) × fxRate → USD×(USD/NGN) ✗  NEVER USE
-    //
-    // subtotalUSD can be null when the fxRate service is temporarily down.
-    // Show '—' instead of '$0.00' so the buyer is not misled.
+    // Both paths show '—' when the value is null (fxRate service was down server-side).
 
-    // Subtotal: product cost only (no delivery)
-    const subtotalUSD = order?.subtotalUSD ?? null;
-    const subTotal = subtotalUSD !== null ? formatCurrency(subtotalUSD) : '—';
+    const subTotalRaw = isNGN ? (order?.subtotal ?? null) : (order?.subtotalUSD ?? null);
+    const subTotal = subTotalRaw !== null ? formatCurrency(subTotalRaw, currencyCode) : '—';
 
-    // Delivery fee: persisted in USD at checkout; 0 means free (or pre-fee legacy order)
-    const deliveryFeeRaw = order?.deliveryFee ?? 0;   // USD — NOT deliveryFeeUSD
+    const deliveryFeeRaw = isNGN ? (order?.deliveryFee ?? 0) : (order?.deliveryFeeUSD ?? 0);
     const deliveryFeeDisplay = deliveryFeeRaw === 0
         ? 'Free'
-        : formatCurrency(deliveryFeeRaw);
+        : formatCurrency(deliveryFeeRaw, currencyCode);
 
-    // Grand total: Stripe product USD + delivery USD — the actual amount buyer was charged
-    const grandTotalRaw = order?.totalAmount ?? null;  // USD — NOT totalAmountUSD
-    const grandTotal = grandTotalRaw !== null ? formatCurrency(grandTotalRaw) : '—';
+    const grandTotalRaw = isNGN ? (order?.totalAmount ?? null) : (order?.totalAmountUSD ?? null);
+    const grandTotal = grandTotalRaw !== null ? formatCurrency(grandTotalRaw, currencyCode) : '—';
 
     return (
         <OrderDetailsWrapper>
+            <Toaster />
             <p className="breadcrumb__paragraph">
                 <span onClick={() => router.push('/')} style={{ cursor: 'pointer' }}>Home</span> /
                 <span onClick={() => router.push('/order')} style={{ cursor: 'pointer' }}> My Order</span> /
@@ -165,49 +133,61 @@ export default function OrderDetailsScreen() {
             <div>
                 {vendorName && <NameTag name={vendorName} image={vendorImage} />}
 
-                {/* Product Card */}
-                <div className='product_card'>
-                    <div className='product_card_content'>
-                        <div className='product_image_container'>
-                            <SafeImage
-                                src={productImage}
-                                alt={productTitle}
-                                className='product_image'
-                                width={150}
-                                height={150}
-                            />
-                        </div>
-                        <div className='product_info'>
-                            <p className='order_id'>Order #{orderNumber}</p>
-                            <h4 className='product_title'>{productTitle}</h4>
-                            {productDescription && (
-                                <p className='product_description' style={{ fontSize: '13px', color: '#666', marginTop: '4px' }}>
-                                    {productDescription}
-                                </p>
-                            )}
+                {/* Product list — all items */}
+                {(order?.products || order?.items || []).map((product, idx) => {
+                    const pTitle = product?.productName || product?.title || 'Product';
+                    const pImage = Array.isArray(product?.productImage)
+                        ? (product.productImage[0] || null)
+                        : (product?.productImage || product?.images?.[0] || null);
+                    const pDesc = stripHtml(product?.productDescription || product?.description || '');
+                    const pBrand = product?.productBrand || '';
+                    const pColor = product?.color || '';
+                    const pCondition = product?.condition || '';
+                    const pType = product?.productType || '';
+                    const pDimension = product?.dimension || '';
+                    const pQty = product?.quantity || 1;
+                    const pAmountRaw = isNGN
+                        ? (product?.productAmount ?? null)
+                        : (product?.productAmountUSD ?? null);
+                    const pPrice = pAmountRaw !== null ? formatCurrency(pAmountRaw, currencyCode) : '—';
 
-                            {/* Extra Product Attributes */}
-                            <div className='product_extra_attributes' style={{ marginTop: '12px', display: 'flex', flexWrap: 'wrap', gap: '8px', fontSize: '12px', color: '#555' }}>
-                                {productBrand && <span style={{ background: '#f5f5f5', padding: '4px 8px', borderRadius: '4px' }}><b>Brand:</b> {productBrand}</span>}
-                                {color && <span style={{ background: '#f5f5f5', padding: '4px 8px', borderRadius: '4px' }}><b>Color:</b> {color}</span>}
-                                {condition && <span style={{ background: '#f5f5f5', padding: '4px 8px', borderRadius: '4px' }}><b>Condition:</b> {condition}</span>}
-                                {productType && <span style={{ background: '#f5f5f5', padding: '4px 8px', borderRadius: '4px' }}><b>Type:</b> {productType}</span>}
-                                {dimension && <span style={{ background: '#f5f5f5', padding: '4px 8px', borderRadius: '4px' }}><b>Dimensions:</b> {dimension}</span>}
-                            </div>
-                            <div className='product_footer'>
-                                <h3 className='product_price'>{productPrice}</h3>
-                                <p className='product_time'>{createdAt}</p>
+                    return (
+                        <div key={product?.productId || idx} className='product_card' style={{ marginBottom: idx < (order?.products || order?.items).length - 1 ? '12px' : '0' }}>
+                            <div className='product_card_content'>
+                                <div className='product_image_container'>
+                                    <SafeImage
+                                        src={pImage}
+                                        alt={pTitle}
+                                        className='product_image'
+                                        width={150}
+                                        height={150}
+                                    />
+                                </div>
+                                <div className='product_info'>
+                                    <p className='order_id'>Order #{orderNumber}</p>
+                                    <h4 className='product_title'>{pTitle}</h4>
+                                    {pDesc && (
+                                        <p className='product_description' style={{ fontSize: '13px', color: '#666', marginTop: '4px' }}>
+                                            {pDesc}
+                                        </p>
+                                    )}
+                                    <div className='product_extra_attributes' style={{ marginTop: '12px', display: 'flex', flexWrap: 'wrap', gap: '8px', fontSize: '12px', color: '#555' }}>
+                                        <span style={{ background: '#f0f4ff', padding: '4px 8px', borderRadius: '4px', fontWeight: 700 }}>Qty: {pQty}</span>
+                                        {pBrand && <span style={{ background: '#f5f5f5', padding: '4px 8px', borderRadius: '4px' }}><b>Brand:</b> {pBrand}</span>}
+                                        {pColor && <span style={{ background: '#f5f5f5', padding: '4px 8px', borderRadius: '4px' }}><b>Color:</b> {pColor}</span>}
+                                        {pCondition && <span style={{ background: '#f5f5f5', padding: '4px 8px', borderRadius: '4px' }}><b>Condition:</b> {pCondition}</span>}
+                                        {pType && <span style={{ background: '#f5f5f5', padding: '4px 8px', borderRadius: '4px' }}><b>Type:</b> {pType}</span>}
+                                        {pDimension && <span style={{ background: '#f5f5f5', padding: '4px 8px', borderRadius: '4px' }}><b>Dimensions:</b> {pDimension}</span>}
+                                    </div>
+                                    <div className='product_footer'>
+                                        <h3 className='product_price'>{pPrice}</h3>
+                                        <p className='product_time'>{createdAt}</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                {/* Extra items */}
-                {(order?.products || order?.items || []).length > 1 && (
-                    <p style={{ fontSize: '13px', color: '#888', marginTop: '8px' }}>
-                        +{(order?.products || order?.items).length - 1} more item(s) in this order
-                    </p>
-                )}
+                    );
+                })}
 
                 <span className='total_amount'>
                     <p className='total_text'>Sub Total:</p>
@@ -239,6 +219,138 @@ export default function OrderDetailsScreen() {
                     <p className='total_text'>Grand Total:</p>
                     <p className='grand_total_value'>{grandTotal}</p>
                 </span>
+
+                {CANCELLABLE_STATUSES.includes(orderStatus?.toLowerCase()) && (
+                    <div style={{ marginTop: 24, borderTop: '1px solid #EEEEEE', paddingTop: 20 }}>
+                        {!showCancelConfirm ? (
+                            <>
+                                <p style={{ fontSize: 13, color: '#9E9E9E', margin: '0 0 10px' }}>
+                                    Need to cancel? You can cancel this order while it has not yet shipped.
+                                </p>
+                                <button
+                                    onClick={() => setShowCancelConfirm(true)}
+                                    style={{
+                                        background: '#fff',
+                                        border: '1px solid #9E9E9E',
+                                        color: '#555',
+                                        borderRadius: 8,
+                                        padding: '10px 20px',
+                                        fontSize: 14,
+                                        fontWeight: 600,
+                                        cursor: 'pointer',
+                                        fontFamily: 'inherit',
+                                    }}
+                                >
+                                    Cancel Order
+                                </button>
+                            </>
+                        ) : (
+                            <div style={{ background: '#FFF8F8', border: '1px solid #FFCDD2', borderRadius: 10, padding: '20px' }}>
+                                <p style={{ fontSize: 15, color: '#222', margin: '0 0 16px', fontWeight: 700 }}>
+                                    Before you cancel — here's what happens next
+                                </p>
+
+                                {/* Refund process steps */}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 18 }}>
+                                    {[
+                                        {
+                                            step: '1',
+                                            title: 'Cancellation is confirmed',
+                                            body: 'Your order status will change to Cancelled and the seller will be notified immediately.',
+                                        },
+                                        {
+                                            step: '2',
+                                            title: 'Refund is initiated',
+                                            body: isNGN
+                                                ? 'A refund will be submitted to Paystack and routed back to your original payment method (bank account or card).'
+                                                : 'A refund will be submitted to Stripe and routed back to your original card.',
+                                        },
+                                        {
+                                            step: '3',
+                                            title: isNGN ? '3–5 business days' : '5–10 business days',
+                                            body: isNGN
+                                                ? 'Our payment partners typically complete refunds within 3–5 business days. Weekends and public holidays are not counted.'
+                                                : 'Our payment partners typically complete refunds within 5–10 business days. The exact timing may vary depending on your card issuer.',
+                                        },
+                                        {
+                                            step: '4',
+                                            title: 'Confirmation email',
+                                            body: 'You will receive an email confirmation once the cancellation is processed. If your refund does not arrive after the stated period, contact our support team.',
+                                        },
+                                    ].map(({ step, title, body }) => (
+                                        <div key={step} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                                            <div style={{
+                                                minWidth: 24, height: 24, borderRadius: '50%',
+                                                background: '#FC5353', color: '#fff',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                fontSize: 12, fontWeight: 700, flexShrink: 0,
+                                            }}>
+                                                {step}
+                                            </div>
+                                            <div>
+                                                <p style={{ margin: '0 0 2px', fontSize: 13, fontWeight: 600, color: '#333' }}>{title}</p>
+                                                <p style={{ margin: 0, fontSize: 12, color: '#777', lineHeight: 1.5 }}>{body}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <p style={{ fontSize: 12, color: '#B00020', margin: '0 0 16px', fontWeight: 600 }}>
+                                    ⚠ This action cannot be undone once confirmed.
+                                </p>
+
+                                <div style={{ display: 'flex', gap: 10 }}>
+                                    <button
+                                        disabled={isCancelling}
+                                        onClick={() => {
+                                            cancelOrder(String(orderNumber), {
+                                                onSuccess: () => {
+                                                    toast.success('Order cancelled. A confirmation email is on its way.', { position: 'top-center', duration: 4000 });
+                                                    setTimeout(() => router.push('/order'), 1200);
+                                                },
+                                                onError: (err) => {
+                                                    toast.error(err?.response?.data?.message || err.message || 'Failed to cancel order', { position: 'top-center' });
+                                                    setShowCancelConfirm(false);
+                                                },
+                                            });
+                                        }}
+                                        style={{
+                                            background: '#FC5353',
+                                            border: 'none',
+                                            color: '#fff',
+                                            borderRadius: 8,
+                                            padding: '10px 20px',
+                                            fontSize: 14,
+                                            fontWeight: 600,
+                                            cursor: isCancelling ? 'not-allowed' : 'pointer',
+                                            opacity: isCancelling ? 0.7 : 1,
+                                            fontFamily: 'inherit',
+                                        }}
+                                    >
+                                        {isCancelling ? 'Cancelling...' : 'Yes, Cancel Order'}
+                                    </button>
+                                    <button
+                                        disabled={isCancelling}
+                                        onClick={() => setShowCancelConfirm(false)}
+                                        style={{
+                                            background: '#fff',
+                                            border: '1px solid #DDDDDD',
+                                            color: '#333',
+                                            borderRadius: 8,
+                                            padding: '10px 20px',
+                                            fontSize: 14,
+                                            fontWeight: 600,
+                                            cursor: 'pointer',
+                                            fontFamily: 'inherit',
+                                        }}
+                                    >
+                                        Keep Order
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 {RETURNABLE_STATUSES.includes(orderStatus?.toLowerCase()) && (
                     <div style={{ marginTop: 24, borderTop: '1px solid #EEEEEE', paddingTop: 20 }}>

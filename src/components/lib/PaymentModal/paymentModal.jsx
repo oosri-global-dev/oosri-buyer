@@ -22,6 +22,13 @@ import {
   useCreatePaystackCheckout,
 } from "@/network/checkout";
 import { useFormatPrice } from "@/data-helpers/hooks";
+
+const formatStockIssues = (issues = []) =>
+  issues.map((i) => {
+    if (i.issueType === "NOT_FOUND") return `${i.productName} is no longer available`;
+    if (i.issueType === "NOT_AVAILABLE") return `${i.productName} is currently unavailable for purchase`;
+    return `${i.productName}: only ${i.availableStock} unit${i.availableStock === 1 ? "" : "s"} left`;
+  }).join("; ");
 import { TOAST_BOX, CART } from "@/context/types";
 import { useMainContext } from "@/context";
 import { handleClearCart } from "@/network/cart";
@@ -60,6 +67,17 @@ const COUNTRIES = [
 
 const countryOptions = COUNTRIES.map((c) => ({ label: c.name, value: c.code }));
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+
+function loadPaystackScript() {
+  if (typeof window === "undefined" || document.getElementById("paystack-v2-script")) return;
+  const old = document.getElementById("paystack-inline-script");
+  if (old) old.remove();
+  const script = document.createElement("script");
+  script.id = "paystack-v2-script";
+  script.src = "https://js.paystack.co/v2/inline.js";
+  script.async = true;
+  document.body.appendChild(script);
+}
 
 export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItems = [] }) {
   const router = useRouter();
@@ -133,6 +151,10 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     : (selectedAddress?.countryCode || null);
   const isNigerianBuyer = effectiveCountryCode === "NG";
 
+  useEffect(() => {
+    if (isNigerianBuyer) loadPaystackScript();
+  }, [isNigerianBuyer]);
+
   // Shipping calculations
   const shippingEstimates = Array.isArray(shippingInfo?.estimates) ? shippingInfo.estimates : [];
   const selectedShippingOption =
@@ -148,8 +170,17 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     ? Number((subtotal / liveNGNRate).toFixed(2))
     : subtotal;
 
-  // Derived totals
-  const subtotalNGN = Math.round(subtotalUSD * liveNGNRate);
+  // For Nigerian buyers, derive the NGN total directly from each cart item's raw NGN
+  // price (salesPrice ?? regularPrice) to match the exact amount the backend will
+  // charge — avoids the NGN→USD→NGN round-trip rounding gap.
+  const subtotalNGN = isNigerianBuyer
+    ? cartItems.reduce((acc, item) => {
+        if (!item) return acc;
+        const priceNGN = (item.salesPrice > 0 ? item.salesPrice : item.regularPrice) || 0;
+        return acc + priceNGN * (item.quantity || 1);
+      }, 0)
+    : Math.round(subtotalUSD * liveNGNRate);
+
   const totalNGN = subtotalNGN + (isNigerianBuyer ? NIGERIAN_FLAT_RATE_NGN : 0);
   const totalUSD = subtotalUSD + shippingFeeUSD;
 
@@ -403,7 +434,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     } catch (error) {
       let msg = error?.response?.data?.message || error?.response?.data?.error || "Failed to create payment intent";
       if (error?.response?.data?.stockIssues?.length > 0) {
-        msg = `Insufficient stock: ${error.response.data.stockIssues.map((i) => `${i.productName} (Available: ${i.availableStock})`).join("; ")}`;
+        msg = formatStockIssues(error.response.data.stockIssues);
       }
       dispatch({ type: TOAST_BOX, payload: { type: "error", message: msg } });
     }
@@ -435,18 +466,34 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
         items: cartItems.map((item) => ({ productId: item._id, quantity: item.quantity })),
       };
       const response = await createPaystackCheckout.mutateAsync(payload);
-      const { authorizationUrl, reference } = response?.body || response || {};
+      const { authorizationUrl, accessCode, reference } = response?.body || response || {};
 
-      if (!authorizationUrl || !reference) throw new Error("Paystack did not return a payment URL");
+      if (!accessCode) throw new Error("Paystack did not return an access code");
 
-      if (typeof window !== "undefined") {
+      if (typeof window !== "undefined" && window.PaystackPop) {
+        const popup = new window.PaystackPop();
+        popup.resumeTransaction(accessCode, {
+          onSuccess: () => {
+            window.sessionStorage.setItem("oosri_pending_paystack_reference", reference);
+            dispatch({ type: TOAST_BOX, payload: { type: "success", message: "Payment successful!" } });
+            dispatch({ type: CART, payload: [] });
+            handleClearCart().catch(() => {});
+            if (setBuyNowItem) setBuyNowItem(null);
+            handleCancel();
+            router.push(`/order-confirmation?paystack_reference=${reference}`);
+          },
+          onCancel: () => {
+            dispatch({ type: TOAST_BOX, payload: { type: "error", message: "Payment cancelled" } });
+          },
+        });
+      } else {
         window.sessionStorage.setItem("oosri_pending_paystack_reference", reference);
         window.location.href = authorizationUrl;
       }
     } catch (error) {
       let msg = error?.response?.data?.message || error?.message || "Failed to initiate Paystack payment";
       if (error?.response?.data?.stockIssues?.length > 0) {
-        msg = `Insufficient stock: ${error.response.data.stockIssues.map((i) => `${i.productName} (Available: ${i.availableStock})`).join("; ")}`;
+        msg = formatStockIssues(error.response.data.stockIssues);
       }
       dispatch({ type: TOAST_BOX, payload: { type: "error", message: msg } });
     }
@@ -743,6 +790,32 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
             {/* ── 4. Payment Summary ─────────────────────────────────── */}
             <div className="payment__summary">
               <h3 className="section__title">Order Summary</h3>
+              {cartItems.length > 0 && (
+                <div className="order__items">
+                  {cartItems.map((item) => {
+                    const priceNGN = (item.salesPrice > 0 ? item.salesPrice : item.regularPrice) || 0;
+                    const qty = item.quantity || 1;
+                    const imgUrl = item.images?.[0]?.url || (typeof item.images?.[0] === "string" ? item.images[0] : null);
+                    const itemPrice = isNigerianBuyer
+                      ? `₦${(priceNGN * qty).toLocaleString()}`
+                      : formatPrice(Number(((priceNGN / liveNGNRate) * qty).toFixed(2)));
+                    return (
+                      <div key={item._id} className="order__item">
+                        {imgUrl ? (
+                          <img src={imgUrl} alt={item.productName} className="order__item__img" />
+                        ) : (
+                          <div className="order__item__img__placeholder" />
+                        )}
+                        <div className="order__item__info">
+                          <p className="order__item__name">{item.productName}</p>
+                          <p className="order__item__meta">Qty: {qty}</p>
+                        </div>
+                        <p className="order__item__price">{itemPrice}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
               <FlexibleDiv flexDir="column" gap="8px" className="summary__details" justifyContent="flex-start" alignItems="stretch">
                 <FlexibleDiv justifyContent="space-between" alignItems="center">
                   <p className="summary__label">Subtotal:</p>
