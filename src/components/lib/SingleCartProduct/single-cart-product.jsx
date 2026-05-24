@@ -41,8 +41,7 @@ export default function SingleCartProduct({
     await updateQuantity(item, next, setIsLoadingIncrease);
   };
 
-  const rawPriceNGN = item?.salesPrice > 0 ? item.salesPrice : (item?.regularPrice || 0);
-  const hasNGNDiscount = item?.salesPrice > 0 && item?.regularPrice > item.salesPrice;
+  const rawPriceNGN = item?.discountPrice > 0 && item?.discountPrice < item?.regularPrice ? item.discountPrice : (item?.regularPrice || 0);
   const lineTotal = currency === 'NGN'
     ? Math.round(rawPriceNGN * numOfProduct)
     : (priceData?.price || 0) * numOfProduct;
@@ -115,15 +114,6 @@ export default function SingleCartProduct({
               : `${formatPrice(priceData?.price || 0)} each`
             }
           </p>
-        )}
-        {currency === 'NGN' ? (
-          hasNGNDiscount && (
-            <p className="unit__original">₦{Math.round(item.regularPrice).toLocaleString()}</p>
-          )
-        ) : (
-          priceData?.hasDiscount && priceData?.originalPrice && (
-            <p className="unit__original">{formatPrice(priceData.originalPrice)}</p>
-          )
         )}
       </div>
     </SCProductWrapper>

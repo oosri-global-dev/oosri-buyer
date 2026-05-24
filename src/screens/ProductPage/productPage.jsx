@@ -245,11 +245,6 @@ export default function ProductPage({ product, loading, relatedProducts }) {
 
   const images = product?.productImages || [];
   const selectedImage = images[selectedIdx] || images[0] || null;
-  const discountPct =
-    priceData?.hasDiscount && priceData?.originalPrice
-      ? Math.round(((priceData.originalPrice - priceData.price) / priceData.originalPrice) * 100)
-      : 0;
-
   const sellerStoreName = product?.seller?.storeProfile?.storeName || product?.seller?._id || product?.seller;
   const sellerDisplayName =
     product?.seller?.corporateBusinessAccount?.companyName ||
@@ -437,30 +432,12 @@ export default function ProductPage({ product, loading, relatedProducts }) {
             <div className="pdp__price__block">
               {currency === 'NGN' ? (
                 // For NGN buyers: use the raw NGN price directly — avoids NGN→USD→NGN
-                // double conversion which introduces rounding errors of ₦1–₦125.
-                <>
-                  <span className="pdp__price">
-                    ₦{Math.round(product?.salesPrice > 0 ? product.salesPrice : (product?.regularPrice || 0)).toLocaleString()}
-                  </span>
-                  {product?.salesPrice > 0 && product?.regularPrice > product.salesPrice && (
-                    <>
-                      <span className="pdp__original__price">
-                        ₦{Math.round(product.regularPrice).toLocaleString()}
-                      </span>
-                      {discountPct > 0 && <span className="pdp__discount__badge">-{discountPct}%</span>}
-                    </>
-                  )}
-                </>
+                // double conversion which introduces rounding errors.
+                <span className="pdp__price">
+                  ₦{Math.round(product?.discountPrice > 0 && product?.discountPrice < product?.regularPrice ? product.discountPrice : (product?.regularPrice || 0)).toLocaleString()}
+                </span>
               ) : (
-                <>
-                  <span className="pdp__price">{formatPrice(priceData?.price || 0)}</span>
-                  {priceData?.hasDiscount && priceData?.originalPrice && (
-                    <>
-                      <span className="pdp__original__price">{formatPrice(priceData.originalPrice)}</span>
-                      {discountPct > 0 && <span className="pdp__discount__badge">-{discountPct}%</span>}
-                    </>
-                  )}
-                </>
+                <span className="pdp__price">{formatPrice(priceData?.price || 0)}</span>
               )}
             </div>
 

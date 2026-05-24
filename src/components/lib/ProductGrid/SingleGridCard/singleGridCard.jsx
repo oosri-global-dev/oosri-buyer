@@ -73,8 +73,8 @@ export default function SingleGridCard({ key, product, isLoading = false }) {
             >
               <p className="product__price__grid">
                 {currency === 'NGN'
-                  ? `₦${Math.round(product?.salesPrice > 0 ? product.salesPrice : (product?.regularPrice || 0)).toLocaleString()}`
-                  : formatPrice(priceData?.originalPrice || priceData?.price || 0)
+                  ? `₦${Math.round(product?.discountPrice > 0 && product?.discountPrice < product?.regularPrice ? product.discountPrice : (product?.regularPrice || 0)).toLocaleString()}`
+                  : formatPrice(priceData?.price || 0)
                 }
               </p>
             </FlexibleDiv>

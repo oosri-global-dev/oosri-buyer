@@ -127,35 +127,19 @@ export const calculateProductPrice = (product) => {
     productPrice ||
     0;
 
-  // salesPrice and discountPrice are the same concept — reduced selling price.
-  // salesPriceUSD / discountPriceUSD are their USD-converted equivalents.
-  const sales =
+  // Resolve discounted price — same concept across salesPrice/discountPrice fields.
+  const discounted =
     salesPriceUSD ||
     discountPriceUSD ||
     toUSD(salesPrice) ||
     toUSD(discountPrice) ||
     null;
 
-  const previous = previousPriceUSD || toUSD(product.previousPrice) || null;
+  // Use discounted price only when it is genuinely lower than regular.
+  // Always present a single buyer-facing price — no badge, no crossed-out original.
+  const effective = discounted && Number(discounted) < Number(regular) ? discounted : regular;
 
-  // Only treat as discounted when the sale price is genuinely lower than regular.
-  // The backend sometimes sets salesPrice = regularPrice as a fallback — ignore those.
-  if (sales && !previous) {
-    if (Number(sales) < Number(regular)) {
-      return { price: sales, originalPrice: regular, hasDiscount: true };
-    }
-    return { price: regular, originalPrice: null, hasDiscount: false };
-  }
-
-  if (previous) {
-    const currentPrice = sales && Number(sales) < Number(regular) ? sales : regular;
-    if (Number(previous) > Number(currentPrice)) {
-      return { price: currentPrice, originalPrice: previous, hasDiscount: true };
-    }
-    return { price: regular, originalPrice: null, hasDiscount: false };
-  }
-
-  return { price: regular, originalPrice: null, hasDiscount: false };
+  return { price: effective, originalPrice: null, hasDiscount: false };
 };
 
 /**

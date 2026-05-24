@@ -240,12 +240,6 @@ export default function ProductCard({ card, keyProp, isLoading = false }) {
           }
         </button>
 
-        {/* Discount badge */}
-        {priceData?.hasDiscount && priceData?.originalPrice && (
-          <span className="discount__badge">
-            -{Math.round(((priceData.originalPrice - priceData.price) / priceData.originalPrice) * 100)}%
-          </span>
-        )}
       </div>
 
       {/* ── Info ── */}
@@ -269,27 +263,13 @@ export default function ProductCard({ card, keyProp, isLoading = false }) {
 
         <div className="card__price__row">
           {currency === 'NGN' ? (
-            <>
-              <span className="card__price">
-                ₦{Math.round(card?.salesPrice > 0 ? card.salesPrice : (card?.regularPrice || 0)).toLocaleString()}
-              </span>
-              {card?.salesPrice > 0 && card?.regularPrice > card.salesPrice && (
-                <span className="card__original__price">
-                  ₦{Math.round(card.regularPrice).toLocaleString()}
-                </span>
-              )}
-            </>
+            <span className="card__price">
+              ₦{Math.round(card?.discountPrice > 0 && card?.discountPrice < card?.regularPrice ? card.discountPrice : (card?.regularPrice || 0)).toLocaleString()}
+            </span>
           ) : (
-            <>
-              <span className="card__price">
-                {formatPrice(priceData?.price || 0)}
-              </span>
-              {priceData?.hasDiscount && priceData?.originalPrice && (
-                <span className="card__original__price">
-                  {formatPrice(priceData.originalPrice)}
-                </span>
-              )}
-            </>
+            <span className="card__price">
+              {formatPrice(priceData?.price || 0)}
+            </span>
           )}
         </div>
       </div>
