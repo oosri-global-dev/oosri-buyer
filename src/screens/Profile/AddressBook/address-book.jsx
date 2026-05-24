@@ -193,7 +193,7 @@ export default function AddressBook({ setCurrentPage }) {
                       </span>
                     )}
                     <span className="payment__tag">
-                      {addr.countryCode === "NG" ? "🇳🇬 Paystack · Flat-rate delivery" : "💳 Stripe · Haulam / DHL delivery"}
+                      {addr.countryCode === "NG" ? "🇳🇬 Paystack · Flat-rate delivery" : "💳 Stripe · Haulam delivery"}
                     </span>
                   </FlexibleDiv>
                   <FlexibleDiv gap="6px" flexWrap="nowrap" alignItems="center">
