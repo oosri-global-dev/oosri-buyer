@@ -52,6 +52,10 @@ export const handleRemoveProductFromSavedItems = async (productId) => {
   return data;
 };
 
+// Retry delays spaced wide enough for Render free-tier cold-start (~30 s warm-up).
+// Attempt 0 → 5 s, 1 → 10 s, 2 → 20 s, 3 → 30 s, capped at 30 s.
+const coldStartRetryDelay = (attempt) => Math.min(30000, 5000 * 2 ** attempt);
+
 export function useProductsQuery(category, limit, key = "products", skip, queryOptions = {}) {
   return useQuery({
     // Include category in the key so each filter combination is cached independently
@@ -62,6 +66,8 @@ export function useProductsQuery(category, limit, key = "products", skip, queryO
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
+    retry: 4,
+    retryDelay: coldStartRetryDelay,
     placeholderData: keepPreviousData,
     ...queryOptions,             // allows enabled:false for lazy/deferred loading
   });
@@ -76,6 +82,8 @@ export function useProductCategoriesQuery() {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
+    retry: 4,
+    retryDelay: coldStartRetryDelay,
   });
 }
 

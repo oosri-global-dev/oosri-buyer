@@ -224,6 +224,7 @@ export default function ShopPage() {
     data: products,
     isLoading: isLoadingProducts,
     isError: isErrorProducts,
+    refetch: refetchProducts,
   } = useProductsQuery(apiCategory, itemsPerPage, productQueryKey, itemOffset, {
     enabled: !isSearchMode,
   });
@@ -581,12 +582,21 @@ export default function ShopPage() {
               {isLoadingProductsAny ? (
                 Array.from({ length: 12 }).map((_, idx) => <LoadingCard key={idx} />)
               ) : (isErrorProducts || isErrorSearch) ? (
-                <Alert
-                  message="Error"
-                  description="Failed to fetch products. Please try again later."
-                  type="error"
-                  showIcon
-                />
+                <div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+                  <Alert
+                    message="Could not load products"
+                    description="The server may be starting up. Please wait a moment and try again."
+                    type="error"
+                    showIcon
+                    style={{ width: "100%" }}
+                  />
+                  <button
+                    onClick={() => { refetchProducts(); }}
+                    style={{ padding: "8px 24px", background: "#000", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer", fontWeight: 600 }}
+                  >
+                    Retry
+                  </button>
+                </div>
               ) : (
                 <>
                   {sortedProducts.map((p, idx) => (
