@@ -227,20 +227,21 @@ export const MainProvider = ({ children }) => {
   };
 
   const handleGenerateCartKeyForVisitor = async () => {
-    try {
-      const res = await handleGenerateUniqueCartKey();
-
-      if (res?.body?.cartKey) {
-        storeDataInCookie("public__cart__key", res?.body?.cartKey);
+    // Retry silently — cold-start on Render can close the connection before
+    // the server is ready.  Users don't need to see this background operation.
+    const delays = [5000, 10000, 20000];
+    for (let attempt = 0; attempt <= delays.length; attempt++) {
+      try {
+        const res = await handleGenerateUniqueCartKey();
+        if (res?.body?.cartKey) {
+          storeDataInCookie("public__cart__key", res?.body?.cartKey);
+        }
+        return;
+      } catch {
+        if (attempt < delays.length) {
+          await new Promise((r) => setTimeout(r, delays[attempt]));
+        }
       }
-    } catch (err) {
-      dispatch({
-        type: TOAST_BOX,
-        payload: {
-          type: "error",
-          message: "Error generating a cart key on your device",
-        },
-      });
     }
   };
 
