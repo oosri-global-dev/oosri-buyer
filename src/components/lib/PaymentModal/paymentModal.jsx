@@ -68,6 +68,17 @@ const COUNTRIES = [
 const countryOptions = COUNTRIES.map((c) => ({ label: c.name, value: c.code }));
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
+function loadPaystackScript() {
+  if (typeof window === "undefined" || document.getElementById("paystack-v2-script")) return;
+  const old = document.getElementById("paystack-inline-script");
+  if (old) old.remove();
+  const script = document.createElement("script");
+  script.id = "paystack-v2-script";
+  script.src = "https://js.paystack.co/v2/inline.js";
+  script.async = true;
+  document.body.appendChild(script);
+}
+
 export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItems = [] }) {
   const router = useRouter();
 
@@ -139,6 +150,10 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     ? (watchedCountryCode || selectedAddress?.countryCode || null)
     : (selectedAddress?.countryCode || null);
   const isNigerianBuyer = effectiveCountryCode === "NG";
+
+  useEffect(() => {
+    if (isNigerianBuyer) loadPaystackScript();
+  }, [isNigerianBuyer]);
 
   // Shipping calculations
   const shippingEstimates = Array.isArray(shippingInfo?.estimates) ? shippingInfo.estimates : [];
@@ -451,11 +466,24 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
         items: cartItems.map((item) => ({ productId: item._id, quantity: item.quantity })),
       };
       const response = await createPaystackCheckout.mutateAsync(payload);
-      const { authorizationUrl, reference } = response?.body || response || {};
+      const { authorizationUrl, accessCode, reference } = response?.body || response || {};
 
-      if (!authorizationUrl || !reference) throw new Error("Paystack did not return a payment URL");
+      if (!accessCode) throw new Error("Paystack did not return an access code");
 
-      if (typeof window !== "undefined") {
+      if (typeof window !== "undefined" && window.PaystackPop) {
+        const popup = new window.PaystackPop();
+        popup.resumeTransaction(accessCode, {
+          onSuccess: () => {
+            window.sessionStorage.setItem("oosri_pending_paystack_reference", reference);
+            if (setBuyNowItem) setBuyNowItem(null);
+            handleCancel();
+            router.push(`/order-confirmation?paystack_reference=${reference}`);
+          },
+          onCancel: () => {
+            dispatch({ type: TOAST_BOX, payload: { type: "error", message: "Payment cancelled" } });
+          },
+        });
+      } else {
         window.sessionStorage.setItem("oosri_pending_paystack_reference", reference);
         window.location.href = authorizationUrl;
       }
