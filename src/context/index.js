@@ -68,7 +68,7 @@ export const MainProvider = ({ children }) => {
     //api to add to cart before dispatching
     try {
       await handleAddToCart({
-        items: [{ productId: item?._id, quantity: 1 }],
+        items: [{ productId: item?._id, quantity: item?.quantity || 1 }],
         ...(_.isEmpty(state.user) && { cartKey }), //add cartkey is user is empty
       });
       await handleUpdateCartItemsInContext(cartKey, { silent: true });
