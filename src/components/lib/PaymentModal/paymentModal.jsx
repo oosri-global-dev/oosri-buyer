@@ -563,7 +563,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                               <span className="address__tag paystack__tag">Paystack · ₦{NIGERIAN_FLAT_RATE_NGN.toLocaleString()} flat shipping</span>
                             )}
                             {addr.countryCode !== "NG" && (
-                              <span className="address__tag stripe__tag">Stripe · Haulam / DHL shipping</span>
+                              <span className="address__tag stripe__tag">Stripe · Haulam shipping</span>
                             )}
                           </FlexibleDiv>
                           <FlexibleDiv gap="8px" flexWrap="nowrap" justifyContent="flex-start" alignItems="center">

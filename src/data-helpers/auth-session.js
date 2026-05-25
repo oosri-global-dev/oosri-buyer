@@ -1,5 +1,7 @@
 const DEFAULT_COOKIE_EXP_DAYS = 7;
 const BUYER_SESSION_COOKIE = "buyer_session";
+const BUYER_AT_COOKIE = "buyer_at";
+const BUYER_RT_COOKIE = "buyer_rt";
 
 const getCookieAttributes = (expDays = DEFAULT_COOKIE_EXP_DAYS) => {
   const attributes = ["path=/", "SameSite=Lax"];
@@ -58,15 +60,34 @@ export function deleteDataInCookie(cName) {
 }
 
 export function storeAuthTokens(accessToken, refreshToken) {
-  if (typeof window !== "undefined" && (accessToken || refreshToken)) {
+  if (typeof window === "undefined") return;
+
+  if (accessToken && typeof accessToken === "string") {
+    // Access token matches backend maxAge of 3 days
+    storeDataInCookie(BUYER_AT_COOKIE, accessToken, 3);
+  }
+  if (refreshToken && typeof refreshToken === "string") {
+    storeDataInCookie(BUYER_RT_COOKIE, refreshToken, 7);
+  }
+  if (accessToken || refreshToken) {
     storeDataInCookie(BUYER_SESSION_COOKIE, "1");
   }
+}
+
+export function getBuyerAccessToken() {
+  return getDataInCookie(BUYER_AT_COOKIE) || null;
+}
+
+export function getBuyerRefreshToken() {
+  return getDataInCookie(BUYER_RT_COOKIE) || null;
 }
 
 export function clearAuthSession() {
   if (typeof window !== "undefined") {
     deleteDataInCookie("_id");
     deleteDataInCookie(BUYER_SESSION_COOKIE);
+    deleteDataInCookie(BUYER_AT_COOKIE);
+    deleteDataInCookie(BUYER_RT_COOKIE);
   }
 }
 

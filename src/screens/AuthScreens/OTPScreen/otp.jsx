@@ -98,7 +98,7 @@ export default function OTP() {
     try {
       const res = await confirmOTP(payload);
 
-      storeAuthTokens(true, true);
+      storeAuthTokens(res?.body?.accessToken, res?.body?.refreshToken);
       dispatch({
         type: CURRENT_USER,
         payload: res?.body?.user || {},

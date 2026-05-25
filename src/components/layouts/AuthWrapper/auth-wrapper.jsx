@@ -6,11 +6,15 @@ import { useState, useEffect } from "react";
 import { useMainContext } from "@/context";
 import { useRouter } from "next/router";
 
+// Auth pages (other than /login) where a logged-in user should be sent home.
+// /login is excluded because the login screen owns its post-auth redirect.
+const AUTH_ONLY_PATHS = ["/register", "/forgot-password", "/otp", "/reset-password"];
+
 export default function AuthWrapper({ children }) {
   const [width, height] = useWindowSize();
   const [removeHeader, setRemoveHeader] = useState(false);
   const { user } = useMainContext();
-  const { push, pathname } = useRouter();
+  const { push, replace, pathname } = useRouter();
 
   useEffect(() => {
     if (width <= 550) {
@@ -21,11 +25,15 @@ export default function AuthWrapper({ children }) {
   }, [width]);
 
   useEffect(() => {
-    // Let the login page finish its own redirect flow when "from" is present.
-    if (user?.id && pathname !== "/login") {
-      push("/");
+    // Redirect already-authenticated users away from auth-only pages.
+    // Using an explicit path list prevents this from firing during the brief
+    // navigation transition on /login when pathname momentarily becomes "/"
+    // (which previously caused a competing push("/") on mobile, racing against
+    // the login screen's own replace("/") and snapping the user back to login).
+    if (user?.id && AUTH_ONLY_PATHS.some((p) => pathname.startsWith(p))) {
+      replace("/");
     }
-  }, [user, push, pathname]);
+  }, [user?.id, replace, pathname]);
 
   const handleGoBack = () => {
     if (typeof window !== "undefined") {

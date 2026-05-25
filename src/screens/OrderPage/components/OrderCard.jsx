@@ -1,7 +1,7 @@
 import SafeImage from "@/components/lib/SafeImage/SafeImage";
 import { OrderCardWrapper } from "./orderComponent.styled";
 import { useRouter } from "next/router";
-import { useFormatPrice, stripHtml } from "@/data-helpers/hooks";
+import { formatCurrency, stripHtml } from "@/data-helpers/hooks";
 import { MdOutlineChevronRight as ChevronIcon } from "react-icons/md";
 
 const formatDateTime = (dateString) => {
@@ -39,7 +39,6 @@ const getStatusLabel = (status) => {
 
 export default function OrderCard({ order }) {
   const router = useRouter();
-  const formatPrice = useFormatPrice();
 
   const handleCardClick = () => {
     const orderId = order?.orderId || order?.id || order?._id;
@@ -127,10 +126,8 @@ export default function OrderCard({ order }) {
         </span>
         <span className="order__total">
           {currencyCode === 'NGN'
-            ? (ngnAmount != null ? `₦${Number(ngnAmount).toLocaleString()}` : '—')
-            : usdAmount != null
-            ? formatPrice(usdAmount)
-            : '—'}
+            ? (ngnAmount != null ? formatCurrency(ngnAmount, 'NGN') : '—')
+            : (usdAmount != null ? formatCurrency(usdAmount, currencyCode || 'USD') : '—')}
         </span>
       </div>
     </OrderCardWrapper>

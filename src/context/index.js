@@ -68,7 +68,7 @@ export const MainProvider = ({ children }) => {
     //api to add to cart before dispatching
     try {
       await handleAddToCart({
-        items: [{ productId: item?._id, quantity: 1 }],
+        items: [{ productId: item?._id, quantity: item?.quantity || 1 }],
         ...(_.isEmpty(state.user) && { cartKey }), //add cartkey is user is empty
       });
       await handleUpdateCartItemsInContext(cartKey, { silent: true });
@@ -204,17 +204,18 @@ export const MainProvider = ({ children }) => {
         },
       });
     } catch (err) {
-      clearAuthSession();
-      // If fetch fails, user doesn't exist or token is invalid
-      // Redirect to login if not already on login page
-      // Note: Using window.location.href causes a full page reload,
-      // but since GeneralLayout uses router.replace() for initial redirects,
-      // the history should be correct for most cases
-      if (
-        typeof window !== "undefined" &&
-        window.location.pathname !== "/login"
-      ) {
-        window.location.replace("/login");
+      const httpStatus = err?.response?.status;
+      // Only destroy the session for a confirmed auth failure (401/403).
+      // Network errors, timeouts, and 5xx responses are transient — treating
+      // them as "logged out" would sign the user out on any mobile network hiccup.
+      if (httpStatus === 401 || httpStatus === 403) {
+        clearAuthSession();
+        if (
+          typeof window !== "undefined" &&
+          window.location.pathname !== "/login"
+        ) {
+          window.location.replace("/login");
+        }
       }
     } finally {
       dispatch({
@@ -227,20 +228,21 @@ export const MainProvider = ({ children }) => {
   };
 
   const handleGenerateCartKeyForVisitor = async () => {
-    try {
-      const res = await handleGenerateUniqueCartKey();
-
-      if (res?.body?.cartKey) {
-        storeDataInCookie("public__cart__key", res?.body?.cartKey);
+    // Retry silently — cold-start on Render can close the connection before
+    // the server is ready.  Users don't need to see this background operation.
+    const delays = [5000, 10000, 20000];
+    for (let attempt = 0; attempt <= delays.length; attempt++) {
+      try {
+        const res = await handleGenerateUniqueCartKey();
+        if (res?.body?.cartKey) {
+          storeDataInCookie("public__cart__key", res?.body?.cartKey);
+        }
+        return;
+      } catch {
+        if (attempt < delays.length) {
+          await new Promise((r) => setTimeout(r, delays[attempt]));
+        }
       }
-    } catch (err) {
-      dispatch({
-        type: TOAST_BOX,
-        payload: {
-          type: "error",
-          message: "Error generating a cart key on your device",
-        },
-      });
     }
   };
 
