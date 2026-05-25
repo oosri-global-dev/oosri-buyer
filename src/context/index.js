@@ -204,17 +204,18 @@ export const MainProvider = ({ children }) => {
         },
       });
     } catch (err) {
-      clearAuthSession();
-      // If fetch fails, user doesn't exist or token is invalid
-      // Redirect to login if not already on login page
-      // Note: Using window.location.href causes a full page reload,
-      // but since GeneralLayout uses router.replace() for initial redirects,
-      // the history should be correct for most cases
-      if (
-        typeof window !== "undefined" &&
-        window.location.pathname !== "/login"
-      ) {
-        window.location.replace("/login");
+      const httpStatus = err?.response?.status;
+      // Only destroy the session for a confirmed auth failure (401/403).
+      // Network errors, timeouts, and 5xx responses are transient — treating
+      // them as "logged out" would sign the user out on any mobile network hiccup.
+      if (httpStatus === 401 || httpStatus === 403) {
+        clearAuthSession();
+        if (
+          typeof window !== "undefined" &&
+          window.location.pathname !== "/login"
+        ) {
+          window.location.replace("/login");
+        }
       }
     } finally {
       dispatch({
