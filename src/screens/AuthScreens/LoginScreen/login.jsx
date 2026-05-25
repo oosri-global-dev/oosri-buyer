@@ -41,7 +41,7 @@ function GoogleLoginButton({ setGoogleLoading }) {
           accessToken: tokenResponse.access_token,
         });
 
-        storeAuthTokens(true, true);
+        storeAuthTokens(res?.body?.accessToken, res?.body?.refreshToken);
         dispatch({
           type: CURRENT_USER,
           payload: res?.body?.user || {},
@@ -160,7 +160,7 @@ function LoginForm({ googleButton = null, googleLoading = false }) {
     try {
       const res = await loginUser(values);
 
-      storeAuthTokens(true, true);
+      storeAuthTokens(res?.body?.accessToken, res?.body?.refreshToken);
       dispatch({
         type: CURRENT_USER,
         payload: res?.body?.user || {},

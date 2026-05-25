@@ -1,6 +1,8 @@
 import {
   storeAuthTokens,
   clearAuthSession,
+  getBuyerAccessToken,
+  getBuyerRefreshToken,
 } from "@/data-helpers/auth-session";
 import axios from "axios";
 
@@ -24,6 +26,20 @@ export const instance = axios.create({
   },
 });
 
+// Attach Bearer token on every authenticated request.
+// This makes auth work on iOS Safari where ITP blocks cross-site httpOnly cookies
+// from being stored via XHR responses — the first-party cookie is readable here.
+instance.interceptors.request.use(
+  (config) => {
+    const token = getBuyerAccessToken();
+    if (token) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 instance.interceptors.response.use(
   (res) => res,
   async (err) => {
@@ -45,9 +61,10 @@ instance.interceptors.response.use(
 
 export const getRefreshToken = async (originalConfig) => {
   try {
+    const refreshToken = getBuyerRefreshToken();
     const data = await axios.post(
       `${process.env.NEXT_PUBLIC_BASE_URL}/auth/buyer/refresh-token`,
-      {},
+      refreshToken ? { refreshToken } : {},
       {
         withCredentials: true,
       }
