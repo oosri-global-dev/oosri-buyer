@@ -7,7 +7,7 @@ import { useMainContext } from "@/context";
 import SingleCartProduct from "@/components/lib/SingleCartProduct/single-cart-product";
 import RemoveFromCartModal from "@/components/lib/RemoveFromCartModal/remove-from-cart";
 import PaymentModal from "@/components/lib/PaymentModal";
-import { calculateProductPrice, useFormatPrice } from "@/data-helpers/hooks";
+import { useFormatPrice } from "@/data-helpers/hooks";
 import { useRouter } from "next/router";
 import _ from "lodash";
 
@@ -25,14 +25,12 @@ export default function CartPage() {
 
   const liveNGNRate = fxRates?.NGN || 1550;
 
-  // subTotal stays in USD — PaymentModal and Stripe depend on it
+  // subTotal stays in USD — PaymentModal and Stripe use it for display.
+  // Use regularPriceUSD so the USD display matches the NGN regularPrice shown per-item.
+  // Actual payment amount is always computed server-side.
   const subTotal = safeCart.reduce((acc, item) => {
     if (!item) return acc;
-    const priceData = calculateProductPrice(item);
-    let priceUSD = priceData?.price || 0;
-    if (!item.regularPriceUSD && !item.fxRate && priceUSD > 10000) {
-      priceUSD = Number((priceUSD / liveNGNRate).toFixed(2));
-    }
+    const priceUSD = item.regularPriceUSD || Number(((item.regularPrice || 0) / liveNGNRate).toFixed(2));
     const qty = (typeof item.quantity === "number" && item.quantity > 0) ? item.quantity : 1;
     return acc + priceUSD * qty;
   }, 0);

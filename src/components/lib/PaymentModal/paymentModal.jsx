@@ -170,13 +170,12 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     ? Number((subtotal / liveNGNRate).toFixed(2))
     : subtotal;
 
-  const subtotalNGN = isNigerianBuyer
-    ? cartItems.reduce((acc, item) => {
-        if (!item) return acc;
-        const priceNGN = item.regularPrice || 0;
-        return acc + priceNGN * (item.quantity || 1);
-      }, 0)
-    : Math.round(subtotalUSD * liveNGNRate);
+  // Always derive from regularPrice — never fall back to USD conversion.
+  // All products are priced in NGN; regularPrice is always the correct source.
+  const subtotalNGN = cartItems.reduce((acc, item) => {
+    if (!item) return acc;
+    return acc + (item.regularPrice || 0) * (item.quantity || 1);
+  }, 0);
 
   const totalNGN = subtotalNGN + (isNigerianBuyer ? NIGERIAN_FLAT_RATE_NGN : 0);
   const totalUSD = subtotalUSD + shippingFeeUSD;
