@@ -170,13 +170,10 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     ? Number((subtotal / liveNGNRate).toFixed(2))
     : subtotal;
 
-  // For Nigerian buyers, derive the NGN total directly from each cart item's raw NGN
-  // price (salesPrice ?? regularPrice) to match the exact amount the backend will
-  // charge — avoids the NGN→USD→NGN round-trip rounding gap.
   const subtotalNGN = isNigerianBuyer
     ? cartItems.reduce((acc, item) => {
         if (!item) return acc;
-        const priceNGN = (item.salesPrice > 0 ? item.salesPrice : item.regularPrice) || 0;
+        const priceNGN = item.regularPrice || 0;
         return acc + priceNGN * (item.quantity || 1);
       }, 0)
     : Math.round(subtotalUSD * liveNGNRate);
@@ -273,6 +270,10 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
         const id = defaultAddr._id || defaultAddr.id;
         setSelectedAddressId(id);
         fetchShippingFee(id);
+      } else if (addresses.length === 0 && !isLoadingAddresses) {
+        // No saved addresses — open the add form immediately so country selection
+        // drives currency detection without requiring an extra tap.
+        setShowAddForm(true);
       }
     } else {
       document.body.style.overflow = "unset";
@@ -288,7 +289,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
       setClientSecret(null);
       setPaymentSummary(null);
     }
-  }, [isOpen, addresses, selectedAddressId, fetchShippingFee, form]);
+  }, [isOpen, addresses, selectedAddressId, isLoadingAddresses, fetchShippingFee, form]);
 
   const handleCancel = () => {
     setIsOpen(false);
@@ -793,9 +794,10 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
               {cartItems.length > 0 && (
                 <div className="order__items">
                   {cartItems.map((item) => {
-                    const priceNGN = (item.salesPrice > 0 ? item.salesPrice : item.regularPrice) || 0;
+                    const priceNGN = item.regularPrice || 0;
                     const qty = item.quantity || 1;
-                    const imgUrl = item.images?.[0]?.url || (typeof item.images?.[0] === "string" ? item.images[0] : null);
+                    const rawImg = item.productImages?.[0] ?? item.images?.[0];
+                    const imgUrl = typeof rawImg === "string" ? rawImg : (rawImg?.url || null);
                     const itemPrice = isNigerianBuyer
                       ? `₦${(priceNGN * qty).toLocaleString()}`
                       : formatPrice(Number(((priceNGN / liveNGNRate) * qty).toFixed(2)));
