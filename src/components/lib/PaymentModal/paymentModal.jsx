@@ -847,7 +847,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                     {isNigerianBuyer
                       ? `₦${totalNGN.toLocaleString()}`
                       : currency === 'NGN'
-                        ? `₦${subtotalNGN.toLocaleString()}`
+                        ? `₦${(subtotalNGN + Math.round(shippingFeeUSD * liveNGNRate)).toLocaleString()}`
                         : formatPrice(totalUSD)}
                   </p>
                 </FlexibleDiv>
