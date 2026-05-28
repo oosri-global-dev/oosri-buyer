@@ -91,7 +91,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     if (document.requestStorageAccess) document.requestStorageAccess().catch(() => {});
   }, []);
 
-  const { dispatch, user, setBuyNowItem, fxRates } = useMainContext();
+  const { dispatch, user, setBuyNowItem, fxRates, currency } = useMainContext();
   const formatPrice = useFormatPrice();
   const [form] = Form.useForm();
 
@@ -821,7 +821,9 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                 <FlexibleDiv justifyContent="space-between" alignItems="center">
                   <p className="summary__label">Subtotal:</p>
                   <p className="summary__value">
-                    {isNigerianBuyer ? `₦${subtotalNGN.toLocaleString()}` : formatPrice(subtotalUSD)}
+                    {(isNigerianBuyer || currency === 'NGN')
+                      ? `₦${subtotalNGN.toLocaleString()}`
+                      : formatPrice(subtotalUSD)}
                   </p>
                 </FlexibleDiv>
                 <FlexibleDiv justifyContent="space-between" alignItems="center">
@@ -839,7 +841,11 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                 <FlexibleDiv justifyContent="space-between" alignItems="center" className="total__row">
                   <p className="summary__label total__label">Total:</p>
                   <p className="summary__value total__value">
-                    {isNigerianBuyer ? `₦${totalNGN.toLocaleString()}` : formatPrice(totalUSD)}
+                    {isNigerianBuyer
+                      ? `₦${totalNGN.toLocaleString()}`
+                      : currency === 'NGN'
+                        ? `₦${subtotalNGN.toLocaleString()}`
+                        : formatPrice(totalUSD)}
                   </p>
                 </FlexibleDiv>
               </FlexibleDiv>

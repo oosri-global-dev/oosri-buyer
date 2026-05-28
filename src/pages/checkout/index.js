@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useMainContext } from "@/context";
 import { useRouter } from "next/router";
 import PaymentModal from "@/components/lib/PaymentModal/paymentModal";
+import { calculateProductPrice } from "@/data-helpers/hooks";
 import { FlexibleDiv } from "@/components/lib/Box/styles";
 import { Spin } from "antd";
 
@@ -32,10 +33,12 @@ const CheckoutPage = () => {
         );
     }
 
-    // Use regularPriceUSD so the display matches the NGN regularPrice shown on the product page.
-    // Actual payment amount is always computed server-side.
+    const priceData = calculateProductPrice(buyNowItem);
+    let priceUSD = priceData?.price || 0;
     const liveNGNRate = fxRates?.NGN || 1550;
-    const priceUSD = buyNowItem.regularPriceUSD || Number(((buyNowItem.regularPrice || 0) / liveNGNRate).toFixed(2));
+    if (!buyNowItem.regularPriceUSD && !buyNowItem.fxRate && priceUSD > 10000) {
+        priceUSD = Number((priceUSD / liveNGNRate).toFixed(2));
+    }
     const subtotal = priceUSD * (buyNowItem.quantity || 1);
 
     return (
