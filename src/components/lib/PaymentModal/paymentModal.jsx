@@ -21,7 +21,7 @@ import {
   useCreatePaymentIntent,
   useCreatePaystackCheckout,
 } from "@/network/checkout";
-import { useFormatPrice } from "@/data-helpers/hooks";
+import { calculateProductPrice, useFormatPrice } from "@/data-helpers/hooks";
 
 const formatStockIssues = (issues = []) =>
   issues.map((i) => {
@@ -797,9 +797,12 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                     const qty = item.quantity || 1;
                     const rawImg = item.productImages?.[0] ?? item.images?.[0];
                     const imgUrl = typeof rawImg === "string" ? rawImg : (rawImg?.url || null);
-                    const itemPrice = isNigerianBuyer
+                    // NGN: use regularPrice directly. Non-NGN: use calculateProductPrice (same
+                    // source as the subtotal) so per-item and subtotal always agree.
+                    const effectivePriceUSD = calculateProductPrice(item).price;
+                    const itemPrice = (isNigerianBuyer || currency === 'NGN')
                       ? `₦${(priceNGN * qty).toLocaleString()}`
-                      : formatPrice(Number(((priceNGN / liveNGNRate) * qty).toFixed(2)));
+                      : formatPrice(Number((effectivePriceUSD * qty).toFixed(2)));
                     return (
                       <div key={item._id} className="order__item">
                         {imgUrl ? (
