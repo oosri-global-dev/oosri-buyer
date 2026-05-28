@@ -35,8 +35,6 @@ const CheckoutPage = () => {
 
     const priceData = calculateProductPrice(buyNowItem);
     let priceUSD = priceData?.price || 0;
-    // Guard: if the product has no fxRate or regularPriceUSD and the raw price looks like
-    // an NGN value, convert it to USD using the live rate from context.
     const liveNGNRate = fxRates?.NGN || 1550;
     if (!buyNowItem.regularPriceUSD && !buyNowItem.fxRate && priceUSD > 10000) {
         priceUSD = Number((priceUSD / liveNGNRate).toFixed(2));

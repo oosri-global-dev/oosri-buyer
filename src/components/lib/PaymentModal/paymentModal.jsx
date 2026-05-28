@@ -21,7 +21,7 @@ import {
   useCreatePaymentIntent,
   useCreatePaystackCheckout,
 } from "@/network/checkout";
-import { useFormatPrice } from "@/data-helpers/hooks";
+import { calculateProductPrice, useFormatPrice } from "@/data-helpers/hooks";
 
 const formatStockIssues = (issues = []) =>
   issues.map((i) => {
@@ -91,7 +91,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     if (document.requestStorageAccess) document.requestStorageAccess().catch(() => {});
   }, []);
 
-  const { dispatch, user, setBuyNowItem, fxRates } = useMainContext();
+  const { dispatch, user, setBuyNowItem, fxRates, currency } = useMainContext();
   const formatPrice = useFormatPrice();
   const [form] = Form.useForm();
 
@@ -170,16 +170,12 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     ? Number((subtotal / liveNGNRate).toFixed(2))
     : subtotal;
 
-  // For Nigerian buyers, derive the NGN total directly from each cart item's raw NGN
-  // price (salesPrice ?? regularPrice) to match the exact amount the backend will
-  // charge — avoids the NGN→USD→NGN round-trip rounding gap.
-  const subtotalNGN = isNigerianBuyer
-    ? cartItems.reduce((acc, item) => {
-        if (!item) return acc;
-        const priceNGN = (item.salesPrice > 0 ? item.salesPrice : item.regularPrice) || 0;
-        return acc + priceNGN * (item.quantity || 1);
-      }, 0)
-    : Math.round(subtotalUSD * liveNGNRate);
+  // Always derive from regularPrice — never fall back to USD conversion.
+  // All products are priced in NGN; regularPrice is always the correct source.
+  const subtotalNGN = cartItems.reduce((acc, item) => {
+    if (!item) return acc;
+    return acc + (item.regularPrice || 0) * (item.quantity || 1);
+  }, 0);
 
   const totalNGN = subtotalNGN + (isNigerianBuyer ? NIGERIAN_FLAT_RATE_NGN : 0);
   const totalUSD = subtotalUSD + shippingFeeUSD;
@@ -273,6 +269,10 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
         const id = defaultAddr._id || defaultAddr.id;
         setSelectedAddressId(id);
         fetchShippingFee(id);
+      } else if (addresses.length === 0 && !isLoadingAddresses) {
+        // No saved addresses — open the add form immediately so country selection
+        // drives currency detection without requiring an extra tap.
+        setShowAddForm(true);
       }
     } else {
       document.body.style.overflow = "unset";
@@ -288,7 +288,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
       setClientSecret(null);
       setPaymentSummary(null);
     }
-  }, [isOpen, addresses, selectedAddressId, fetchShippingFee, form]);
+  }, [isOpen, addresses, selectedAddressId, isLoadingAddresses, fetchShippingFee, form]);
 
   const handleCancel = () => {
     setIsOpen(false);
@@ -793,12 +793,16 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
               {cartItems.length > 0 && (
                 <div className="order__items">
                   {cartItems.map((item) => {
-                    const priceNGN = (item.salesPrice > 0 ? item.salesPrice : item.regularPrice) || 0;
+                    const priceNGN = item.regularPrice || 0;
                     const qty = item.quantity || 1;
-                    const imgUrl = item.images?.[0]?.url || (typeof item.images?.[0] === "string" ? item.images[0] : null);
-                    const itemPrice = isNigerianBuyer
+                    const rawImg = item.productImages?.[0] ?? item.images?.[0];
+                    const imgUrl = typeof rawImg === "string" ? rawImg : (rawImg?.url || null);
+                    // NGN: use regularPrice directly. Non-NGN: use calculateProductPrice (same
+                    // source as the subtotal) so per-item and subtotal always agree.
+                    const effectivePriceUSD = calculateProductPrice(item).price;
+                    const itemPrice = (isNigerianBuyer || currency === 'NGN')
                       ? `₦${(priceNGN * qty).toLocaleString()}`
-                      : formatPrice(Number(((priceNGN / liveNGNRate) * qty).toFixed(2)));
+                      : formatPrice(Number((effectivePriceUSD * qty).toFixed(2)));
                     return (
                       <div key={item._id} className="order__item">
                         {imgUrl ? (
@@ -820,7 +824,9 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                 <FlexibleDiv justifyContent="space-between" alignItems="center">
                   <p className="summary__label">Subtotal:</p>
                   <p className="summary__value">
-                    {isNigerianBuyer ? `₦${subtotalNGN.toLocaleString()}` : formatPrice(subtotalUSD)}
+                    {(isNigerianBuyer || currency === 'NGN')
+                      ? `₦${subtotalNGN.toLocaleString()}`
+                      : formatPrice(subtotalUSD)}
                   </p>
                 </FlexibleDiv>
                 <FlexibleDiv justifyContent="space-between" alignItems="center">
@@ -838,7 +844,11 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                 <FlexibleDiv justifyContent="space-between" alignItems="center" className="total__row">
                   <p className="summary__label total__label">Total:</p>
                   <p className="summary__value total__value">
-                    {isNigerianBuyer ? `₦${totalNGN.toLocaleString()}` : formatPrice(totalUSD)}
+                    {isNigerianBuyer
+                      ? `₦${totalNGN.toLocaleString()}`
+                      : currency === 'NGN'
+                        ? `₦${subtotalNGN.toLocaleString()}`
+                        : formatPrice(totalUSD)}
                   </p>
                 </FlexibleDiv>
               </FlexibleDiv>

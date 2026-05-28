@@ -25,7 +25,8 @@ export default function CartPage() {
 
   const liveNGNRate = fxRates?.NGN || 1550;
 
-  // subTotal stays in USD — PaymentModal and Stripe depend on it
+  // subTotal stays in USD — PaymentModal and Stripe depend on it for non-NGN display.
+  // calculateProductPrice returns the effective buyer-facing USD price (respects discounts).
   const subTotal = safeCart.reduce((acc, item) => {
     if (!item) return acc;
     const priceData = calculateProductPrice(item);
@@ -37,10 +38,10 @@ export default function CartPage() {
     return acc + priceUSD * qty;
   }, 0);
 
-  // For NGN display: use raw stored NGN prices to avoid double-conversion rounding
+  // For NGN display: use regularPrice — matches what SingleCartProduct shows per item
   const subTotalNGN = safeCart.reduce((acc, item) => {
     if (!item) return acc;
-    const priceNGN = (item.salesPrice > 0 ? item.salesPrice : (item.regularPrice || 0));
+    const priceNGN = item.regularPrice || 0;
     const qty = (typeof item.quantity === "number" && item.quantity > 0) ? item.quantity : 1;
     return acc + Math.round(priceNGN) * qty;
   }, 0);
