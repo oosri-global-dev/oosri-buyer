@@ -59,6 +59,15 @@ export const handleGetShippingFee = async (payload) => {
   return data;
 };
 
+// Get domestic Nigerian shipping rate by city name
+export const handleGetDomesticShippingRate = async (cityName) => {
+  const { data } = await instance.get(
+    `/buyer/shipping-provider/domestic-rate`,
+    { params: { cityName } }
+  );
+  return data;
+};
+
 // React Query hook for fetching addresses
 export function useBuyerAddresses(options = {}) {
   return useQuery({
@@ -121,6 +130,12 @@ export function useSetDefaultAddress() {
 export function useGetShippingFee() {
   return useMutation({
     mutationFn: handleGetShippingFee,
+  });
+}
+
+export function useGetDomesticShippingRate() {
+  return useMutation({
+    mutationFn: (cityName) => handleGetDomesticShippingRate(cityName),
   });
 }
 

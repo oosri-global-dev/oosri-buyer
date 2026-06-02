@@ -18,6 +18,7 @@ import {
   useDeleteBuyerAddress,
   useSetDefaultAddress,
   useGetShippingFee,
+  useGetDomesticShippingRate,
   useCreatePaymentIntent,
   useCreatePaystackCheckout,
 } from "@/network/checkout";
@@ -39,8 +40,6 @@ import { useLoadScript } from "@react-google-maps/api";
 import AddressAutocompleteField from "./AddressAutocompleteField";
 
 const GOOGLE_MAPS_LIBRARIES = ["places"];
-
-const NIGERIAN_FLAT_RATE_NGN = 2000;
 
 const COUNTRIES = [
   { code: "NG", name: "Nigeria" },
@@ -134,6 +133,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
   const deleteAddress = useDeleteBuyerAddress();
   const setDefault = useSetDefaultAddress();
   const getShippingFee = useGetShippingFee();
+  const getDomesticRate = useGetDomesticShippingRate();
   const createPaymentIntent = useCreatePaymentIntent();
   const createPaystackCheckout = useCreatePaystackCheckout();
 
@@ -177,7 +177,8 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     return acc + (item.regularPrice || 0) * (item.quantity || 1);
   }, 0);
 
-  const totalNGN = subtotalNGN + (isNigerianBuyer ? NIGERIAN_FLAT_RATE_NGN : 0);
+  const shippingNGN = isNigerianBuyer ? (shippingInfo?.totalPriceNGN || 0) : 0;
+  const totalNGN = subtotalNGN + shippingNGN;
   const totalUSD = subtotalUSD + shippingFeeUSD;
 
   const maxAddresses = 5;
@@ -206,28 +207,37 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
         return;
       }
 
-      // Nigerian buyers get flat rate — no API call needed
       const addr = addresses.find((a) => (a._id || a.id) === addressId);
-      if (addr?.countryCode === "NG") {
-        const flatRateUSD = Number((NIGERIAN_FLAT_RATE_NGN / liveNGNRate).toFixed(2));
-        setShippingInfo({
-          totalPriceNGN: NIGERIAN_FLAT_RATE_NGN,
-          totalPriceUSD: flatRateUSD,
-          currency: "NGN",
-          provider: "FLAT_RATE",
-          providerDisplayName: "Standard Delivery",
-          productCode: "NG_FLAT_RATE",
-          selectedServiceType: "NG_FLAT_RATE",
-          totalTransitDays: 3,
-          description: "Standard flat-rate delivery within Nigeria (3–5 business days)",
-          features: ["Door-to-door delivery", "SMS tracking updates"],
-          estimates: [],
-        });
-        setSelectedServiceType("NG_FLAT_RATE");
-        return;
-      }
 
       setIsLoadingShippingFee(true);
+
+      // Nigerian buyers: call the domestic zone rate API
+      if (addr?.countryCode === "NG") {
+        try {
+          const response = await getDomesticRate.mutateAsync(addr.cityName || '');
+          const rateData = response?.body || {};
+          setShippingInfo(rateData);
+          setSelectedServiceType(rateData.selectedServiceType || "NG_DOMESTIC");
+        } catch {
+          // Fallback so checkout isn't blocked if the rate lookup fails
+          setShippingInfo({
+            totalPriceNGN: 2000,
+            currency: "NGN",
+            provider: "DOMESTIC",
+            providerDisplayName: "Standard Delivery",
+            productCode: "NG_DOMESTIC",
+            selectedServiceType: "NG_DOMESTIC",
+            totalTransitDays: 3,
+            description: "Standard delivery within Nigeria",
+            features: ["Door-to-door delivery"],
+            estimates: [],
+          });
+          setSelectedServiceType("NG_DOMESTIC");
+        } finally {
+          setIsLoadingShippingFee(false);
+        }
+        return;
+      }
       try {
         const payload = {
           addressId,
@@ -251,7 +261,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
         setIsLoadingShippingFee(false);
       }
     },
-    [cartItems, dispatch, getShippingFee, addresses, liveNGNRate]
+    [cartItems, dispatch, getShippingFee, getDomesticRate, addresses, liveNGNRate]
   );
 
   const handleAddressSelect = (addressId) => {
@@ -560,7 +570,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                             <p className="address__details">{addr.cityName}, {addr.postalCode}</p>
                             <p className="address__details">{addr.countryName} ({addr.countryCode})</p>
                             {addr.countryCode === "NG" && (
-                              <span className="address__tag paystack__tag">Paystack · ₦{NIGERIAN_FLAT_RATE_NGN.toLocaleString()} flat shipping</span>
+                              <span className="address__tag paystack__tag">Paystack · Domestic delivery</span>
                             )}
                             {addr.countryCode !== "NG" && (
                               <span className="address__tag stripe__tag">Stripe · Haulam shipping</span>
@@ -732,9 +742,9 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                     <FlexibleDiv gap="8px" flexWrap="wrap" justifyContent="flex-start" alignItems="center">
                       {isNigerianBuyer ? (
                         <>
-                          <span className="shipping__badge">Standard Delivery</span>
-                          <span className="shipping__badge">3–5 business days</span>
-                          <span className="shipping__badge">₦{NIGERIAN_FLAT_RATE_NGN.toLocaleString()} flat rate</span>
+                          <span className="shipping__badge">{shippingInfo?.providerDisplayName || 'Standard Delivery'}</span>
+                          <span className="shipping__badge">{shippingInfo?.totalTransitDays || 3} business days</span>
+                          <span className="shipping__badge">₦{(shippingInfo?.totalPriceNGN || 0).toLocaleString()}</span>
                         </>
                       ) : (
                         <>
@@ -749,8 +759,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                 ) : isNigerianBuyer ? (
                   <FlexibleDiv gap="8px" flexWrap="wrap" justifyContent="flex-start" alignItems="center">
                     <span className="shipping__badge">Standard Delivery</span>
-                    <span className="shipping__badge">3–5 business days</span>
-                    <span className="shipping__badge">₦{NIGERIAN_FLAT_RATE_NGN.toLocaleString()} flat rate</span>
+                    <span className="shipping__badge">Calculating…</span>
                   </FlexibleDiv>
                 ) : null}
               </div>
@@ -800,7 +809,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                     // NGN: use regularPrice directly. Non-NGN: use calculateProductPrice (same
                     // source as the subtotal) so per-item and subtotal always agree.
                     const effectivePriceUSD = calculateProductPrice(item).price;
-                    const itemPrice = (isNigerianBuyer || currency === 'NGN')
+                    const itemPrice = isNigerianBuyer
                       ? `₦${(priceNGN * qty).toLocaleString()}`
                       : formatPrice(Number((effectivePriceUSD * qty).toFixed(2)));
                     return (
@@ -824,7 +833,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                 <FlexibleDiv justifyContent="space-between" alignItems="center">
                   <p className="summary__label">Subtotal:</p>
                   <p className="summary__value">
-                    {(isNigerianBuyer || currency === 'NGN')
+                    {isNigerianBuyer
                       ? `₦${subtotalNGN.toLocaleString()}`
                       : formatPrice(subtotalUSD)}
                   </p>
@@ -835,7 +844,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                     {isLoadingShippingFee ? (
                       <span className="calculating__loader">Calculating…</span>
                     ) : isNigerianBuyer ? (
-                      `₦${NIGERIAN_FLAT_RATE_NGN.toLocaleString()}`
+                      `₦${shippingNGN.toLocaleString()}`
                     ) : (
                       formatPrice(shippingFeeUSD)
                     )}
@@ -846,9 +855,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                   <p className="summary__value total__value">
                     {isNigerianBuyer
                       ? `₦${totalNGN.toLocaleString()}`
-                      : currency === 'NGN'
-                        ? `₦${(subtotalNGN + Math.round(shippingFeeUSD * liveNGNRate)).toLocaleString()}`
-                        : formatPrice(totalUSD)}
+                      : formatPrice(totalUSD)}
                   </p>
                 </FlexibleDiv>
               </FlexibleDiv>
@@ -874,6 +881,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                 >
                   <LockIcon size={14} />
                   Pay ₦{totalNGN.toLocaleString()} with Paystack
+
                 </Button>
                 <p className="payment__secure__note">
                   <LockIcon size={11} />
