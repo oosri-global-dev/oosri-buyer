@@ -22,7 +22,7 @@ import {
   useCreatePaymentIntent,
   useCreatePaystackCheckout,
 } from "@/network/checkout";
-import { calculateProductPrice, useFormatPrice } from "@/data-helpers/hooks";
+import { calculateProductPrice } from "@/data-helpers/hooks";
 
 const formatStockIssues = (issues = []) =>
   issues.map((i) => {
@@ -91,7 +91,6 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
   }, []);
 
   const { dispatch, user, setBuyNowItem, fxRates, currency } = useMainContext();
-  const formatPrice = useFormatPrice();
   const [form] = Form.useForm();
 
   // Address state
@@ -163,23 +162,25 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
     null;
   const shippingFeeUSD = selectedShippingOption?.estimateUSD || shippingInfo?.totalPriceUSD || 0;
 
-  // Ensure subtotal is treated as USD. If the caller accidentally passed an NGN amount
-  // (large value with no fxRate hint), normalise it back to USD using the live rate.
   const liveNGNRate = fxRates?.NGN || 1550;
-  const subtotalUSD = subtotal > 10000 && subtotal > liveNGNRate
-    ? Number((subtotal / liveNGNRate).toFixed(2))
-    : subtotal;
 
-  // Always derive from regularPrice — never fall back to USD conversion.
-  // All products are priced in NGN; regularPrice is always the correct source.
+  // All products are priced in NGN — regularPrice is always the correct source.
   const subtotalNGN = cartItems.reduce((acc, item) => {
     if (!item) return acc;
     return acc + (item.regularPrice || 0) * (item.quantity || 1);
   }, 0);
 
+  // Derive USD subtotal from NGN prices using the live rate — cart items don't
+  // carry regularPriceUSD, so calculateProductPrice would return 0 for them.
+  const subtotalUSD = Number((subtotalNGN / liveNGNRate).toFixed(2));
+
   const shippingNGN = isNigerianBuyer ? (shippingInfo?.totalPriceNGN || 0) : 0;
   const totalNGN = subtotalNGN + shippingNGN;
   const totalUSD = subtotalUSD + shippingFeeUSD;
+
+  // Checkout always displays in the payment currency — not the global selector.
+  // Nigerian buyers pay NGN via Paystack; everyone else pays USD via Stripe.
+  const fmtUSD = (amount) => `$${Number(amount).toFixed(2)}`;
 
   const maxAddresses = 5;
 
@@ -750,7 +751,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                         <>
                           {shippingInfo.providerDisplayName && <span className="shipping__badge">via {shippingInfo.providerDisplayName}</span>}
                           {shippingInfo.totalTransitDays && <span className="shipping__badge">{shippingInfo.totalTransitDays} day{shippingInfo.totalTransitDays !== 1 ? "s" : ""}</span>}
-                          <span className="shipping__badge">{formatPrice(shippingFeeUSD)}</span>
+                          <span className="shipping__badge">{fmtUSD(shippingFeeUSD)}</span>
                         </>
                       )}
                     </FlexibleDiv>
@@ -781,7 +782,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                       >
                         <FlexibleDiv justifyContent="space-between" alignItems="center">
                           <p className="shipping__service__name">{est.serviceName}</p>
-                          <p className="shipping__service__price">{formatPrice(est.estimateUSD || 0)}</p>
+                          <p className="shipping__service__price">{fmtUSD(est.estimateUSD || 0)}</p>
                         </FlexibleDiv>
                         {est.description && <p className="shipping__service__description">{est.description}</p>}
                         {Array.isArray(est.features) && est.features.length > 0 && (
@@ -809,9 +810,12 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                     // NGN: use regularPrice directly. Non-NGN: use calculateProductPrice (same
                     // source as the subtotal) so per-item and subtotal always agree.
                     const effectivePriceUSD = calculateProductPrice(item).price;
+                    // Derive USD from NGN using live rate — cart items don't carry regularPriceUSD.
+                    const itemPriceUSD = item.regularPriceUSD
+                      || Number(((priceNGN / liveNGNRate) * qty).toFixed(2));
                     const itemPrice = isNigerianBuyer
                       ? `₦${(priceNGN * qty).toLocaleString()}`
-                      : formatPrice(Number((effectivePriceUSD * qty).toFixed(2)));
+                      : fmtUSD(itemPriceUSD);
                     return (
                       <div key={item._id} className="order__item">
                         {imgUrl ? (
@@ -835,7 +839,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                   <p className="summary__value">
                     {isNigerianBuyer
                       ? `₦${subtotalNGN.toLocaleString()}`
-                      : formatPrice(subtotalUSD)}
+                      : fmtUSD(subtotalUSD)}
                   </p>
                 </FlexibleDiv>
                 <FlexibleDiv justifyContent="space-between" alignItems="center">
@@ -846,7 +850,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                     ) : isNigerianBuyer ? (
                       `₦${shippingNGN.toLocaleString()}`
                     ) : (
-                      formatPrice(shippingFeeUSD)
+                      fmtUSD(shippingFeeUSD)
                     )}
                   </p>
                 </FlexibleDiv>
@@ -855,7 +859,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                   <p className="summary__value total__value">
                     {isNigerianBuyer
                       ? `₦${totalNGN.toLocaleString()}`
-                      : formatPrice(totalUSD)}
+                      : fmtUSD(totalUSD)}
                   </p>
                 </FlexibleDiv>
               </FlexibleDiv>
@@ -906,7 +910,7 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                   className="complete__payment__btn"
                 >
                   <LockIcon size={14} />
-                  Pay {formatPrice(totalUSD)} with Stripe
+                  Pay {fmtUSD(totalUSD)} with Stripe
                 </Button>
                 <p className="payment__secure__note">
                   <LockIcon size={11} />
