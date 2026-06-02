@@ -22,7 +22,6 @@ import {
   useCreatePaymentIntent,
   useCreatePaystackCheckout,
 } from "@/network/checkout";
-import { calculateProductPrice } from "@/data-helpers/hooks";
 
 const formatStockIssues = (issues = []) =>
   issues.map((i) => {
@@ -807,9 +806,6 @@ export default function PaymentModal({ isOpen, setIsOpen, subtotal = 0, cartItem
                     const qty = item.quantity || 1;
                     const rawImg = item.productImages?.[0] ?? item.images?.[0];
                     const imgUrl = typeof rawImg === "string" ? rawImg : (rawImg?.url || null);
-                    // NGN: use regularPrice directly. Non-NGN: use calculateProductPrice (same
-                    // source as the subtotal) so per-item and subtotal always agree.
-                    const effectivePriceUSD = calculateProductPrice(item).price;
                     // Derive USD from NGN using live rate — cart items don't carry regularPriceUSD.
                     const itemPriceUSD = item.regularPriceUSD
                       || Number(((priceNGN / liveNGNRate) * qty).toFixed(2));
