@@ -6,7 +6,7 @@ import { FcGoogle as GoogleIcon } from "react-icons/fc";
 import TextField from "@/components/lib/TextField";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import Link from "next/link";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { loginUser, googleLogin as googleLoginUser } from "@/network/auth";
 import toast, { Toaster } from "react-hot-toast";
 import { useMainContext } from "@/context";
@@ -19,6 +19,7 @@ import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import Image from "next/image";
 import Logo from "@/assets/images/homepage/logo.png";
 import { getSafeRedirectPath } from "@/utils/security";
+import TurnstileWidget from "@/components/lib/TurnstileWidget";
 
 /**
  * LoginForm Component
@@ -126,6 +127,7 @@ function DisabledGoogleLoginButton() {
 function LoginForm({ googleButton = null, googleLoading = false }) {
   const [form] = Form.useForm();
   const [loadingBtn, setLoadingBtn] = useState(false);
+  const turnstileRef = useRef(null);
   const { dispatch } = useMainContext();
   const { push, query, replace } = useRouter();
 
@@ -158,7 +160,8 @@ function LoginForm({ googleButton = null, googleLoading = false }) {
     }
 
     try {
-      const res = await loginUser(values);
+      const turnstileToken = await turnstileRef.current.getFreshToken();
+      const res = await loginUser({ ...values, turnstileToken });
 
       storeAuthTokens(res?.body?.accessToken, res?.body?.refreshToken);
       dispatch({
@@ -196,6 +199,7 @@ function LoginForm({ googleButton = null, googleLoading = false }) {
       }
 
       setLoadingBtn(false);
+      turnstileRef.current?.reset();
     }
   };
 
@@ -277,6 +281,7 @@ function LoginForm({ googleButton = null, googleLoading = false }) {
             >
               Login
             </Button>
+            <TurnstileWidget ref={turnstileRef} action="buyer_login" />
 
             <p className="no__account__yet">
               No account yet?{" "}

@@ -6,16 +6,18 @@ import { Form } from "antd";
 import TextField from "@/components/lib/TextField";
 import Button from "@/components/lib/Button";
 import { forgotPassword } from "@/network/auth";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { TOAST_BOX } from "@/context/types";
 import { useMainContext } from "@/context";
 import { useRouter } from "next/router";
+import TurnstileWidget from "@/components/lib/TurnstileWidget";
 
 export default function ForgotPassword({ setStep }) {
   const [form] = Form.useForm();
   const { dispatch } = useMainContext();
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const turnstileRef = useRef(null);
 
   const appendParams = (newParams) => {
     const pathname = router.pathname;
@@ -34,7 +36,8 @@ export default function ForgotPassword({ setStep }) {
   const handleSubmit = async (values) => {
     setIsLoading(true);
     try {
-      const res = await forgotPassword({ email: values?.email?.trim() });
+      const turnstileToken = await turnstileRef.current.getFreshToken();
+      const res = await forgotPassword({ email: values?.email?.trim(), turnstileToken });
       //message
       dispatch({
         type: TOAST_BOX,
@@ -56,6 +59,7 @@ export default function ForgotPassword({ setStep }) {
           message: err?.response?.data?.message || "Sorry, an error occured",
         },
       });
+      turnstileRef.current?.reset();
       setIsLoading(false);
     }
   };
@@ -99,6 +103,7 @@ export default function ForgotPassword({ setStep }) {
             >
               Send
             </Button>
+            <TurnstileWidget ref={turnstileRef} action="buyer_request_reset" />
           </FlexibleDiv>
         </Form>
       </ForgotPasswordWrapper>

@@ -8,12 +8,13 @@ import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import Link from "next/link";
 import AuthWrapper from "@/components/layouts/AuthWrapper/auth-wrapper";
 import toast, { Toaster } from "react-hot-toast";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { signUpUser } from "@/network/auth";
 import { useRouter } from "next/router";
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import Image from "next/image";
 import Logo from "@/assets/images/homepage/logo.png";
+import TurnstileWidget from "@/components/lib/TurnstileWidget";
 
 /**
  * RegisterForm Component
@@ -89,6 +90,7 @@ function DisabledGoogleRegisterButton() {
 function RegisterForm({ form, googleButton = null, googleLoading = false }) {
   const [loading, setIsLoading] = useState(false);
   const { push } = useRouter();
+  const turnstileRef = useRef(null);
 
   /**
    * Submission handler for manual registration
@@ -112,7 +114,8 @@ function RegisterForm({ form, googleButton = null, googleLoading = false }) {
     }
 
     try {
-      const res = await signUpUser(values);
+      const turnstileToken = await turnstileRef.current.getFreshToken();
+      const res = await signUpUser({ ...values, turnstileToken });
       window.scroll(0, 0);
       toast.success("Signup successful! Verifying your email...");
       
@@ -125,6 +128,7 @@ function RegisterForm({ form, googleButton = null, googleLoading = false }) {
         err?.response?.data?.message || "Registration failed. Please try again later.",
         { position: "bottom-center" }
       );
+      turnstileRef.current?.reset();
       setIsLoading(false);
     }
   };
@@ -229,6 +233,7 @@ function RegisterForm({ form, googleButton = null, googleLoading = false }) {
             >
               Register
             </Button>
+            <TurnstileWidget ref={turnstileRef} action="buyer_register" />
 
             <p className="no__account__yet">
               I have an account already{" "}

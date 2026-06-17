@@ -7,11 +7,12 @@ import { Form } from "antd";
 import TextField from "@/components/lib/TextField";
 import Button from "@/components/lib/Button";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { confirmOTP, resendOTP } from "@/network/auth";
 import { CURRENT_USER, TOAST_BOX } from "@/context/types";
 import { useMainContext } from "@/context";
 import { storeAuthTokens } from "@/data-helpers/auth-session";
+import TurnstileWidget from "@/components/lib/TurnstileWidget";
 
 export default function OTP() {
   const [form] = Form.useForm();
@@ -19,6 +20,7 @@ export default function OTP() {
   const [isResending, setIsResending] = useState(false);
   const { dispatch } = useMainContext();
   const [loading, setLoading] = useState(false);
+  const resendTurnstileRef = useRef(null);
 
   const handleChange = (e) => {
     const { value, name } = e.target;
@@ -66,7 +68,8 @@ export default function OTP() {
     setIsResending(true);
 
     try {
-      const res = await resendOTP({ email: decodeURIComponent(query?.email) });
+      const turnstileToken = await resendTurnstileRef.current.getFreshToken();
+      const res = await resendOTP({ email: decodeURIComponent(query?.email), turnstileToken });
       setIsResending(false);
 
       dispatch({
@@ -84,6 +87,7 @@ export default function OTP() {
           message: err?.response?.data?.message || "Sorry, an error occured",
         },
       });
+      resendTurnstileRef.current?.reset();
       setIsResending(false);
     }
   };
@@ -204,6 +208,7 @@ export default function OTP() {
           >
             Send
           </Button>
+          <TurnstileWidget ref={resendTurnstileRef} action="buyer_resend_otp" />
         </Form>
       </CheckEmailWrapper>
     </AuthWrapper>
