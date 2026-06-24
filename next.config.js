@@ -48,11 +48,8 @@ const nextConfig = {
         hostname: 'placehold.co',
         pathname: '/**',
       },
-      {
-        protocol: 'https',
-        hostname: 'via.placeholder.com',
-        pathname: '/**',
-      },
+      // via.placeholder.com omitted — the service has been dead/unreachable for years.
+      // SafeImage.jsx catches any remaining references and replaces them with a local fallback.
       {
         protocol: 'https',
         hostname: 'lh3.googleusercontent.com',
